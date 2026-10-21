@@ -1,6 +1,25 @@
 {
-  "updated": "2026-10-21T21:47:11.673Z",
+  "updated": "2026-10-21T22:01:29.445Z",
+  "categories": [
+    "全部",
+    "策略遊戲",
+    "派對遊戲",
+    "家庭遊戲",
+    "雙人對戰"
+  ],
   "manuals": [
+    {
+      "name": "test 2",
+      "slug": "test_2",
+      "category": "策略遊戲",
+      "note": "",
+      "description": "fdfsfsfsfsg",
+      "pages": 1,
+      "files": [
+        "001.jpg"
+      ],
+      "updated": "2026-10-21T22:01:29.444Z"
+    },
     {
       "name": "test",
       "slug": "test",
