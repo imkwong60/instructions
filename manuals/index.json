@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-22T04:41:10.443Z",
+  "updated": "2026-10-22T04:43:18.128Z",
   "categories": [
     "策略",
     "派對",
@@ -27,9 +27,8 @@
       "slug": "test_3",
       "note": "",
       "category": "家庭",
-      "pages": 3,
+      "pages": 2,
       "files": [
-        "001.jpg",
         "002.jpg",
         "003.jpg"
       ],
