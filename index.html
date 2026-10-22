@@ -1119,7 +1119,14 @@
     const LS_UNIT = 'benben_unit_price';
     const INDEX_FILE = 'index.json';
 
-    let settings = { token: '', owner: '', repo: '', branch: 'main', path: 'manuals' };
+    let settings = { 
+  token: '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', // 你的 GitHub Personal Access Token
+  owner: 'imkwong60',   // 你的 GitHub 用戶名
+  repo: 'instructions',   // 你的 Repository 名稱
+  branch: 'main',           // 分支名稱（預設 main）
+  path: 'manuals'           // 資料夾路徑（預設 manuals）
+};
+
     let MANUALS = [];
     let CATEGORIES = ['全部', '策略', '派對', '家庭'];
     let activeCat = '全部';
