@@ -499,6 +499,11 @@
     #viewerModal.fullscreen .viewer-body:has(.viewer-text) { align-items:stretch; justify-content:flex-start; overflow-y:auto; }
     #viewerModal.fullscreen .viewer-body:has(.viewer-text) .viewer-text { flex:1 0 auto; }
     #viewerModal.fullscreen .viewer-nav button { min-width:44px; min-height:42px; background:rgba(40,40,40,.75); color:#fff; border:1px solid rgba(255,255,255,.35); border-radius:10px; }
+    #viewerModal.fullscreen .viewer-nav button { -webkit-tap-highlight-color:transparent; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; touch-action:manipulation; flex-shrink:0; }
+    #viewerModal.fullscreen .viewer-nav #viewerBack { min-width:44px; width:44px; padding:0; font-size:1.35rem; font-weight:700; border-radius:50%; background:rgba(35,35,35,.9); box-shadow:0 2px 10px rgba(0,0,0,.35); }
+    .card-actions { display:flex; gap:6px; align-items:center; flex-shrink:0; }
+    .card-edit, .card-delete { -webkit-tap-highlight-color:transparent; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; touch-action:manipulation; }
+    .viewer-nav, .viewer-nav * { -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent; }
     .viewer-body {
       flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
       padding: 12px; display: flex; flex-direction: column; gap: 12px; align-items: center;
@@ -1616,6 +1621,7 @@
     // ========== Viewer ==========
     function openViewer(manual) {
       viewerManual = manual;
+      viewerManual = manual;
       document.getElementById('viewerTitle').textContent = manual.name + (manual.note ? ` · ${manual.note}` : '');
       const body = document.getElementById('viewerBody');
       body.innerHTML = '';
@@ -1713,7 +1719,10 @@
               ${m.category ? `<span class="badge cat">${m.category}</span>` : ''}
               <span class="badge pages">${m.pages || 0} 頁${m.text ? ' · 有文字' : ''}</span>
             </div>
-            <button type="button" class="card-delete" data-delete-slug="${m.slug}" aria-label="刪除 ${escapeHtml(m.name || '說明書')}">刪除</button>
+            <div class="card-actions">
+              <button type="button" class="card-edit" data-edit-slug="${m.slug}" aria-label="編輯 ${escapeHtml(m.name || '說明書')}">編輯</button>
+              <button type="button" class="card-delete" data-delete-slug="${m.slug}" aria-label="刪除 ${escapeHtml(m.name || '說明書')}">刪除</button>
+            </div>
           </div>
           <div class="card-title">${highlight(m.name, query)}</div>
           ${m.note ? `<div class="card-sub">${highlight(m.note, query)}</div>` : ''}
@@ -2967,6 +2976,12 @@
       }
     }
     grid.addEventListener('click', e => {
+      const editButton = e.target.closest('[data-edit-slug]');
+      if (editButton) {
+        const editManual = MANUALS.find(m => m.slug === editButton.dataset.editSlug);
+        if (editManual) { viewerManual = editManual; document.getElementById('viewerEdit').click(); }
+        return;
+      }
       const deleteButton = e.target.closest('[data-delete-slug]');
       if (deleteButton) {
         e.preventDefault();
@@ -2981,6 +2996,7 @@
       if (manual) openViewer(manual);
     });
     document.getElementById('viewerClose').addEventListener('click', closeViewer);
+    document.getElementById('viewerBack').addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); closeViewer(); });
     document.getElementById('viewerPrev').addEventListener('click', () => {
       if (viewerIndex > 0) { viewerIndex--; showViewerPage(); }
     });
