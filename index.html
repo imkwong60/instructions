@@ -1563,11 +1563,11 @@
       if (!hasConfig()) { toast('請先完成 GitHub 設定'); return; }
       const name = document.getElementById('gameName').value.trim();
       if (!name) return;
-      const slug = editingManual ? editingManual.slug : slugify(name);
+      let slug = editingManual ? editingManual.slug : slugify(name);
       const note = document.getElementById('gameNote').value.trim();
       const cat = document.getElementById('gameCat').value;
       const text = document.getElementById('gameText').value.trim();
-      const basePath = `${settings.path}/${slug}`;
+      let basePath = `${settings.path}/${slug}`;
       const btn = document.getElementById('btnDoUpload');
       const progressWrap = document.getElementById('progressWrap');
       const progressText = document.getElementById('progressText');
@@ -1579,7 +1579,52 @@
 
       try {
         const existingManual = editingManual || MANUALS.find(m => m.slug === slug);
-        const pages = existingManual ? [...(existingManual.files || [])] : [];
+        const oldSlug = editingManual ? editingManual.slug : null;
+        const newSlug = editingManual ? slugify(name) : slug;
+        let pages = existingManual ? [...(existingManual.files || [])] : [];
+        // Renaming a manual requires copying the actual GitHub files; changing index.json alone does not rename a folder.
+        if (editingManual && newSlug !== oldSlug) {
+          progressText.textContent = '準備重新命名資料夾…';
+          progressBar.style.width = '5%';
+          const collision = MANUALS.find(m => m.slug === newSlug && m.slug !== oldSlug);
+          if (collision) throw new Error(`新名稱的資料夾「${newSlug}」已被另一份說明書使用，請更改名稱。`);
+          const oldFolderPath = `${settings.path}/${oldSlug}`.replace(/^\/+|\/+$/g, '');
+          const newFolderPath = `${settings.path}/${newSlug}`.replace(/^\/+|\/+$/g, '');
+          const existingTarget = await ghGet(newFolderPath);
+          if (existingTarget) throw new Error(`GitHub 上已存在「${newSlug}」資料夾，為免覆蓋其他檔案，已取消改名。`);
+          async function listRenameFiles(path) {
+            const result = await ghGet(path);
+            if (!result) return [];
+            const entries = Array.isArray(result) ? result : [result];
+            let found = [];
+            for (const item of entries) {
+              if (item.type === 'file') found.push(item);
+              else if (item.type === 'dir') found = found.concat(await listRenameFiles(item.path));
+            }
+            return found;
+          }
+          const oldFiles = await listRenameFiles(oldFolderPath);
+          const copiedNames = [];
+          for (let i = 0; i < oldFiles.length; i++) {
+            const fileMeta = oldFiles[i];
+            progressText.textContent = `複製檔案 ${i + 1}/${oldFiles.length}…`;
+            progressBar.style.width = `${5 + (i / Math.max(oldFiles.length, 1)) * 35}%`;
+            const fileData = await ghGet(fileMeta.path);
+            if (!fileData || !fileData.content) throw new Error(`無法讀取舊檔案「${fileMeta.path}」，已停止改名，舊資料仍保留。`);
+            const relativeName = fileMeta.path.slice(oldFolderPath.length + 1);
+            if (relativeName.includes('/')) throw new Error('資料夾內包含多層子資料夾，為避免搬漏檔案，已停止改名。');
+            await ghPut(`${newFolderPath}/${relativeName}`, fileData.content.replace(/\n/g, ''), `Rename manual folder ${oldSlug} to ${newSlug}: copy ${relativeName}`, null);
+            copiedNames.push(relativeName);
+          }
+          // Verify every copied file exists before updating the index.
+          for (const fileName of copiedNames) {
+            const check = await ghGet(`${newFolderPath}/${fileName}`);
+            if (!check || !check.sha) throw new Error(`新資料夾檔案驗證失敗：${fileName}。舊資料仍保留，請重新整理後檢查。`);
+          }
+          slug = newSlug;
+          basePath = newFolderPath;
+          pages = copiedNames.filter(f => /\.(jpg|jpeg|png|webp|gif)$/i.test(f)).sort((a,b) => a.localeCompare(b, undefined, {numeric:true}));
+        }
         const total = selectedFiles.length;
         for (let i = 0; i < total; i++) {
           progressText.textContent = `轉 JPEG ${i+1}/${total}…`;
@@ -1594,16 +1639,50 @@
         }
         progressText.textContent = '更新索引…';
         progressBar.style.width = '92%';
-        const existingIdx = MANUALS.findIndex(m => m.slug === slug);
+        const existingIdx = MANUALS.findIndex(m => m.slug === (editingManual ? editingManual.slug : slug));
         const entry = {
           name, slug, note, category: cat || '',
           pages: pages.length, files: pages,
           text: text || '',
           updated: new Date().toISOString()
         };
+        const previousManuals = MANUALS.map(m => ({...m}));
         if (existingIdx >= 0) MANUALS[existingIdx] = entry;
         else MANUALS.unshift(entry);
-        await saveIndex(MANUALS, `Add/Update: ${name}`);
+        try {
+          await saveIndex(MANUALS, `Add/Update: ${name}`);
+        } catch (indexError) {
+          MANUALS = previousManuals;
+          throw new Error(`索引更新失敗：${indexError.message}。已保留舊資料夾；若剛才已複製新資料夾，新資料夾也會保留，請檢查 GitHub 後再試。`);
+        }
+        // Only after the new folder is copied and index points to it, delete the old folder files.
+        if (editingManual && editingManual.slug !== slug) {
+          progressText.textContent = '新資料夾及索引已確認，清理舊資料夾…';
+          const oldFolderPath = `${settings.path}/${editingManual.slug}`.replace(/^\/+|\/+$/g, '');
+          async function listOldFiles(path) {
+            const result = await ghGet(path);
+            if (!result) return [];
+            const entries = Array.isArray(result) ? result : [result];
+            let found = [];
+            for (const item of entries) {
+              if (item.type === 'file') found.push(item);
+              else if (item.type === 'dir') found = found.concat(await listOldFiles(item.path));
+            }
+            return found;
+          }
+          try {
+            const oldFiles = await listOldFiles(oldFolderPath);
+            for (const fileMeta of oldFiles) {
+              const latest = await ghGet(fileMeta.path);
+              if (!latest || !latest.sha) continue;
+              const res = await fetch(contentUrl(fileMeta.path), { method: 'DELETE', headers: { ...apiHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ message: `Remove old folder after rename: ${editingManual.slug}`, sha: latest.sha, branch: settings.branch }) });
+              if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || `HTTP ${res.status}`); }
+            }
+          } catch (cleanupError) {
+            console.warn('New folder and index are saved, but old folder cleanup failed:', cleanupError);
+            toast(`名稱已同步，但舊資料夾清理未完成：${cleanupError.message}`, 5000, 'err');
+          }
+        }
         progressBar.style.width = '100%';
         progressText.textContent = '完成！';
         toast(`${editingManual ? '已更新' : '已上傳'}「${name}」`, 2600, 'ok');
