@@ -1171,6 +1171,9 @@
     let scores = []; // {name, score}
     let pickerNames = [];
     let scoreMode = 'count'; // count | mahjong | big2
+    // 分頁重繪 dirty flags：只在首次進入或資料確實變更時重建大型區塊
+    let scorePageDirty = true;
+    let pickerPageDirty = true;
 
     // DOM
     const qEl = document.getElementById('q');
@@ -1535,7 +1538,7 @@
         div.innerHTML = `<img src="${url}" alt=""><span class="num">${i+1}</span><button type="button" class="rm" data-i="${i}">×</button>`;
         previewEl.appendChild(div);
       });
-      document.getElementById('btnDoUpload').disabled = !(document.getElementById('gameName').value.trim() && (selectedFiles.length || document.getElementById('gameText').value.trim()));
+      document.getElementById('btnDoUpload').disabled = !(document.getElementById('gameName').value.trim() && (editingManual || selectedFiles.length || document.getElementById('gameText').value.trim()));
     }
     document.getElementById('preview').addEventListener('click', e => {
       const btn = e.target.closest('.rm');
@@ -1580,7 +1583,7 @@
       try {
         const existingManual = editingManual || MANUALS.find(m => m.slug === slug);
         const oldSlug = editingManual ? editingManual.slug : null;
-        const newSlug = editingManual ? slugify(name) : slug;
+        const newSlug = editingManual ? (name === (editingManual.name || '') ? editingManual.slug : slugify(name)) : slug;
         let pages = existingManual ? [...(existingManual.files || [])] : [];
         // Renaming a manual requires copying the actual GitHub files; changing index.json alone does not rename a folder.
         if (editingManual && newSlug !== oldSlug) {
@@ -1605,6 +1608,13 @@
           }
           const oldFiles = await listRenameFiles(oldFolderPath);
           const copiedNames = [];
+          // GitHub does not store empty folders. For text-only manuals (or manuals
+          // with no files yet), add a small marker so the renamed folder really exists.
+          if (oldFiles.length === 0) {
+            progressText.textContent = '建立新資料夾…';
+            await ghPut(`${newFolderPath}/.keep`, btoa('Boardgame manual folder marker'), `Create renamed manual folder ${newSlug}`, null);
+            copiedNames.push('.keep');
+          }
           for (let i = 0; i < oldFiles.length; i++) {
             const fileMeta = oldFiles[i];
             progressText.textContent = `複製檔案 ${i + 1}/${oldFiles.length}…`;
@@ -1945,6 +1955,7 @@
         renderB2History();
         updateB2RuleHint();
       }
+      scorePageDirty = false;
     }
     function renderScores() {
       const list = document.getElementById('playerList');
@@ -2561,6 +2572,7 @@
     // ========== Random Picker ==========
     function savePicker() {
       localStorage.setItem(LS_PICKER, JSON.stringify(pickerNames));
+      pickerPageDirty = true;
     }
     const WHEEL_COLORS = [
       '#FF3B3B', '#FF8A00', '#FFD400', '#7CFF2E', '#00D4AA',
@@ -2633,6 +2645,7 @@
       drawWheel();
       const canvas = document.getElementById('wheelCanvas');
       if (canvas) canvas.style.transform = `rotate(${wheelRotation}deg)`;
+      pickerPageDirty = false;
     }
     document.getElementById('pickerPlayers').addEventListener('click', e => {
       const btn = e.target.closest('.rm');
@@ -2808,10 +2821,15 @@
       if (pageEl) pageEl.classList.add('active');
       fabUpload.classList.toggle('show', pageId === 'pageManuals');
       const topbar = document.getElementById('topbar');
-      if (topbar) topbar.style.display = pageId === 'pageManuals' ? '' : 'none';
-      if (pageId === 'pageScore') setScoreMode(scoreMode);
-      if (pageId === 'pageRandom') renderPicker();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (topbar) {
+        const showTopbar = pageId === 'pageManuals';
+        topbar.style.visibility = showTopbar ? 'visible' : 'hidden';
+        topbar.style.pointerEvents = showTopbar ? '' : 'none';
+      }
+      if (pageId === 'pageScore' && scorePageDirty) setScoreMode(scoreMode);
+      if (pageId === 'pageRandom' && pickerPageDirty) renderPicker();
+      // 即時回頂，避免 smooth scroll 期間先短暫顯示舊捲動位置
+      window.scrollTo(0, 0);
     }
     document.querySelectorAll('.nav-item').forEach(btn => {
       btn.addEventListener('click', () => goToPage(btn.dataset.page));
