@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover" />
   <meta name="theme-color" content="#F7F1E8" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -320,6 +320,8 @@
     }
     .card-sub { font-size: 0.8rem; color: var(--muted); }
     .card-meta { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+    .card-delete { border: 1px solid #e7a4a4; background: #fff1f1; color: #a33b3b; border-radius: 999px; padding: 5px 10px; font: inherit; font-size: .72rem; font-weight: 700; cursor: pointer; flex-shrink: 0; }
+    .card-delete:disabled { opacity: .55; cursor: wait; }
     .empty, .loading {
       text-align: center; padding: 48px 16px; color: var(--muted);
     }
@@ -483,6 +485,11 @@
     }
 
     /* Viewer */
+    #viewerModal.fullscreen { padding:0; justify-content:center; }
+    #viewerModal.fullscreen .modal-sheet { width:100%; max-width:none; height:100dvh; max-height:100dvh; border-radius:0; }
+    #viewerModal.fullscreen .viewer-body { padding:0; gap:0; overflow:auto; touch-action:pan-x pan-y pinch-zoom; }
+    #viewerModal.fullscreen .viewer-body img { width:auto; height:auto; max-width:none; max-height:none; border-radius:0; flex:0 0 auto; }
+    #viewerModal.fullscreen .viewer-text { max-width:none; border-radius:0; min-height:100%; }
     .viewer-body {
       flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
       padding: 12px; display: flex; flex-direction: column; gap: 12px; align-items: center;
@@ -1099,6 +1106,8 @@
     <div class="modal-sheet" style="max-height:95dvh">
       <div class="modal-header">
         <div class="title" id="viewerTitle">說明書</div>
+        <button class="btn ghost" id="viewerEdit" type="button" style="padding:7px 10px">編輯</button>
+        <button class="btn danger" id="viewerDeletePhoto" type="button" style="padding:7px 10px;display:none">刪相</button>
         <button class="close" id="viewerClose" type="button">×</button>
       </div>
       <div class="viewer-body" id="viewerBody"></div>
@@ -1136,6 +1145,8 @@
     let viewerImages = [];
     let viewerText = '';
     let viewerIndex = 0;
+    let editingManual = null;
+    let viewerManual = null;
     let scores = []; // {name, score}
     let pickerNames = [];
     let scoreMode = 'count'; // count | mahjong | big2
@@ -1390,12 +1401,29 @@
         manuals
       };
       const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
-      let sha = null;
-      try {
+      // Always fetch the latest index SHA immediately before writing. If another
+      // write lands between the read and PUT, refresh the SHA and retry once.
+      let lastError = null;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        let sha = null;
         const existing = await ghGet(indexPath);
         if (existing) sha = existing.sha;
-      } catch (e) {}
-      await ghPut(indexPath, content, commitMsg || 'Update manuals index', sha);
+        try {
+          await ghPut(indexPath, content, commitMsg || 'Update manuals index', sha);
+          return;
+        } catch (e) {
+          lastError = e;
+          const message = String(e && e.message || e);
+          const isShaConflict = /does not match|sha|409|422|already exists/i.test(message);
+          if (attempt === 0 && isShaConflict) {
+            // Retry with a fresh SHA from GitHub.
+            await new Promise(resolve => setTimeout(resolve, 350));
+            continue;
+          }
+          throw e;
+        }
+      }
+      throw lastError || new Error('更新說明書索引失敗');
     }
 
     // ========== Compress → 一律轉 JPEG ==========
@@ -1508,7 +1536,7 @@
       if (!hasConfig()) { toast('請先完成 GitHub 設定'); return; }
       const name = document.getElementById('gameName').value.trim();
       if (!name) return;
-      const slug = slugify(name);
+      const slug = editingManual ? editingManual.slug : slugify(name);
       const note = document.getElementById('gameNote').value.trim();
       const cat = document.getElementById('gameCat').value;
       const text = document.getElementById('gameText').value.trim();
@@ -1523,13 +1551,14 @@
       progressBar.style.width = '0%';
 
       try {
+        const existingManual = editingManual || MANUALS.find(m => m.slug === slug);
+        const pages = existingManual ? [...(existingManual.files || [])] : [];
         const total = selectedFiles.length;
-        const pages = [];
         for (let i = 0; i < total; i++) {
           progressText.textContent = `轉 JPEG ${i+1}/${total}…`;
           progressBar.style.width = ((i / Math.max(total, 1)) * 40) + '%';
           const compressed = await compressImage(selectedFiles[i], 1600, 0.82);
-          const pageNum = String(i + 1).padStart(3, '0');
+          const pageNum = String(pages.length + 1).padStart(3, '0');
           const fileName = `${pageNum}.jpg`;
           progressText.textContent = `上傳 ${fileName}（${Math.round(compressed.size/1024)} KB）…`;
           progressBar.style.width = (40 + (i / Math.max(total, 1)) * 50) + '%';
@@ -1550,7 +1579,10 @@
         await saveIndex(MANUALS, `Add/Update: ${name}`);
         progressBar.style.width = '100%';
         progressText.textContent = '完成！';
-        toast(`已上傳「${name}」`, 2600, 'ok');
+        toast(`${editingManual ? '已更新' : '已上傳'}「${name}」`, 2600, 'ok');
+        editingManual = null;
+        document.querySelector('#uploadModal .modal-header .title').textContent = '🐻 新增說明本本';
+        btn.textContent = '上傳到 GitHub';
         renderCats();
         fillCatSelect();
         render();
@@ -1567,6 +1599,7 @@
 
     // ========== Viewer ==========
     function openViewer(manual) {
+      viewerManual = manual;
       document.getElementById('viewerTitle').textContent = manual.name + (manual.note ? ` · ${manual.note}` : '');
       const body = document.getElementById('viewerBody');
       body.innerHTML = '';
@@ -1581,12 +1614,14 @@
       viewerIndex = 0;
       // If has text, show text first as "page 0"
       showViewerPage();
-      document.getElementById('viewerModal').classList.add('open');
+      document.getElementById('viewerModal').classList.add('open','fullscreen');
       document.body.style.overflow = 'hidden';
     }
     function showViewerPage() {
       const body = document.getElementById('viewerBody');
+      const delPhotoBtn = document.getElementById('viewerDeletePhoto');
       const hasText = !!viewerText;
+      delPhotoBtn.style.display = (!hasText || viewerIndex > 0) && viewerImages.length ? '' : 'none';
       const total = viewerImages.length + (hasText ? 1 : 0);
       const pageEl = document.getElementById('viewerPage');
       const prev = document.getElementById('viewerPrev');
@@ -1618,7 +1653,7 @@
       return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
     }
     function closeViewer() {
-      document.getElementById('viewerModal').classList.remove('open');
+      document.getElementById('viewerModal').classList.remove('open','fullscreen');
       document.body.style.overflow = '';
       viewerImages = []; viewerText = ''; viewerIndex = 0;
     }
@@ -1659,6 +1694,7 @@
               ${m.category ? `<span class="badge cat">${m.category}</span>` : ''}
               <span class="badge pages">${m.pages || 0} 頁${m.text ? ' · 有文字' : ''}</span>
             </div>
+            <button type="button" class="card-delete" data-delete-slug="${m.slug}" aria-label="刪除 ${escapeHtml(m.name || '說明書')}">刪除</button>
           </div>
           <div class="card-title">${highlight(m.name, query)}</div>
           ${m.note ? `<div class="card-sub">${highlight(m.note, query)}</div>` : ''}
@@ -2051,8 +2087,8 @@
           <span class="name">${p.name}</span>
           <div style="display:flex;align-items:center;gap:6px">
             <button type="button" class="score-btn minus count-adj" data-idx="${idx}" data-d="-1">−</button>
-            <input type="number" class="count-delta" data-idx="${idx}" value="" placeholder="0"
-              inputmode="numeric" step="1"
+            <input type="text" inputmode="text" class="count-delta" data-idx="${idx}" value="" placeholder="0"
+              autocomplete="off"
               style="width:72px;padding:8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg-soft);text-align:center;font-family:inherit;font-size:1rem;font-weight:600" />
             <button type="button" class="score-btn plus count-adj" data-idx="${idx}" data-d="1">＋</button>
           </div>
@@ -2759,6 +2795,9 @@
         return;
       }
       selectedFiles = [];
+      editingManual = null;
+      document.querySelector('#uploadModal .modal-header .title').textContent = '🐻 新增說明本本';
+      document.getElementById('btnDoUpload').textContent = '上傳到 GitHub';
       document.getElementById('gameName').value = '';
       document.getElementById('gameNote').value = '';
       document.getElementById('gameText').value = '';
@@ -2777,7 +2816,146 @@
     document.getElementById('uploadClose').addEventListener('click', closeUpload);
     document.getElementById('btnDoUpload').addEventListener('click', doUpload);
 
+
+    document.getElementById('viewerEdit').addEventListener('click', () => {
+      const current = MANUALS.find(m => m.slug === (viewerManual && viewerManual.slug));
+      if (!current) { toast('找不到這份說明書'); return; }
+      editingManual = current;
+      closeViewer();
+      selectedFiles = [];
+      document.getElementById('gameName').value = current.name || '';
+      document.getElementById('gameNote').value = current.note || '';
+      document.getElementById('gameText').value = current.text || '';
+      fillCatSelect();
+      document.getElementById('gameCat').value = current.category || '';
+      document.querySelector('#uploadModal .modal-header .title').textContent = '✏️ 編輯說明本本';
+      document.getElementById('btnDoUpload').textContent = '儲存修改';
+      document.getElementById('preview').innerHTML = '<div style="grid-column:1/-1;color:var(--muted);font-size:.8rem">現有相片會保留；如需新增相片，請在下方選取。刪除現有相片請先在檢視畫面按「刪相」。</div>';
+      document.getElementById('progressWrap').classList.remove('show');
+      document.getElementById('btnDoUpload').disabled = false;
+      document.getElementById('uploadModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+    async function deleteCurrentPhoto() {
+      if (!viewerManual || !viewerImages.length) return;
+      const hasText = !!viewerText;
+      const imgIdx = hasText ? viewerIndex - 1 : viewerIndex;
+      if (imgIdx < 0 || imgIdx >= viewerImages.length) return;
+      if (!(await softConfirm('確定刪除此頁相片？此操作會直接刪除 GitHub 上的檔案。',{title:'刪除相片',icon:'🗑️'}))) return;
+      try {
+        const fileName = (viewerManual.files || [])[imgIdx];
+        if (!fileName) throw new Error('找不到相片檔名');
+        const path = `${settings.path}/${viewerManual.slug}/${fileName}`;
+        const file = await ghGet(path);
+        if (file && file.sha) {
+          const res = await fetch(contentUrl(path), {method:'DELETE',headers:{...apiHeaders(),'Content-Type':'application/json'},body:JSON.stringify({message:`Delete ${fileName} from ${viewerManual.name}`,sha:file.sha,branch:settings.branch})});
+          if (!res.ok) { const err=await res.json().catch(()=>({})); throw new Error(err.message || `HTTP ${res.status}`); }
+        }
+        viewerManual.files.splice(imgIdx,1);
+        viewerManual.pages = viewerManual.files.length;
+        await saveIndex(MANUALS, `Delete photo: ${viewerManual.name}`);
+        viewerImages.splice(imgIdx,1);
+        const newTotal = viewerImages.length + (hasText ? 1 : 0);
+        viewerIndex = Math.max(0,Math.min(viewerIndex,newTotal-1));
+        showViewerPage(); render(); toast('相片已刪除','', 'ok');
+      } catch(err) { toast('刪除失敗：'+err.message,3200,'err'); }
+    }
+    document.getElementById('viewerDeletePhoto').addEventListener('click', deleteCurrentPhoto);
+
+    async function deleteManualFromList(manual, button) {
+      if (!manual) return;
+      const accepted = await softConfirm(
+        `確定從 GitHub 刪除「${manual.name || manual.slug}」？這會刪除該說明書 folder 內的所有檔案，並從索引移除，無法直接復原。`,
+        { title: '刪除整份說明書', icon: '🗑️', okText: '刪除全部檔案' }
+      );
+      if (!accepted) return;
+      if (!hasConfig()) { toast('請先完成 GitHub 設定', 3000, 'err'); return; }
+      const originalText = button ? button.textContent : '';
+      if (button) { button.disabled = true; button.textContent = '刪除中…'; }
+      try {
+        const folderPath = `${settings.path}/${manual.slug}`.replace(/^\/+|\/+$/g, '');
+        async function listFiles(path) {
+          let result;
+          try { result = await ghGet(path); }
+          catch (e) {
+            if (/not found|404|不存在/i.test(String(e.message || e))) return [];
+            throw e;
+          }
+          if (!result) return [];
+          const entries = Array.isArray(result) ? result : [result];
+          let files = [];
+          for (const entry of entries) {
+            if (entry.type === 'file') files.push(entry);
+            else if (entry.type === 'dir') files = files.concat(await listFiles(entry.path));
+          }
+          return files;
+        }
+        const files = await listFiles(folderPath);
+        for (const file of files) {
+          const latest = await ghGet(file.path);
+          if (!latest || !latest.sha) continue;
+          const res = await fetch(contentUrl(file.path), {
+            method: 'DELETE',
+            headers: { ...apiHeaders(), 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: `Delete ${file.path} for manual ${manual.name || manual.slug}`, sha: latest.sha, branch: settings.branch })
+          });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(`刪除 ${file.path} 失敗：${err.message || `HTTP ${res.status}`}。可能已有部分檔案刪除；索引尚未更新，請先重新整理列表。`);
+          }
+        }
+
+        // Read the latest remote index and mutate that version, rather than stale in-memory MANUALS.
+        const indexPath = `${settings.path}/${INDEX_FILE}`;
+        let saved = false, lastErr = null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          const remoteIndex = await ghGet(indexPath);
+          if (!remoteIndex || !remoteIndex.content || !remoteIndex.sha) {
+            throw new Error('GitHub 找不到有效的 index.json；檔案已處理，但索引未能更新。');
+          }
+          let payload;
+          try { payload = JSON.parse(decodeURIComponent(escape(atob(remoteIndex.content.replace(/\n/g, ''))))); }
+          catch (_) { throw new Error('GitHub 的 index.json 無法解析；檔案已處理，但索引未能更新。'); }
+          const remoteManuals = Array.isArray(payload.manuals) ? payload.manuals : (Array.isArray(payload) ? payload : []);
+          const updatedManuals = remoteManuals.filter(m => m.slug !== manual.slug);
+          const nextPayload = Array.isArray(payload) ? updatedManuals : { ...payload, updated: new Date().toISOString(), manuals: updatedManuals };
+          const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(nextPayload, null, 2))));
+          try {
+            await ghPut(indexPath, encoded, `Delete manual index entry: ${manual.name || manual.slug}`, remoteIndex.sha);
+            MANUALS = updatedManuals;
+            saved = true;
+            break;
+          } catch (e) {
+            lastErr = e;
+            if (attempt < 2 && /does not match|sha|409|422|already exists/i.test(String(e.message || e))) {
+              await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+              continue;
+            }
+            throw e;
+          }
+        }
+        if (!saved) throw lastErr || new Error('更新 index.json 失敗');
+        renderCats();
+        fillCatSelect();
+        render();
+        toast(files.length ? `已刪除說明書及 ${files.length} 個檔案，索引已同步` : '說明書已從索引移除', 3200, 'ok');
+      } catch (err) {
+        console.error(err);
+        toast('刪除未完全完成：' + err.message, 5000, 'err');
+        try { await loadIndex(); } catch (_) {}
+      } finally {
+        if (button) { button.disabled = false; button.textContent = originalText || '刪除'; }
+      }
+    }
     grid.addEventListener('click', e => {
+      const deleteButton = e.target.closest('[data-delete-slug]');
+      if (deleteButton) {
+        e.preventDefault();
+        e.stopPropagation();
+        const manual = MANUALS.find(m => m.slug === deleteButton.dataset.deleteSlug);
+        deleteManualFromList(manual, deleteButton);
+        return;
+      }
       const card = e.target.closest('.card');
       if (!card) return;
       const manual = MANUALS.find(m => m.slug === card.dataset.slug);
