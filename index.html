@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#F7F1E8" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -486,9 +486,12 @@
 
     /* Viewer */
     #viewerModal.fullscreen { padding:0; justify-content:center; }
-    #viewerModal.fullscreen .modal-sheet { width:100%; max-width:none; height:100dvh; max-height:100dvh; border-radius:0; }
-    #viewerModal.fullscreen .viewer-body { padding:0; gap:0; overflow:auto; touch-action:pan-x pan-y pinch-zoom; }
-    #viewerModal.fullscreen .viewer-body img { width:auto; height:auto; max-width:none; max-height:none; border-radius:0; flex:0 0 auto; }
+    #viewerModal.fullscreen { padding:0; padding-top:env(safe-area-inset-top); padding-bottom:env(safe-area-inset-bottom); }
+    #viewerModal.fullscreen .modal-sheet { width:100%; max-width:none; height:100%; min-height:0; max-height:none !important; border-radius:0; }
+    #viewerModal.fullscreen .viewer-body { padding:0; gap:0; min-height:0; overflow:auto; touch-action:pan-x pan-y; overscroll-behavior:contain; }
+    /* Prevent page-level zoom; image pinch zoom is handled only inside the viewer. */
+    #viewerModal.fullscreen .viewer-body img { touch-action:pan-x pan-y; }
+    #viewerModal.fullscreen .viewer-body img { width:auto; height:auto; max-width:100%; max-height:none; border-radius:0; flex:0 0 auto; transform-origin:center center; user-select:none; -webkit-user-drag:none; }
     #viewerModal.fullscreen .viewer-text { max-width:none; border-radius:0; min-height:100%; }
     .viewer-body {
       flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
@@ -505,7 +508,7 @@
       white-space: pre-wrap; word-break: break-word;
     }
     .viewer-nav {
-      display: flex; align-items: center; justify-content: center; gap: 16px;
+      position:relative; z-index:5; display: flex; align-items: center; justify-content: center; gap: 16px;
       padding: 10px 14px; border-top: 1px solid var(--border); flex-shrink: 0;
       background: var(--panel);
     }
@@ -1103,7 +1106,7 @@
 
   <!-- Viewer Modal -->
   <div class="modal" id="viewerModal">
-    <div class="modal-sheet" style="max-height:95dvh">
+    <div class="modal-sheet">
       <div class="modal-header">
         <div class="title" id="viewerTitle">說明書</div>
         <button class="btn ghost" id="viewerEdit" type="button" style="padding:7px 10px">編輯</button>
@@ -1308,6 +1311,12 @@
     }
     async function ghPut(path, contentBase64, message, sha) {
       const body = { message, content: contentBase64, branch: settings.branch };
+      // GitHub requires the current blob SHA when updating an existing file.
+      // If callers did not supply it, fetch the latest metadata before PUT.
+      if (!sha) {
+        const latest = await ghGet(path);
+        if (latest && latest.sha) sha = latest.sha;
+      }
       if (sha) body.sha = sha;
       const res = await fetch(contentUrl(path), {
         method: 'PUT',
@@ -1642,12 +1651,15 @@
       } else {
         const imgIdx = hasText ? viewerIndex - 1 : viewerIndex;
         const src = viewerImages[imgIdx];
-        body.innerHTML = `<img src="${src}" alt="第 ${imgIdx+1} 頁" onerror="this.parentNode.innerHTML='<div style=color:#ccc;padding:30px;text-align:center>載入失敗</div>'" />`;
+        body.innerHTML = `<img class="viewer-page-image" src="${src}" alt="第 ${imgIdx+1} 頁" draggable="false" onerror="this.parentNode.innerHTML='<div style=color:#ccc;padding:30px;text-align:center>載入失敗</div>'" />`;
       }
       pageEl.textContent = `${viewerIndex + 1} / ${total}`;
       prev.disabled = viewerIndex <= 0;
       next.disabled = viewerIndex >= total - 1;
       body.scrollTop = 0;
+      imageScale = 1;
+      const shownImage = body.querySelector('.viewer-page-image');
+      if (shownImage) { shownImage.style.transform = ''; shownImage.style.maxWidth = '100%'; }
     }
     function escapeHtml(s) {
       return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
@@ -2927,7 +2939,7 @@
             break;
           } catch (e) {
             lastErr = e;
-            if (attempt < 2 && /does not match|sha|409|422|already exists/i.test(String(e.message || e))) {
+            if (attempt < 2 && /does not match|sha|409|422|already exists|wasn.t supplied/i.test(String(e.message || e))) {
               await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
               continue;
             }
@@ -2979,12 +2991,42 @@
       if (document.getElementById('uploadModal').classList.contains('open') && e.key === 'Escape') closeUpload();
     });
     let touchX = null;
-    document.getElementById('viewerBody').addEventListener('touchstart', e => { touchX = e.changedTouches[0].screenX; }, { passive: true });
-    document.getElementById('viewerBody').addEventListener('touchend', e => {
-      if (touchX == null) return;
+    let pinchStartDistance = 0;
+    let pinchStartScale = 1;
+    let imageScale = 1;
+    const viewerBodyEl = document.getElementById('viewerBody');
+    function touchDistance(t1, t2) {
+      const dx = t1.clientX - t2.clientX, dy = t1.clientY - t2.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+    function resetViewerImageZoom() {
+      imageScale = 1;
+      const img = viewerBodyEl.querySelector('.viewer-page-image');
+      if (img) { img.style.transform = ''; img.style.maxWidth = '100%'; }
+    }
+    viewerBodyEl.addEventListener('touchstart', e => {
+      if (e.touches.length >= 2) {
+        touchX = null;
+        pinchStartDistance = touchDistance(e.touches[0], e.touches[1]);
+        pinchStartScale = imageScale;
+      } else if (e.touches.length === 1) touchX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    viewerBodyEl.addEventListener('touchmove', e => {
+      if (e.touches.length < 2) return;
+      const img = viewerBodyEl.querySelector('.viewer-page-image');
+      if (!img || !pinchStartDistance) return;
+      const ratio = touchDistance(e.touches[0], e.touches[1]) / pinchStartDistance;
+      imageScale = Math.min(5, Math.max(1, pinchStartScale * ratio));
+      img.style.maxWidth = 'none';
+      img.style.transform = `scale(${imageScale})`;
+      e.preventDefault();
+    }, { passive: false });
+    viewerBodyEl.addEventListener('touchend', e => {
+      if (e.touches.length < 2) pinchStartDistance = 0;
+      if (touchX == null || e.changedTouches.length !== 1) return;
       const dx = e.changedTouches[0].screenX - touchX;
       touchX = null;
-      if (Math.abs(dx) < 50) return;
+      if (Math.abs(dx) < 60) return;
       if (dx < 0) document.getElementById('viewerNext').click();
       else document.getElementById('viewerPrev').click();
     }, { passive: true });
