@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-22T04:56:43.520Z",
+  "updated": "2026-10-22T05:33:43.800Z",
   "categories": [
     "策略",
     "派對",
@@ -11,7 +11,7 @@
   ],
   "manuals": [
     {
-      "name": "Test 4",
+      "name": "Test 5",
       "slug": "Test_4",
       "note": "",
       "category": "策略",
@@ -19,8 +19,8 @@
       "files": [
         "001.jpg"
       ],
-      "text": "",
-      "updated": "2026-10-22T02:48:35.434Z"
+      "text": "a",
+      "updated": "2026-10-22T05:33:43.800Z"
     },
     {
       "name": "test 3",
