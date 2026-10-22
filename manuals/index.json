@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-22T04:48:24.755Z",
+  "updated": "2026-10-22T04:49:28.559Z",
   "categories": [
     "策略",
     "派對",
@@ -32,20 +32,20 @@
         "002.jpg",
         "003.jpg"
       ],
-      "text": "先 update cookies\n用 chrome extension \"cookie-editor\"\nExport >> netscape\n貼上 cookies.txt\n\n下載 youtube Private video 單一\nyt-dlp.exe --cookies cookies.txt --js-runtime node --user-agent \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36\" -f \"bestvideo[height<=1080]+bestaudio/best[height<=1080]\" --merge-output-format mp4 \"https://youtu.be/lsBvajQyvZQ\"\n\n下載 youtube Private video (批量下載 download.txt) (將 attempt times 改做 30次)(同封字幕)\nyt-dlp.exe --cookies cookies.txt --js-runtime node --user-agent \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36\" -f \"bestvideo[height<=1080]+bestaudio/best[height<=1080]\" --merge-output-format mkv -o \"%(title)s.%(ext)s\" -a download.txt --retries 30 --fragment-retries 30 --ignore-errors --sleep-interval 5 --max-sleep-interval 10 --no-warnings --sub-langs \"zh-Hant,zh-HK,zh-TW,zh\" --convert-subs srt --embed-subs\n\nyt-dlp.exe --cookies cookies.txt --js-runtime node --user-agent \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36\" -f \"bestvideo[height<=1080]+bestaudio/best[height<=1080]\" --merge-output-format mkv -o \"%(title)s.%(ext)s\" -a download.txt --retries 3000 --fragment-retries 30 --ignore-errors --sleep-interval 5 --max-sleep-interval 10 --no-warnings --sub-langs \"zh-Hant,zh-HK,zh-TW,zh\" --convert-subs srt --embed-subs\n\n\nyt-dlp.exe --cookies cookies.txt --js-runtime node --user-agent \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36\" -f \"bestvideo[height<=360]+bestaudio/best[height<=360]\" --merge-output-format mp4 \"https://www.youtube.com/watch?v=gz9H8Miq05w\"\n\n\nyt-dlp \"https://youtu.be/P_xdLGTsD8E?si=4y_X3KhbH_hjlavA\"\n\n教团：1886.The Order: 1886\n\n下載 youtube Private video Firefox(批量下載 download.txt) (將 attempt times 改做 30次)(同封字幕)\nyt-dlp.exe --cookies cookiesFirefox.txt --js-runtime node --user-agent \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36\" -f \"bestvideo[height<=1080]+bestaudio/best[height<=1080]\" --merge-output-format mkv -o \"%(title)s.%(ext)s\" -a downloadFirefox.txt --retries 30 --fragment-retries 30 --ignore-errors --sleep-interval 5 --max-sleep-interval 10 --no-warnings --sub-langs \"zh-Hant,zh-HK,zh-TW,zh\" --convert-subs srt --embed-subs\n\n下載 video ，特定時間\nyt-dlp --referer \"https://jable.tv/videos/dass-015/\" --download-sections \"*01:52:57-01:53:12\" -o \"DASS-015-4.mp4\" \"https://halas-monsl.mushroomtrack.com/hls/PtQ3qdtRrvs1AVyaFFjMCQ/1785315352/25000/25100/25100.m3u8\"\n\n下載 bilibili\nyt-dlp.exe --cookies cookiesbili.txt --js-runtime node --user-agent \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36\" \"https://www.bilibili.com/video/BV15cnK6bEDv?t=1.0\"\n\n\nyt-dlp -f bestaudio -x --audio-format m4a \"https://www.bilibili.com/video/BV1Fx411X79T/?p=2&spm_id_from=333.788.videopod.episodes&vd_source=84257528ed75ef3d6398b7d937df0955\"\n\n下載 xgcartoon\nyt-dlp --referer \"https://jable.tv/videos/hmn-866/\" --external-downloader aria2c -o \"HMN-866.mp4\" \"https://hot-box-gen.mushroomtrack.com/hls/GrV4pKVrFyM0hSzD0vYgAA/1785140682/60000/60878/60878.m3u8\"\n\nyt-dlp --referer \"https://www.hkanime.com/play/%E5%B9%B8%E9%81%8B%E5%A5%B3%E7%A5%9E%20S2/172x0\" --external-downloader aria2c -o \"video.mp4\" \"https://cdn.hkanimal.com/animal-steamOK/%E5%B9%B8%E9%81%8B%E5%A5%B3%E7%A5%9E/II/,lang/yue/01.srt,01.mp4,.urlset/master.m3u8\"\n超快 Searching\ncd /d d:\\\ndir /s /b | fzf\nupdate yt-dlp\nyt-dlp.exe -U\nGeneral download\naria2c -x 16 -s 16 \"magnet:?xt=urn:btih:5725d79cadcb5fa1cf563aec71004ea54acbc2da\"",
-      "updated": "2026-10-22T04:41:10.443Z"
+      "text": "aaa",
+      "updated": "2026-10-22T04:49:28.559Z"
     },
     {
-      "name": "test 2",
+      "name": "test 2 renamed",
       "slug": "test_2",
-      "category": "策略遊戲",
       "note": "",
-      "description": "fdfsfsfsfsg",
+      "category": "策略遊戲",
       "pages": 1,
       "files": [
         "001.jpg"
       ],
-      "updated": "2026-10-21T22:01:29.444Z"
+      "text": "a",
+      "updated": "2026-10-22T04:49:03.839Z"
     }
   ]
 }
