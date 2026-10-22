@@ -492,9 +492,12 @@
     #viewerModal.fullscreen .modal-header { display:none !important; }
     #viewerModal.fullscreen .viewer-body { position:absolute; inset:0; padding:0; margin:0; gap:0; min-height:0; height:100%; width:100%; display:flex; align-items:center; justify-content:center; overflow:auto; background:#000; touch-action:pan-x pan-y; overscroll-behavior:contain; }
     #viewerModal.fullscreen .viewer-body img { display:block; width:100%; height:100%; max-width:100%; max-height:100%; object-fit:contain; border-radius:0; flex:0 0 auto; transform-origin:center center; user-select:none; -webkit-user-select:none; -webkit-user-drag:none; }
-    #viewerModal.fullscreen .viewer-text { display:none !important; }
+    #viewerModal.fullscreen .viewer-text { display:block !important; width:100%; max-width:760px; margin:auto; box-sizing:border-box; border-radius:0; min-height:100%; padding:24px 18px 100px; background:#111; color:#fff; font-size:1.05rem; line-height:1.8; overflow-wrap:anywhere; }
     #viewerModal.fullscreen .viewer-nav { position:absolute; left:0; right:0; bottom:0; z-index:10; padding:10px 14px calc(10px + env(safe-area-inset-bottom)); border:0; background:linear-gradient(transparent,rgba(0,0,0,.72)); color:#fff; }
     #viewerModal.fullscreen .viewer-nav .page { color:#fff; }
+    #viewerModal.fullscreen .viewer-nav #viewerBack { margin-right:auto; padding:0 12px; }
+    #viewerModal.fullscreen .viewer-body:has(.viewer-text) { align-items:stretch; justify-content:flex-start; overflow-y:auto; }
+    #viewerModal.fullscreen .viewer-body:has(.viewer-text) .viewer-text { flex:1 0 auto; }
     #viewerModal.fullscreen .viewer-nav button { min-width:44px; min-height:42px; background:rgba(40,40,40,.75); color:#fff; border:1px solid rgba(255,255,255,.35); border-radius:10px; }
     .viewer-body {
       flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
@@ -1118,6 +1121,7 @@
       </div>
       <div class="viewer-body" id="viewerBody"></div>
       <div class="viewer-nav">
+        <button type="button" id="viewerBack" aria-label="返回主畫面">← 返回</button>
         <button type="button" id="viewerPrev">‹</button>
         <div class="page" id="viewerPage">—</div>
         <button type="button" id="viewerNext">›</button>
