@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#F7F1E8" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -485,14 +485,17 @@
     }
 
     /* Viewer */
-    #viewerModal.fullscreen { padding:0; justify-content:center; }
-    #viewerModal.fullscreen { padding:0; padding-top:env(safe-area-inset-top); padding-bottom:env(safe-area-inset-bottom); }
-    #viewerModal.fullscreen .modal-sheet { width:100%; max-width:none; height:100%; min-height:0; max-height:none !important; border-radius:0; }
-    #viewerModal.fullscreen .viewer-body { padding:0; gap:0; min-height:0; overflow:auto; touch-action:pan-x pan-y; overscroll-behavior:contain; }
-    /* Prevent page-level zoom; image pinch zoom is handled only inside the viewer. */
-    #viewerModal.fullscreen .viewer-body img { touch-action:pan-x pan-y; }
-    #viewerModal.fullscreen .viewer-body img { width:auto; height:auto; max-width:100%; max-height:none; border-radius:0; flex:0 0 auto; transform-origin:center center; user-select:none; -webkit-user-drag:none; }
-    #viewerModal.fullscreen .viewer-text { max-width:none; border-radius:0; min-height:100%; }
+    /* Photo viewer: edge-to-edge image, with only persistent photo navigation controls. */
+    #viewerModal.fullscreen { position:fixed; inset:0; width:100vw; height:100vh; height:100dvh; padding:0; margin:0; display:none; align-items:stretch; justify-content:stretch; overflow:hidden; background:#000; z-index:9999; }
+    #viewerModal.fullscreen.open { display:flex; }
+    #viewerModal.fullscreen .modal-sheet { position:relative; display:flex; flex-direction:column; width:100%; max-width:none; height:100vh; height:100dvh; min-height:0; max-height:none !important; margin:0; padding:0; border:0; border-radius:0; background:#000; overflow:hidden; }
+    #viewerModal.fullscreen .modal-header { display:none !important; }
+    #viewerModal.fullscreen .viewer-body { position:absolute; inset:0; padding:0; margin:0; gap:0; min-height:0; height:100%; width:100%; display:flex; align-items:center; justify-content:center; overflow:auto; background:#000; touch-action:pan-x pan-y; overscroll-behavior:contain; }
+    #viewerModal.fullscreen .viewer-body img { display:block; width:100%; height:100%; max-width:100%; max-height:100%; object-fit:contain; border-radius:0; flex:0 0 auto; transform-origin:center center; user-select:none; -webkit-user-select:none; -webkit-user-drag:none; }
+    #viewerModal.fullscreen .viewer-text { display:none !important; }
+    #viewerModal.fullscreen .viewer-nav { position:absolute; left:0; right:0; bottom:0; z-index:10; padding:10px 14px calc(10px + env(safe-area-inset-bottom)); border:0; background:linear-gradient(transparent,rgba(0,0,0,.72)); color:#fff; }
+    #viewerModal.fullscreen .viewer-nav .page { color:#fff; }
+    #viewerModal.fullscreen .viewer-nav button { min-width:44px; min-height:42px; background:rgba(40,40,40,.75); color:#fff; border:1px solid rgba(255,255,255,.35); border-radius:10px; }
     .viewer-body {
       flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
       padding: 12px; display: flex; flex-direction: column; gap: 12px; align-items: center;
@@ -3030,6 +3033,28 @@
       if (dx < 0) document.getElementById('viewerNext').click();
       else document.getElementById('viewerPrev').click();
     }, { passive: true });
+
+    // iOS Safari can still zoom the document despite viewport flags. Block browser-level
+    // pinch/double-tap zoom outside the photo viewer; viewer pinch is handled above.
+    document.addEventListener('gesturestart', e => {
+      if (!document.getElementById('viewerModal').classList.contains('fullscreen')) e.preventDefault();
+    }, { passive: false });
+    document.addEventListener('gesturechange', e => {
+      if (!document.getElementById('viewerModal').classList.contains('fullscreen')) e.preventDefault();
+    }, { passive: false });
+    document.addEventListener('gestureend', e => {
+      if (!document.getElementById('viewerModal').classList.contains('fullscreen')) e.preventDefault();
+    }, { passive: false });
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', e => {
+      if (document.getElementById('viewerModal').classList.contains('fullscreen')) return;
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) e.preventDefault();
+      lastTouchEnd = now;
+    }, { passive: false });
+    document.addEventListener('touchmove', e => {
+      if (e.touches && e.touches.length > 1 && !document.getElementById('viewerModal').classList.contains('fullscreen')) e.preventDefault();
+    }, { passive: false });
 
     // Init
     loadSettings();
