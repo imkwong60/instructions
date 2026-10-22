@@ -8,32 +8,4 @@
     "派對遊戲",
     "家庭遊戲",
     "雙人對戰"
-  ],
-  "manuals": [
-    {
-      "name": "Test 4",
-      "slug": "Test_4",
-      "note": "",
-      "category": "策略",
-      "pages": 1,
-      "files": [
-        "001.jpg"
-      ],
-      "text": "",
-      "updated": "2026-10-22T02:48:35.434Z"
-    },
-    {
-      "name": "test 3",
-      "slug": "test_3",
-      "note": "",
-      "category": "家庭",
-      "pages": 2,
-      "files": [
-        "002.jpg",
-        "003.jpg"
-      ],
-      "text": "aaabbb",
-      "updated": "2026-10-22T04:56:43.519Z"
-    }
   ]
-}
