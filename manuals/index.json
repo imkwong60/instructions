@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-21T22:36:07.236Z",
+  "updated": "2026-10-22T02:48:35.436Z",
   "categories": [
     "策略",
     "派對",
@@ -10,6 +10,18 @@
     "雙人對戰"
   ],
   "manuals": [
+    {
+      "name": "Test 4",
+      "slug": "Test_4",
+      "note": "",
+      "category": "策略",
+      "pages": 1,
+      "files": [
+        "001.jpg"
+      ],
+      "text": "",
+      "updated": "2026-10-22T02:48:35.434Z"
+    },
     {
       "name": "test 3",
       "slug": "test_3",
