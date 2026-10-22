@@ -761,10 +761,7 @@
 
   <!-- Settings -->
   <div class="settings-panel" id="settingsPanel">
-    <h3>☁️ 儲存設定</h3>
-    <div class="field">
-      <div class="hint" style="margin:0;line-height:1.55">已改用 <strong>Supabase Storage</strong>。Project URL 與 anon key 已寫入程式碼（個人自用）。請在 Supabase Dashboard 建立名為 <code>manuals</code> 的 bucket，設為 Public，並在 Storage policies 允許 anon 讀寫（SELECT / INSERT / UPDATE / DELETE）。</div>
-    </div>
+    <h3>☁️ 儲存</h3>
     <div class="settings-actions">
       <button class="btn primary" id="btnTestConnection" type="button">測試連線</button>
     </div>
@@ -2795,12 +2792,7 @@
       const pageEl = document.getElementById(pageId);
       if (pageEl) pageEl.classList.add('active');
       fabUpload.classList.toggle('show', pageId === 'pageManuals');
-      const topbar = document.getElementById('topbar');
-      if (topbar) {
-        const showTopbar = pageId === 'pageManuals';
-        topbar.style.visibility = showTopbar ? 'visible' : 'hidden';
-        topbar.style.pointerEvents = showTopbar ? '' : 'none';
-      }
+      // 頂欄（標題／icon／設定）在所有分頁都保持顯示
       if (pageId === 'pageScore' && scorePageDirty) setScoreMode(scoreMode);
       if (pageId === 'pageRandom' && pickerPageDirty) renderPicker();
       // 即時回頂，避免 smooth scroll 期間先短暫顯示舊捲動位置
