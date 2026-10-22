@@ -1,5 +1,5 @@
 /* 說明本本 Service Worker */
-const CACHE = 'benben-v4';
+const CACHE = 'benben-v5';
 const PRECACHE = [
   './',
   './index.html',
