@@ -1,6 +1,6 @@
 {
-  "name": "說明本本",
-  "short_name": "說明本本",
+  "name": "桌遊本本",
+  "short_name": "桌遊本本",
   "description": "桌遊說明書管理、廣東麻雀／鋤大D／自訂計分、隨機抽選",
   "start_url": "./index.html",
   "scope": "./",
