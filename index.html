@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#F7F1E8" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="桌遊本本" />
-  <title>桌遊本本</title>
+  <meta name="apple-mobile-web-app-title" content="æ¡ŒéŠæœ¬æœ¬" />
+  <title>æ¡ŒéŠæœ¬æœ¬</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -57,7 +57,7 @@
       max-width: 480px;
       margin: 0 auto;
       padding: 0 14px;
-      padding-top: max(10px, env(safe-area-inset-top));
+      padding-top: calc(78px + env(safe-area-inset-top));
       padding-bottom: max(140px, env(safe-area-inset-bottom) + 110px);
       overflow-x: hidden;
       overflow-y: visible;
@@ -69,9 +69,11 @@
 
     /* ===== Header ===== */
     .topbar {
-      position: sticky; top: 0; z-index: 40;
-      background: linear-gradient(180deg, var(--bg) 70%, transparent);
-      padding: 8px 0 6px;
+      position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+      width: min(calc(100% - 28px), 452px); z-index: 100;
+      background: var(--bg);
+      padding: max(8px, env(safe-area-inset-top)) 0 6px;
+      box-shadow: 0 5px 12px rgba(74,63,53,0.035);
     }
     .title-row {
       display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px;
@@ -468,6 +470,16 @@
       border: none; font-size: 12px; cursor: pointer; display: flex;
       align-items: center; justify-content: center;
     }
+    .upload-preview .thumb .rotate {
+      position: absolute; bottom: 4px; right: 4px; width: 28px; height: 28px;
+      border-radius: 50%; background: rgba(74,63,53,.82); color: #fff;
+      border: 1px solid rgba(255,255,255,.85); font-size: 17px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .photo-pick-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
+    .photo-pick-actions .file-input-btn { padding:14px 8px; font-size:.88rem; text-align:center; }
+    .photo-pick-actions .file-input-btn span { display:block; }
+
     .progress-wrap {
       background: var(--panel); border-radius: 12px; padding: 12px; display: none;
       border: 1.5px solid var(--border);
@@ -744,11 +756,11 @@
         <div class="brand-icon" title="Kumamon">
           <img src="data:image/jpeg;base64,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" alt="Kumamon" />
         </div>
-        <h1>桌遊<span>本本</span></h1>
+        <h1>æ¡ŒéŠ<span>æœ¬æœ¬</span></h1>
       </div>
       <div class="title-actions">
-        <button class="icon-btn" id="btnSettings" type="button" title="設定" aria-label="設定">⚙️</button>
-        <button class="icon-btn" id="btnRefresh" type="button" title="重新載入" aria-label="重新載入">
+        <button class="icon-btn" id="btnSettings" type="button" title="è¨­å®š" aria-label="è¨­å®š">âš™ï¸</button>
+        <button class="icon-btn" id="btnRefresh" type="button" title="é‡æ–°è¼‰å…¥" aria-label="é‡æ–°è¼‰å…¥">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="23 4 23 10 17 10"></polyline>
             <polyline points="1 20 1 14 7 14"></polyline>
@@ -761,215 +773,215 @@
 
   <!-- Settings -->
   <div class="settings-panel" id="settingsPanel">
-    <h3>☁️ 儲存</h3>
+    <h3>â˜ï¸ å„²å­˜</h3>
     <div class="settings-actions">
-      <button class="btn primary" id="btnTestConnection" type="button">測試連線</button>
+      <button class="btn primary" id="btnTestConnection" type="button">æ¸¬è©¦é€£ç·š</button>
     </div>
 
     <hr style="border:none;border-top:1px solid var(--border);margin:16px 0 12px">
-    <h3>📁 自訂分區</h3>
+    <h3>ðŸ“ è‡ªè¨‚åˆ†å€</h3>
     <div class="field">
-      <label>分區名稱（用逗號分隔）</label>
-      <input type="text" id="catInput" placeholder="策略, 派對, 家庭, 合作" />
-      <div class="hint">會顯示在說明書頁上方，方便分類</div>
+      <label>åˆ†å€åç¨±ï¼ˆç”¨é€—è™Ÿåˆ†éš”ï¼‰</label>
+      <input type="text" id="catInput" placeholder="ç­–ç•¥, æ´¾å°, å®¶åº­, åˆä½œ" />
+      <div class="hint">æœƒé¡¯ç¤ºåœ¨èªªæ˜Žæ›¸é ä¸Šæ–¹ï¼Œæ–¹ä¾¿åˆ†é¡ž</div>
     </div>
-    <button class="btn mint" id="btnSaveCats" type="button" style="margin-top:4px">儲存分區</button>
+    <button class="btn mint" id="btnSaveCats" type="button" style="margin-top:4px">å„²å­˜åˆ†å€</button>
   </div>
 
   <!-- ===== PAGE: Manuals ===== -->
   <div class="page active" id="pageManuals">
     <div class="search-box">
-      <span class="icon">🔍</span>
-      <input id="q" type="search" placeholder="搜尋遊戲名稱…" autocomplete="off" enterkeyhint="search" />
-      <button class="clear" id="clearBtn" type="button" aria-label="清除">×</button>
+      <span class="icon">ðŸ”</span>
+      <input id="q" type="search" placeholder="æœå°‹éŠæˆ²åç¨±â€¦" autocomplete="off" enterkeyhint="search" />
+      <button class="clear" id="clearBtn" type="button" aria-label="æ¸…é™¤">Ã—</button>
     </div>
     <div class="cats" id="cats"></div>
     <div class="toolbar">
-      <div class="count">顯示 <strong id="shown">0</strong> / <span id="total">0</span> 本</div>
+      <div class="count">é¡¯ç¤º <strong id="shown">0</strong> / <span id="total">0</span> æœ¬</div>
     </div>
     <div class="status-bar" id="status"></div>
     <div class="grid" id="grid">
-      <div class="loading"><div class="spinner"></div>載入中…</div>
+      <div class="loading"><div class="spinner"></div>è¼‰å…¥ä¸­â€¦</div>
     </div>
   </div>
 
   <!-- ===== PAGE: Score ===== -->
   <div class="page" id="pageScore">
     <div class="score-header">
-      <h2>🏆 計分板</h2>
-      <button class="btn ghost" id="btnResetScores" type="button" style="padding:6px 12px;font-size:0.75rem">全部歸零</button>
+      <h2>ðŸ† è¨ˆåˆ†æ¿</h2>
+      <button class="btn ghost" id="btnResetScores" type="button" style="padding:6px 12px;font-size:0.75rem">å…¨éƒ¨æ­¸é›¶</button>
     </div>
     <div class="segment" id="scoreModeSeg">
-      <button type="button" class="active" data-mode="count">自訂計分</button>
-      <button type="button" data-mode="mahjong">麻雀</button>
-      <button type="button" data-mode="big2">鋤大D</button>
+      <button type="button" class="active" data-mode="count">è‡ªè¨‚è¨ˆåˆ†</button>
+      <button type="button" data-mode="mahjong">éº»é›€</button>
+      <button type="button" data-mode="big2">é‹¤å¤§D</button>
     </div>
 
-    <!-- 金額單位：麻雀／鋤大D 顯示 -->
+    <!-- é‡‘é¡å–®ä½ï¼šéº»é›€ï¼é‹¤å¤§D é¡¯ç¤º -->
     <div id="unitWrap" style="display:none">
       <div class="unit-row">
-        <label id="unitLabel">每分金額（$）</label>
+        <label id="unitLabel">æ¯åˆ†é‡‘é¡ï¼ˆ$ï¼‰</label>
         <input type="number" id="unitPrice" inputmode="decimal" placeholder="1" value="1" min="0" step="0.5" />
       </div>
-      <p class="field" style="margin:-4px 0 10px"><span class="hint" id="unitHint">分數 × 每分金額 = 實收金額</span></p>
+      <p class="field" style="margin:-4px 0 10px"><span class="hint" id="unitHint">åˆ†æ•¸ Ã— æ¯åˆ†é‡‘é¡ = å¯¦æ”¶é‡‘é¡</span></p>
     </div>
 
     <div class="player-list" id="playerList"></div>
     <div class="add-player-row" id="addPlayerRow">
-      <input type="text" id="newPlayerName" placeholder="輸入玩家名稱…" enterkeyhint="done" />
-      <button class="btn primary" id="btnAddPlayer" type="button">加入</button>
+      <input type="text" id="newPlayerName" placeholder="è¼¸å…¥çŽ©å®¶åç¨±â€¦" enterkeyhint="done" />
+      <button class="btn primary" id="btnAddPlayer" type="button">åŠ å…¥</button>
     </div>
     <div class="score-actions">
-      <button class="btn ghost" id="btnClearPlayers" type="button">清除所有玩家</button>
+      <button class="btn ghost" id="btnClearPlayers" type="button">æ¸…é™¤æ‰€æœ‰çŽ©å®¶</button>
     </div>
 
-    <!-- Count / 自訂計分：每回合輸入 -->
+    <!-- Count / è‡ªè¨‚è¨ˆåˆ†ï¼šæ¯å›žåˆè¼¸å…¥ -->
     <div id="countPanel" style="display:none;margin-top:14px">
       <div class="settle-card" style="margin-top:0">
-        <h3>🧮 本回合計分器</h3>
-        <p class="hint" style="padding:0;margin-bottom:10px">為每位玩家輸入本回合增減，例如 +10、−5、0。可留空＝0。</p>
+        <h3>ðŸ§® æœ¬å›žåˆè¨ˆåˆ†å™¨</h3>
+        <p class="hint" style="padding:0;margin-bottom:10px">ç‚ºæ¯ä½çŽ©å®¶è¼¸å…¥æœ¬å›žåˆå¢žæ¸›ï¼Œä¾‹å¦‚ +10ã€âˆ’5ã€0ã€‚å¯ç•™ç©ºï¼0ã€‚</p>
         <div id="countInputs"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-          <button class="btn ghost" id="btnCountQuickP5" type="button" style="padding:8px 12px">全 +5</button>
-          <button class="btn ghost" id="btnCountQuick0" type="button" style="padding:8px 12px">全清零</button>
+          <button class="btn ghost" id="btnCountQuickP5" type="button" style="padding:8px 12px">å…¨ +5</button>
+          <button class="btn ghost" id="btnCountQuick0" type="button" style="padding:8px 12px">å…¨æ¸…é›¶</button>
         </div>
-        <button class="btn primary" id="btnCountApply" type="button" style="width:100%;margin-top:12px;padding:12px">記入本回合</button>
-        <button class="btn ghost" id="btnCountUndo" type="button" style="width:100%;margin-top:8px;padding:10px" disabled>↩ 還原上一回</button>
+        <button class="btn primary" id="btnCountApply" type="button" style="width:100%;margin-top:12px;padding:12px">è¨˜å…¥æœ¬å›žåˆ</button>
+        <button class="btn ghost" id="btnCountUndo" type="button" style="width:100%;margin-top:8px;padding:10px" disabled>â†© é‚„åŽŸä¸Šä¸€å›ž</button>
       </div>
-      <button class="btn ghost collapsible-toggle" type="button" id="btnCountHistoryToggle" data-target="countHistoryWrap" style="width:100%;margin-top:10px;padding:10px">📋 回合紀錄（0）▾</button>
+      <button class="btn ghost collapsible-toggle" type="button" id="btnCountHistoryToggle" data-target="countHistoryWrap" style="width:100%;margin-top:10px;padding:10px">ðŸ“‹ å›žåˆç´€éŒ„ï¼ˆ0ï¼‰â–¾</button>
       <div id="countHistoryWrap" class="collapsible-body" style="display:none">
         <div class="settle-card" style="margin-top:8px">
           <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:8px">
-            <button class="btn ghost" id="btnCountClearHistory" type="button" style="padding:4px 10px;font-size:0.72rem">清空紀錄</button>
+            <button class="btn ghost" id="btnCountClearHistory" type="button" style="padding:4px 10px;font-size:0.72rem">æ¸…ç©ºç´€éŒ„</button>
           </div>
-          <div id="countHistory" class="settle-empty" style="max-height:min(55vh,420px);overflow:auto;-webkit-overflow-scrolling:touch">暫無紀錄</div>
+          <div id="countHistory" class="settle-empty" style="max-height:min(55vh,420px);overflow:auto;-webkit-overflow-scrolling:touch">æš«ç„¡ç´€éŒ„</div>
         </div>
       </div>
     </div>
 
-    <!-- 廣東麻雀：本局結算 -->
+    <!-- å»£æ±éº»é›€ï¼šæœ¬å±€çµç®— -->
     <div id="mahjongPanel" style="display:none;margin-top:14px">
       <div class="settle-card" style="margin-top:0">
-        <h3>🀄 本局結算（三番起胡 · 半辣上）</h3>
+        <h3>ðŸ€„ æœ¬å±€çµç®—ï¼ˆä¸‰ç•ªèµ·èƒ¡ Â· åŠè¾£ä¸Šï¼‰</h3>
         <div class="field" style="margin-bottom:10px">
-          <label>贏家（食胡者）</label>
+          <label>è´å®¶ï¼ˆé£Ÿèƒ¡è€…ï¼‰</label>
           <select id="mjWinner"></select>
         </div>
         <div class="field" style="margin-bottom:10px">
-          <label>食胡方式</label>
+          <label>é£Ÿèƒ¡æ–¹å¼</label>
           <select id="mjWinType">
-            <option value="self-draw">自摸</option>
-            <option value="discard">出沖（放銃）</option>
+            <option value="self-draw">è‡ªæ‘¸</option>
+            <option value="discard">å‡ºæ²–ï¼ˆæ”¾éŠƒï¼‰</option>
           </select>
         </div>
         <div class="field" id="mjLoserWrap" style="display:none;margin-bottom:10px">
-          <label>出沖者（出銃家）</label>
+          <label>å‡ºæ²–è€…ï¼ˆå‡ºéŠƒå®¶ï¼‰</label>
           <select id="mjLoser"></select>
         </div>
         <div class="field" style="margin-bottom:10px">
-          <label>番數（最少 3 番）</label>
+          <label>ç•ªæ•¸ï¼ˆæœ€å°‘ 3 ç•ªï¼‰</label>
           <input type="number" id="mjFan" min="3" max="13" value="3" inputmode="numeric" />
-          <div class="hint" id="mjFanHint">3番＝16分 · 4番＝32分 · 5番＝64分…（半辣上）</div>
+          <div class="hint" id="mjFanHint">3ç•ªï¼16åˆ† Â· 4ç•ªï¼32åˆ† Â· 5ç•ªï¼64åˆ†â€¦ï¼ˆåŠè¾£ä¸Šï¼‰</div>
         </div>
-        <button class="btn primary" id="btnMjCalc" type="button" style="width:100%;padding:12px">計算並記入本局</button>
-        <button class="btn ghost" id="btnMjUndo" type="button" style="width:100%;margin-top:8px;padding:10px" disabled>↩ 還原上一鋪</button>
+        <button class="btn primary" id="btnMjCalc" type="button" style="width:100%;padding:12px">è¨ˆç®—ä¸¦è¨˜å…¥æœ¬å±€</button>
+        <button class="btn ghost" id="btnMjUndo" type="button" style="width:100%;margin-top:8px;padding:10px" disabled>â†© é‚„åŽŸä¸Šä¸€é‹ª</button>
       </div>
-      <button class="btn ghost collapsible-toggle" type="button" data-target="mjHistoryWrap" style="width:100%;margin-top:10px;padding:10px">📋 對局紀錄 ▾</button>
+      <button class="btn ghost collapsible-toggle" type="button" data-target="mjHistoryWrap" style="width:100%;margin-top:10px;padding:10px">ðŸ“‹ å°å±€ç´€éŒ„ â–¾</button>
       <div id="mjHistoryWrap" class="collapsible-body" style="display:none">
         <div class="settle-card" style="margin-top:8px">
           <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:8px">
-            <button class="btn ghost" id="btnMjClearHistory" type="button" style="padding:4px 10px;font-size:0.72rem">清空紀錄</button>
+            <button class="btn ghost" id="btnMjClearHistory" type="button" style="padding:4px 10px;font-size:0.72rem">æ¸…ç©ºç´€éŒ„</button>
           </div>
-          <div id="mjHistory" class="settle-empty" style="max-height:220px;overflow-y:auto;-webkit-overflow-scrolling:touch">暫無紀錄</div>
+          <div id="mjHistory" class="settle-empty" style="max-height:220px;overflow-y:auto;-webkit-overflow-scrolling:touch">æš«ç„¡ç´€éŒ„</div>
         </div>
       </div>
-      <button class="btn ghost collapsible-toggle" type="button" data-target="mjFanWrap" style="width:100%;margin-top:8px;padding:10px">📖 計番參考 ▾</button>
+      <button class="btn ghost collapsible-toggle" type="button" data-target="mjFanWrap" style="width:100%;margin-top:8px;padding:10px">ðŸ“– è¨ˆç•ªåƒè€ƒ â–¾</button>
       <div id="mjFanWrap" class="collapsible-body" style="display:none">
         <div class="settle-card" style="margin-top:8px">
-          <h3>廣東麻雀計番參考（常見）</h3>
-          <p class="hint" style="padding:0;margin-bottom:8px">三番起胡 · 可疊加 · 實際以牌局約定為準</p>
+          <h3>å»£æ±éº»é›€è¨ˆç•ªåƒè€ƒï¼ˆå¸¸è¦‹ï¼‰</h3>
+          <p class="hint" style="padding:0;margin-bottom:8px">ä¸‰ç•ªèµ·èƒ¡ Â· å¯ç–ŠåŠ  Â· å¯¦éš›ä»¥ç‰Œå±€ç´„å®šç‚ºæº–</p>
           <div class="fan-table" id="fanTable">
-            <div class="fan-row fan-head"><span>牌型／條件</span><span>番數</span></div>
-            <div class="fan-row"><span>平胡</span><span>1</span></div>
-            <div class="fan-row"><span>自摸</span><span>1</span></div>
-            <div class="fan-row"><span>門清</span><span>1</span></div>
-            <div class="fan-row"><span>單騎／邊張／坎張</span><span>1</span></div>
-            <div class="fan-row"><span>無花／正花</span><span>1</span></div>
-            <div class="fan-row"><span>箭刻（中發白）</span><span>1</span></div>
-            <div class="fan-row"><span>風刻（圈風／門風）</span><span>1</span></div>
-            <div class="fan-row"><span>搶槓</span><span>1</span></div>
-            <div class="fan-row"><span>槓上開花</span><span>1</span></div>
-            <div class="fan-row"><span>海底撈月／河底撈魚</span><span>1</span></div>
-            <div class="fan-row"><span>對對胡（碰碰胡）</span><span>3</span></div>
-            <div class="fan-row"><span>混一色</span><span>3</span></div>
-            <div class="fan-row"><span>小三元</span><span>3</span></div>
-            <div class="fan-row"><span>一條龍（清龍）</span><span>3</span></div>
-            <div class="fan-row"><span>七對子</span><span>4</span></div>
-            <div class="fan-row"><span>清一色</span><span>6～7</span></div>
-            <div class="fan-row"><span>小四喜</span><span>6</span></div>
-            <div class="fan-row"><span>大三元</span><span>8</span></div>
-            <div class="fan-row"><span>大四喜</span><span>8+</span></div>
-            <div class="fan-row"><span>十三么</span><span>8+</span></div>
-            <div class="fan-row"><span>天胡／地胡</span><span>8+</span></div>
+            <div class="fan-row fan-head"><span>ç‰Œåž‹ï¼æ¢ä»¶</span><span>ç•ªæ•¸</span></div>
+            <div class="fan-row"><span>å¹³èƒ¡</span><span>1</span></div>
+            <div class="fan-row"><span>è‡ªæ‘¸</span><span>1</span></div>
+            <div class="fan-row"><span>é–€æ¸…</span><span>1</span></div>
+            <div class="fan-row"><span>å–®é¨Žï¼é‚Šå¼µï¼åŽå¼µ</span><span>1</span></div>
+            <div class="fan-row"><span>ç„¡èŠ±ï¼æ­£èŠ±</span><span>1</span></div>
+            <div class="fan-row"><span>ç®­åˆ»ï¼ˆä¸­ç™¼ç™½ï¼‰</span><span>1</span></div>
+            <div class="fan-row"><span>é¢¨åˆ»ï¼ˆåœˆé¢¨ï¼é–€é¢¨ï¼‰</span><span>1</span></div>
+            <div class="fan-row"><span>æ¶æ§“</span><span>1</span></div>
+            <div class="fan-row"><span>æ§“ä¸Šé–‹èŠ±</span><span>1</span></div>
+            <div class="fan-row"><span>æµ·åº•æ’ˆæœˆï¼æ²³åº•æ’ˆé­š</span><span>1</span></div>
+            <div class="fan-row"><span>å°å°èƒ¡ï¼ˆç¢°ç¢°èƒ¡ï¼‰</span><span>3</span></div>
+            <div class="fan-row"><span>æ··ä¸€è‰²</span><span>3</span></div>
+            <div class="fan-row"><span>å°ä¸‰å…ƒ</span><span>3</span></div>
+            <div class="fan-row"><span>ä¸€æ¢é¾ï¼ˆæ¸…é¾ï¼‰</span><span>3</span></div>
+            <div class="fan-row"><span>ä¸ƒå°å­</span><span>4</span></div>
+            <div class="fan-row"><span>æ¸…ä¸€è‰²</span><span>6ï½ž7</span></div>
+            <div class="fan-row"><span>å°å››å–œ</span><span>6</span></div>
+            <div class="fan-row"><span>å¤§ä¸‰å…ƒ</span><span>8</span></div>
+            <div class="fan-row"><span>å¤§å››å–œ</span><span>8+</span></div>
+            <div class="fan-row"><span>åä¸‰ä¹ˆ</span><span>8+</span></div>
+            <div class="fan-row"><span>å¤©èƒ¡ï¼åœ°èƒ¡</span><span>8+</span></div>
           </div>
-          <p class="hint" style="padding:0;margin-top:8px">半辣上分數：3番＝16 · 4＝32 · 5＝64 · 6＝128 · 7＝256 · 8番起＝512（封頂）</p>
+          <p class="hint" style="padding:0;margin-top:8px">åŠè¾£ä¸Šåˆ†æ•¸ï¼š3ç•ªï¼16 Â· 4ï¼32 Â· 5ï¼64 Â· 6ï¼128 Â· 7ï¼256 Â· 8ç•ªèµ·ï¼512ï¼ˆå°é ‚ï¼‰</p>
         </div>
       </div>
     </div>
 
-    <!-- 鋤大D：本局結算 -->
+    <!-- é‹¤å¤§Dï¼šæœ¬å±€çµç®— -->
     <div id="big2Panel" style="display:none;margin-top:14px">
       <div class="settle-card" style="margin-top:0">
-        <h3>♠️ 本局結算（剩牌計分）</h3>
+        <h3>â™ ï¸ æœ¬å±€çµç®—ï¼ˆå‰©ç‰Œè¨ˆåˆ†ï¼‰</h3>
         <div class="field" style="margin-bottom:10px">
-          <label>勝者（出清者）</label>
+          <label>å‹è€…ï¼ˆå‡ºæ¸…è€…ï¼‰</label>
           <select id="b2Winner"></select>
         </div>
         <div id="b2Losers"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0">
           <div class="field" style="margin:0">
-            <label>雙倍起算張數</label>
+            <label>é›™å€èµ·ç®—å¼µæ•¸</label>
             <input type="number" id="b2DoubleAt" min="2" max="13" value="10" inputmode="numeric" />
           </div>
           <div class="field" style="margin:0">
-            <label>三倍起算張數</label>
+            <label>ä¸‰å€èµ·ç®—å¼µæ•¸</label>
             <input type="number" id="b2TripleAt" min="2" max="13" value="13" inputmode="numeric" />
           </div>
         </div>
-        <p class="hint" style="padding:0;margin-bottom:10px" id="b2RuleHint">剩牌 ≥10 雙倍 · ≥13 三倍 · 每張剩 2 再 ×2</p>
-        <button class="btn primary" id="btnB2Calc" type="button" style="width:100%;padding:12px">計算並記入本局</button>
-        <button class="btn ghost" id="btnB2Undo" type="button" style="width:100%;margin-top:8px;padding:10px" disabled>↩ 還原上一鋪</button>
+        <p class="hint" style="padding:0;margin-bottom:10px" id="b2RuleHint">å‰©ç‰Œ â‰¥10 é›™å€ Â· â‰¥13 ä¸‰å€ Â· æ¯å¼µå‰© 2 å† Ã—2</p>
+        <button class="btn primary" id="btnB2Calc" type="button" style="width:100%;padding:12px">è¨ˆç®—ä¸¦è¨˜å…¥æœ¬å±€</button>
+        <button class="btn ghost" id="btnB2Undo" type="button" style="width:100%;margin-top:8px;padding:10px" disabled>â†© é‚„åŽŸä¸Šä¸€é‹ª</button>
       </div>
-      <button class="btn ghost collapsible-toggle" type="button" data-target="b2HistoryWrap" style="width:100%;margin-top:10px;padding:10px">📋 對局紀錄 ▾</button>
+      <button class="btn ghost collapsible-toggle" type="button" data-target="b2HistoryWrap" style="width:100%;margin-top:10px;padding:10px">ðŸ“‹ å°å±€ç´€éŒ„ â–¾</button>
       <div id="b2HistoryWrap" class="collapsible-body" style="display:none">
         <div class="settle-card" style="margin-top:8px">
           <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:8px">
-            <button class="btn ghost" id="btnB2ClearHistory" type="button" style="padding:4px 10px;font-size:0.72rem">清空紀錄</button>
+            <button class="btn ghost" id="btnB2ClearHistory" type="button" style="padding:4px 10px;font-size:0.72rem">æ¸…ç©ºç´€éŒ„</button>
           </div>
-          <div id="b2History" class="settle-empty" style="max-height:220px;overflow-y:auto;-webkit-overflow-scrolling:touch">暫無紀錄</div>
+          <div id="b2History" class="settle-empty" style="max-height:220px;overflow-y:auto;-webkit-overflow-scrolling:touch">æš«ç„¡ç´€éŒ„</div>
         </div>
       </div>
-      <button class="btn ghost collapsible-toggle" type="button" data-target="b2RuleWrap" style="width:100%;margin-top:8px;padding:10px">📖 計分方法 ▾</button>
+      <button class="btn ghost collapsible-toggle" type="button" data-target="b2RuleWrap" style="width:100%;margin-top:8px;padding:10px">ðŸ“– è¨ˆåˆ†æ–¹æ³• â–¾</button>
       <div id="b2RuleWrap" class="collapsible-body" style="display:none">
         <div class="settle-card" style="margin-top:8px">
-          <h3>鋤大D 計分方法</h3>
+          <h3>é‹¤å¤§D è¨ˆåˆ†æ–¹æ³•</h3>
           <div class="fan-table">
-            <div class="fan-row fan-head"><span>條件</span><span>倍數</span></div>
-            <div class="fan-row"><span>一般剩牌</span><span>×1</span></div>
-            <div class="fan-row"><span id="b2RefDouble">剩牌 ≥ 10 張</span><span>×2</span></div>
-            <div class="fan-row"><span id="b2RefTriple">剩牌 ≥ 13 張</span><span>×3</span></div>
-            <div class="fan-row"><span>每張剩餘的「2」</span><span>再 ×2</span></div>
+            <div class="fan-row fan-head"><span>æ¢ä»¶</span><span>å€æ•¸</span></div>
+            <div class="fan-row"><span>ä¸€èˆ¬å‰©ç‰Œ</span><span>Ã—1</span></div>
+            <div class="fan-row"><span id="b2RefDouble">å‰©ç‰Œ â‰¥ 10 å¼µ</span><span>Ã—2</span></div>
+            <div class="fan-row"><span id="b2RefTriple">å‰©ç‰Œ â‰¥ 13 å¼µ</span><span>Ã—3</span></div>
+            <div class="fan-row"><span>æ¯å¼µå‰©é¤˜çš„ã€Œ2ã€</span><span>å† Ã—2</span></div>
           </div>
-          <p class="hint" style="padding:0;margin-top:8px">公式：損失 = 剩牌數 × 張數倍數 × 2<sup>剩2張數</sup><br>勝者收取所有輸家損失總和。雙倍／三倍張數可自行設定。</p>
+          <p class="hint" style="padding:0;margin-top:8px">å…¬å¼ï¼šæå¤± = å‰©ç‰Œæ•¸ Ã— å¼µæ•¸å€æ•¸ Ã— 2<sup>å‰©2å¼µæ•¸</sup><br>å‹è€…æ”¶å–æ‰€æœ‰è¼¸å®¶æå¤±ç¸½å’Œã€‚é›™å€ï¼ä¸‰å€å¼µæ•¸å¯è‡ªè¡Œè¨­å®šã€‚</p>
         </div>
       </div>
     </div>
 
-    <!-- 金錢結算（麻雀／鋤大D） -->
+    <!-- é‡‘éŒ¢çµç®—ï¼ˆéº»é›€ï¼é‹¤å¤§Dï¼‰ -->
     <div id="settleSection" style="display:none">
-      <button class="btn primary" id="btnSettle" type="button" style="width:100%;margin-top:12px;padding:12px">💰 金錢結算 — 誰付誰多少</button>
+      <button class="btn primary" id="btnSettle" type="button" style="width:100%;margin-top:12px;padding:12px">ðŸ’° é‡‘éŒ¢çµç®— â€” èª°ä»˜èª°å¤šå°‘</button>
       <div class="settle-card" id="settleResult" style="display:none">
-        <h3>結算結果</h3>
+        <h3>çµç®—çµæžœ</h3>
         <div id="settleLines"></div>
       </div>
     </div>
@@ -978,8 +990,8 @@
   <!-- ===== PAGE: Random ===== -->
   <div class="page" id="pageRandom">
     <div class="picker-area">
-      <div class="section-title" style="justify-content:center">🎡 誰先開始？</div>
-      <div class="picker-result placeholder" id="pickerResult">加入玩家後撳抽選</div>
+      <div class="section-title" style="justify-content:center">ðŸŽ¡ èª°å…ˆé–‹å§‹ï¼Ÿ</div>
+      <div class="picker-result placeholder" id="pickerResult">åŠ å…¥çŽ©å®¶å¾Œæ’³æŠ½é¸</div>
       <div class="wheel-wrap" id="wheelWrap">
         <canvas class="wheel-canvas" id="wheelCanvas" width="600" height="600"></canvas>
         <div class="wheel-hub"></div>
@@ -987,59 +999,59 @@
       </div>
       <div class="picker-players" id="pickerPlayers"></div>
       <div class="add-player-row" style="max-width:320px;margin:0 auto">
-        <input type="text" id="pickerNewName" placeholder="加入玩家…" enterkeyhint="done" />
-        <button class="btn primary" id="btnPickerAdd" type="button">加入</button>
+        <input type="text" id="pickerNewName" placeholder="åŠ å…¥çŽ©å®¶â€¦" enterkeyhint="done" />
+        <button class="btn primary" id="btnPickerAdd" type="button">åŠ å…¥</button>
       </div>
       <div class="picker-actions">
-        <button class="btn primary" id="btnSpin" type="button" style="padding:12px 28px;font-size:0.95rem">🎡 轉盤抽選</button>
-        <button class="btn ghost" id="btnSyncFromScore" type="button">從計分板同步</button>
+        <button class="btn primary" id="btnSpin" type="button" style="padding:12px 28px;font-size:0.95rem">ðŸŽ¡ è½‰ç›¤æŠ½é¸</button>
+        <button class="btn ghost" id="btnSyncFromScore" type="button">å¾žè¨ˆåˆ†æ¿åŒæ­¥</button>
       </div>
       <div class="picker-msg" id="pickerMsg"></div>
     </div>
 
     <div class="dice-section">
-      <div class="section-title" style="justify-content:center">🎲 擲骰子</div>
+      <div class="section-title" style="justify-content:center">ðŸŽ² æ“²éª°å­</div>
       <div class="dice-controls">
         <div class="field">
-          <label>粒數</label>
+          <label>ç²’æ•¸</label>
           <input type="number" id="diceCount" min="1" max="12" value="1" inputmode="numeric" />
         </div>
         <div class="field">
-          <label>最小點</label>
+          <label>æœ€å°é»ž</label>
           <input type="number" id="diceMin" min="0" max="999" value="1" inputmode="numeric" />
         </div>
         <div class="field">
-          <label>最大點</label>
+          <label>æœ€å¤§é»ž</label>
           <input type="number" id="diceMax" min="1" max="999" value="6" inputmode="numeric" />
         </div>
       </div>
-      <p class="hint" style="text-align:center;padding:0;margin-bottom:8px">預設 1–6 · 可改成 0–9、1–20 等</p>
+      <p class="hint" style="text-align:center;padding:0;margin-bottom:8px">é è¨­ 1â€“6 Â· å¯æ”¹æˆ 0â€“9ã€1â€“20 ç­‰</p>
       <div class="dice-tray" id="diceTray">
         <div class="die" style="opacity:0.45">?</div>
       </div>
       <div class="dice-sum" id="diceSum"></div>
       <div class="picker-actions">
-        <button class="btn primary" id="btnRollDice" type="button" style="padding:12px 28px;font-size:0.95rem">🎲 擲骰</button>
+        <button class="btn primary" id="btnRollDice" type="button" style="padding:12px 28px;font-size:0.95rem">ðŸŽ² æ“²éª°</button>
       </div>
     </div>
   </div>
 
   <!-- FAB -->
-  <button class="fab show" id="fabUpload" type="button" title="上傳說明書" aria-label="上傳">＋</button>
+  <button class="fab show" id="fabUpload" type="button" title="ä¸Šå‚³èªªæ˜Žæ›¸" aria-label="ä¸Šå‚³">ï¼‹</button>
 
   <!-- Bottom Nav -->
   <nav class="bottom-nav">
     <button class="nav-item active" data-page="pageManuals" type="button">
-      <span class="nav-icon">📖</span>
-      <span>說明書</span>
+      <span class="nav-icon">ðŸ“–</span>
+      <span>èªªæ˜Žæ›¸</span>
     </button>
     <button class="nav-item" data-page="pageScore" type="button">
-      <span class="nav-icon">🏆</span>
-      <span>計分</span>
+      <span class="nav-icon">ðŸ†</span>
+      <span>è¨ˆåˆ†</span>
     </button>
     <button class="nav-item" data-page="pageRandom" type="button">
-      <span class="nav-icon">🎲</span>
-      <span>抽選</span>
+      <span class="nav-icon">ðŸŽ²</span>
+      <span>æŠ½é¸</span>
     </button>
   </nav>
 
@@ -1048,12 +1060,12 @@
   <!-- Soft confirm -->
   <div class="soft-overlay" id="softConfirm" role="dialog" aria-modal="true">
     <div class="soft-card">
-      <div class="soft-icon" id="softIcon">🐻</div>
-      <div class="soft-title" id="softTitle">請確認</div>
+      <div class="soft-icon" id="softIcon">ðŸ»</div>
+      <div class="soft-title" id="softTitle">è«‹ç¢ºèª</div>
       <div class="soft-msg" id="softMsg"></div>
       <div class="soft-actions">
-        <button type="button" class="btn ghost" id="softCancel">取消</button>
-        <button type="button" class="btn primary" id="softOk">確定</button>
+        <button type="button" class="btn ghost" id="softCancel">å–æ¶ˆ</button>
+        <button type="button" class="btn primary" id="softOk">ç¢ºå®š</button>
       </div>
     </div>
   </div>
@@ -1062,38 +1074,43 @@
   <div class="modal" id="uploadModal">
     <div class="modal-sheet">
       <div class="modal-header">
-        <div class="title">🐻 新增桌遊本本</div>
-        <button class="close" id="uploadClose" type="button">×</button>
+        <div class="title">ðŸ» æ–°å¢žæ¡ŒéŠæœ¬æœ¬</div>
+        <button class="close" id="uploadClose" type="button">Ã—</button>
       </div>
       <div class="modal-body">
         <div class="field">
-          <label>遊戲名稱（必填）</label>
-          <input type="text" id="gameName" placeholder="例如：卡坦島" />
+          <label>éŠæˆ²åç¨±ï¼ˆå¿…å¡«ï¼‰</label>
+          <input type="text" id="gameName" placeholder="ä¾‹å¦‚ï¼šå¡å¦å³¶" />
         </div>
         <div class="field">
-          <label>分區</label>
+          <label>åˆ†å€</label>
           <select id="gameCat"></select>
         </div>
         <div class="field">
-          <label>備註（可選）</label>
-          <input type="text" id="gameNote" placeholder="例如：繁中版、第二版…" />
+          <label>å‚™è¨»ï¼ˆå¯é¸ï¼‰</label>
+          <input type="text" id="gameNote" placeholder="ä¾‹å¦‚ï¼šç¹ä¸­ç‰ˆã€ç¬¬äºŒç‰ˆâ€¦" />
         </div>
         <div class="field">
-          <label>文字說明（可直接貼上規則重點）</label>
-          <textarea id="gameText" placeholder="在這裡貼上或輸入文字說明、規則重點、注意事項…"></textarea>
+          <label>æ–‡å­—èªªæ˜Žï¼ˆå¯ç›´æŽ¥è²¼ä¸Šè¦å‰‡é‡é»žï¼‰</label>
+          <textarea id="gameText" placeholder="åœ¨é€™è£¡è²¼ä¸Šæˆ–è¼¸å…¥æ–‡å­—èªªæ˜Žã€è¦å‰‡é‡é»žã€æ³¨æ„äº‹é …â€¦"></textarea>
         </div>
+        <div class="photo-pick-actions">
+          <label class="file-input-btn" for="cameraInput">ðŸ“· <span>å³æ™‚æ‹ç…§</span></label>
+          <label class="file-input-btn" for="albumInput">ðŸ–¼ï¸ <span>å¾žç›¸ç°¿é¸å–</span></label>
+        </div>
+        <input type="file" id="cameraInput" accept="image/*,image/heic,image/heif" capture="environment" style="display:none" />
+        <input type="file" id="albumInput" accept="image/*,image/heic,image/heif" multiple style="display:none" />
         <label class="file-input-btn" id="fileDrop">
-          📷 影相 或 選取相片（可多選）
-          <span style="display:block;font-size:0.75rem;color:var(--muted);margin-top:6px;font-weight:500">上傳前會自動轉成 JPEG 並壓縮</span>
-          <input type="file" id="fileInput" accept="image/*,image/heic,image/heif" multiple capture="environment" style="display:none" />
+          æˆ–å°‡ç›¸ç‰‡æ‹–æ”¾åˆ°é€™è£¡ï¼ˆå¯å¤šé¸ï¼‰
+          <span style="display:block;font-size:0.75rem;color:var(--muted);margin-top:6px;font-weight:500">ä¸Šå‚³å‰æœƒè‡ªå‹•è½‰æˆ JPEG ä¸¦å£“ç¸®ï¼›å¯åœ¨é è¦½åœ–æŒ‰ â†» æ—‹è½‰</span>
         </label>
         <div class="upload-preview" id="preview"></div>
         <div class="progress-wrap" id="progressWrap">
-          <div style="font-size:0.8rem;color:var(--muted)" id="progressText">準備中…</div>
+          <div style="font-size:0.8rem;color:var(--muted)" id="progressText">æº–å‚™ä¸­â€¦</div>
           <div class="progress-bar"><div id="progressBar"></div></div>
         </div>
         <button class="btn primary" id="btnDoUpload" type="button" style="width:100%;padding:14px" disabled>
-          上傳到雲端
+          ä¸Šå‚³åˆ°é›²ç«¯
         </button>
       </div>
     </div>
@@ -1103,24 +1120,25 @@
   <div class="modal" id="viewerModal">
     <div class="modal-sheet">
       <div class="modal-header">
-        <div class="title" id="viewerTitle">說明書</div>
-        <button class="btn ghost" id="viewerEdit" type="button" style="padding:7px 10px">編輯</button>
-        <button class="btn danger" id="viewerDeletePhoto" type="button" style="padding:7px 10px;display:none">刪相</button>
-        <button class="close" id="viewerClose" type="button">×</button>
+        <div class="title" id="viewerTitle">èªªæ˜Žæ›¸</div>
+        <button class="btn ghost" id="viewerEdit" type="button" style="padding:7px 10px">ç·¨è¼¯</button>
+        <button class="btn danger" id="viewerDeletePhoto" type="button" style="padding:7px 10px;display:none">åˆªç›¸</button>
+        <button class="close" id="viewerClose" type="button">Ã—</button>
       </div>
       <div class="viewer-body" id="viewerBody"></div>
       <div class="viewer-nav">
-        <button type="button" id="viewerBack" aria-label="返回主畫面" title="返回主畫面">←</button>
-        <button type="button" id="viewerPrev">‹</button>
-        <div class="page" id="viewerPage">—</div>
-        <button type="button" id="viewerNext">›</button>
+        <button type="button" id="viewerBack" aria-label="è¿”å›žä¸»ç•«é¢" title="è¿”å›žä¸»ç•«é¢">â†</button>
+        <button type="button" id="viewerRotate" aria-label="æ—‹è½‰ç›¸ç‰‡" title="é †æ™‚é‡æ—‹è½‰ 90 åº¦" style="font-size:1.2rem">â†»</button>
+        <button type="button" id="viewerPrev">â€¹</button>
+        <div class="page" id="viewerPage">â€”</div>
+        <button type="button" id="viewerNext">â€º</button>
       </div>
     </div>
   </div>
 
   <script>
     // ========== Config & State ==========
-    // Supabase（個人自用，已寫死）
+    // Supabaseï¼ˆå€‹äººè‡ªç”¨ï¼Œå·²å¯«æ­»ï¼‰
     const SUPABASE_URL = 'https://adnpuxmbnoakuxemfaaa.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkbnB1eG1ibm9ha3V4ZW1mYWFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI2NTc4NjQsImV4cCI6MjEwODIzMzg2NH0.v1qBON4dO3_ltIBdLWko6kEkstFw2CXTddc89giYsZI';
     const BUCKET = 'manuals';
@@ -1136,8 +1154,8 @@
     const STORAGE_ROOT = '';
 
     let MANUALS = [];
-    let CATEGORIES = ['全部', '策略', '派對', '家庭'];
-    let activeCat = '全部';
+    let CATEGORIES = ['å…¨éƒ¨', 'ç­–ç•¥', 'æ´¾å°', 'å®¶åº­'];
+    let activeCat = 'å…¨éƒ¨';
     let query = '';
     let selectedFiles = [];
     let viewerImages = [];
@@ -1148,7 +1166,7 @@
     let scores = []; // {name, score}
     let pickerNames = [];
     let scoreMode = 'count'; // count | mahjong | big2
-    // 分頁重繪 dirty flags：只在首次進入或資料確實變更時重建大型區塊
+    // åˆ†é é‡ç¹ª dirty flagsï¼šåªåœ¨é¦–æ¬¡é€²å…¥æˆ–è³‡æ–™ç¢ºå¯¦è®Šæ›´æ™‚é‡å»ºå¤§åž‹å€å¡Š
     let scorePageDirty = true;
     let pickerPageDirty = true;
 
@@ -1182,11 +1200,11 @@
         const iconEl = document.getElementById('softIcon');
         const okBtn = document.getElementById('softOk');
         const cancelBtn = document.getElementById('softCancel');
-        titleEl.textContent = opts.title || '請確認';
+        titleEl.textContent = opts.title || 'è«‹ç¢ºèª';
         msgEl.textContent = message || '';
-        iconEl.textContent = opts.icon || '🐻';
-        okBtn.textContent = opts.okText || '確定';
-        cancelBtn.textContent = opts.cancelText || '取消';
+        iconEl.textContent = opts.icon || 'ðŸ»';
+        okBtn.textContent = opts.okText || 'ç¢ºå®š';
+        cancelBtn.textContent = opts.cancelText || 'å–æ¶ˆ';
         overlay.classList.add('open');
         const close = (val) => {
           overlay.classList.remove('open');
@@ -1210,7 +1228,7 @@
         if (c) CATEGORIES = JSON.parse(c);
       } catch (e) {}
       const catInput = document.getElementById('catInput');
-      if (catInput) catInput.value = CATEGORIES.filter(x => x !== '全部').join(', ');
+      if (catInput) catInput.value = CATEGORIES.filter(x => x !== 'å…¨éƒ¨').join(', ');
       try {
         const s = localStorage.getItem(LS_SCORE);
         if (s) scores = JSON.parse(s);
@@ -1227,22 +1245,27 @@
     }
     function saveCats() {
       const raw = document.getElementById('catInput').value;
-      const list = raw.split(/[,，、]/).map(s => s.trim()).filter(Boolean);
-      CATEGORIES = ['全部', ...list];
+      const list = raw.split(/[,ï¼Œã€]/).map(s => s.trim()).filter(Boolean);
+      CATEGORIES = ['å…¨éƒ¨', ...list];
       localStorage.setItem(LS_CATS, JSON.stringify(CATEGORIES));
       renderCats();
       fillCatSelect();
-      toast('分區已更新');
+      toast('åˆ†å€å·²æ›´æ–°');
     }
     function hasConfig() {
       return true; // Supabase credentials are hardcoded
     }
     function slugify(name) {
-      return name.trim()
+      const cleaned = name.trim()
         .replace(/[\/\\?%*:|"<>]/g, '-')
         .replace(/\s+/g, '_')
         .replace(/_+/g, '_')
         .slice(0, 80) || 'untitled';
+      // Keep ordinary English slugs readable. For any non-ASCII name, use a
+      // deterministic ASCII-only UTF-8 hex slug so Storage object keys are safe.
+      if (/^[\x00-\x7F]*$/.test(cleaned)) return cleaned;
+      const bytes = new TextEncoder().encode(cleaned);
+      return 'zh-' + Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
     }
     // ========== Supabase Storage ==========
     function sbHeaders(extra) {
@@ -1257,8 +1280,12 @@
       if (!STORAGE_ROOT) return p;
       return (STORAGE_ROOT.replace(/^\/+|\/+$/g, '') + '/' + p).replace(/\/+/g, '/');
     }
+    function encodeStoragePath(path) {
+      // Encode each object-key segment independently; keep '/' as separators.
+      return storagePath(path).split('/').map(segment => encodeURIComponent(segment)).join('/');
+    }
     function publicUrl(path) {
-      const p = storagePath(path);
+      const p = encodeStoragePath(path);
       return SUPABASE_URL + '/storage/v1/object/public/' + BUCKET + '/' + p;
     }
     function rawUrl(path) {
@@ -1275,7 +1302,7 @@
 
     async function sbUpload(path, body, contentType) {
       const p = storagePath(path);
-      const res = await fetch(SUPABASE_URL + '/storage/v1/object/' + BUCKET + '/' + encodeURI(p).replace(/%2F/g, '/'), {
+      const res = await fetch(SUPABASE_URL + '/storage/v1/object/' + BUCKET + '/' + encodeStoragePath(p), {
         method: 'POST',
         headers: sbHeaders({
           'Content-Type': contentType || 'application/octet-stream',
@@ -1295,13 +1322,13 @@
     }
     async function sbDownloadText(path) {
       const p = storagePath(path);
-      const res = await fetch(SUPABASE_URL + '/storage/v1/object/public/' + BUCKET + '/' + encodeURI(p).replace(/%2F/g, '/'), {
+      const res = await fetch(SUPABASE_URL + '/storage/v1/object/public/' + BUCKET + '/' + encodeStoragePath(p), {
         headers: sbHeaders()
       });
       if (res.status === 404) return null;
       if (!res.ok) {
         // try authenticated endpoint (private buckets)
-        const res2 = await fetch(SUPABASE_URL + '/storage/v1/object/' + BUCKET + '/' + encodeURI(p).replace(/%2F/g, '/'), {
+        const res2 = await fetch(SUPABASE_URL + '/storage/v1/object/' + BUCKET + '/' + encodeStoragePath(p), {
           headers: sbHeaders()
         });
         if (res2.status === 404) return null;
@@ -1315,11 +1342,11 @@
     }
     async function sbDownloadBlob(path) {
       const p = storagePath(path);
-      let res = await fetch(SUPABASE_URL + '/storage/v1/object/public/' + BUCKET + '/' + encodeURI(p).replace(/%2F/g, '/'), {
+      let res = await fetch(SUPABASE_URL + '/storage/v1/object/public/' + BUCKET + '/' + encodeStoragePath(p), {
         headers: sbHeaders()
       });
       if (!res.ok) {
-        res = await fetch(SUPABASE_URL + '/storage/v1/object/' + BUCKET + '/' + encodeURI(p).replace(/%2F/g, '/'), {
+        res = await fetch(SUPABASE_URL + '/storage/v1/object/' + BUCKET + '/' + encodeStoragePath(p), {
           headers: sbHeaders()
         });
       }
@@ -1382,7 +1409,7 @@
     }
 
     async function testConnection() {
-      setStatus('測試連線中…');
+      setStatus('æ¸¬è©¦é€£ç·šä¸­â€¦');
       try {
         // List root of bucket
         const res = await fetch(SUPABASE_URL + '/storage/v1/object/list/' + BUCKET, {
@@ -1392,36 +1419,36 @@
         });
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
-          throw new Error(err.message || err.error || ('HTTP ' + res.status + ' — 請確認 bucket「' + BUCKET + '」存在且 policies 允許 anon'));
+          throw new Error(err.message || err.error || ('HTTP ' + res.status + ' â€” è«‹ç¢ºèª bucketã€Œ' + BUCKET + 'ã€å­˜åœ¨ä¸” policies å…è¨± anon'));
         }
-        setStatus('連線成功：Supabase bucket「' + BUCKET + '」', 'ok');
-        toast('連線成功', 2400, 'ok');
+        setStatus('é€£ç·šæˆåŠŸï¼šSupabase bucketã€Œ' + BUCKET + 'ã€', 'ok');
+        toast('é€£ç·šæˆåŠŸ', 2400, 'ok');
       } catch (e) {
-        setStatus('連線失敗：' + e.message, 'error');
-        toast('連線失敗：' + e.message, 3600, 'err');
+        setStatus('é€£ç·šå¤±æ•—ï¼š' + e.message, 'error');
+        toast('é€£ç·šå¤±æ•—ï¼š' + e.message, 3600, 'err');
       }
     }
 
     // ========== Index ==========
     async function loadIndex() {
       document.getElementById('btnRefresh').classList.add('spin');
-      setStatus('載入中…');
+      setStatus('è¼‰å…¥ä¸­â€¦');
       try {
         const textContent = await sbDownloadText(INDEX_FILE);
         if (!textContent) {
           MANUALS = [];
-          setStatus('尚未有任何桌遊本本');
+          setStatus('å°šæœªæœ‰ä»»ä½•æ¡ŒéŠæœ¬æœ¬');
         } else {
           const json = JSON.parse(textContent);
           MANUALS = Array.isArray(json.manuals) ? json.manuals : (Array.isArray(json) ? json : []);
           if (json.categories && Array.isArray(json.categories)) {
-            const remote = json.categories.filter(c => c !== '全部');
-            const local = CATEGORIES.filter(c => c !== '全部');
-            const merged = ['全部', ...new Set([...local, ...remote])];
+            const remote = json.categories.filter(c => c !== 'å…¨éƒ¨');
+            const local = CATEGORIES.filter(c => c !== 'å…¨éƒ¨');
+            const merged = ['å…¨éƒ¨', ...new Set([...local, ...remote])];
             CATEGORIES = merged;
             localStorage.setItem(LS_CATS, JSON.stringify(CATEGORIES));
             const catInput = document.getElementById('catInput');
-            if (catInput) catInput.value = CATEGORIES.filter(x => x !== '全部').join(', ');
+            if (catInput) catInput.value = CATEGORIES.filter(x => x !== 'å…¨éƒ¨').join(', ');
           }
           setStatus('');
         }
@@ -1431,8 +1458,8 @@
       } catch (e) {
         console.error(e);
         MANUALS = [];
-        setStatus('載入失敗：' + e.message, 'error');
-        grid.innerHTML = `<div class="empty"><div class="emoji">😿</div>無法載入<br><small>${e.message}</small></div>`;
+        setStatus('è¼‰å…¥å¤±æ•—ï¼š' + e.message, 'error');
+        grid.innerHTML = `<div class="empty"><div class="emoji">ðŸ˜¿</div>ç„¡æ³•è¼‰å…¥<br><small>${e.message}</small></div>`;
       } finally {
         document.getElementById('btnRefresh').classList.remove('spin');
       }
@@ -1447,7 +1474,7 @@
       await sbUpload(INDEX_FILE, blob, 'application/json');
     }
 
-    // ========== Compress → 一律轉 JPEG ==========
+    // ========== Compress â†’ ä¸€å¾‹è½‰ JPEG ==========
     function compressImage(file, maxWidth, quality) {
       return new Promise((resolve, reject) => {
         const img = new Image();
@@ -1455,8 +1482,8 @@
         img.onload = () => {
           URL.revokeObjectURL(url);
           let w = img.width, h = img.height;
-          if (!w || !h) return reject(new Error('圖片尺寸無效'));
-          // 長邊限制，手機大圖會縮小
+          if (!w || !h) return reject(new Error('åœ–ç‰‡å°ºå¯¸ç„¡æ•ˆ'));
+          // é•·é‚Šé™åˆ¶ï¼Œæ‰‹æ©Ÿå¤§åœ–æœƒç¸®å°
           const maxSide = maxWidth || 1600;
           if (w > maxSide || h > maxSide) {
             if (w >= h) {
@@ -1471,14 +1498,14 @@
           canvas.width = w;
           canvas.height = h;
           const ctx = canvas.getContext('2d');
-          // JPEG 無透明：白底，避免 PNG／透明圖變黑
+          // JPEG ç„¡é€æ˜Žï¼šç™½åº•ï¼Œé¿å… PNGï¼é€æ˜Žåœ–è®Šé»‘
           ctx.fillStyle = '#FFFFFF';
           ctx.fillRect(0, 0, w, h);
           ctx.drawImage(img, 0, 0, w, h);
-          // 強制 image/jpeg
+          // å¼·åˆ¶ image/jpeg
           const q = typeof quality === 'number' ? quality : 0.82;
           canvas.toBlob(blob => {
-            if (!blob) return reject(new Error('轉 JPEG 失敗'));
+            if (!blob) return reject(new Error('è½‰ JPEG å¤±æ•—'));
             const reader = new FileReader();
             reader.onload = () => resolve({
               base64: reader.result.split(',')[1],
@@ -1492,7 +1519,7 @@
         };
         img.onerror = () => {
           URL.revokeObjectURL(url);
-          reject(new Error('無法讀取圖片（若為 iPhone HEIC，請用系統轉成照片或 JPG 後再試）'));
+          reject(new Error('ç„¡æ³•è®€å–åœ–ç‰‡ï¼ˆè‹¥ç‚º iPhone HEICï¼Œè«‹ç”¨ç³»çµ±è½‰æˆç…§ç‰‡æˆ– JPG å¾Œå†è©¦ï¼‰'));
         };
         img.src = url;
       });
@@ -1506,8 +1533,8 @@
     }
     function fillCatSelect() {
       const sel = document.getElementById('gameCat');
-      const opts = CATEGORIES.filter(c => c !== '全部');
-      sel.innerHTML = '<option value="">未分類</option>' +
+      const opts = CATEGORIES.filter(c => c !== 'å…¨éƒ¨');
+      sel.innerHTML = '<option value="">æœªåˆ†é¡ž</option>' +
         opts.map(c => `<option value="${c}">${c}</option>`).join('');
     }
     catsEl.addEventListener('click', e => {
@@ -1518,6 +1545,33 @@
       render();
     });
 
+    // Rotate a selected photo 90 degrees clockwise and keep the rotated pixels for upload.
+    function rotateImageFile(file) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalHeight;
+          canvas.height = img.naturalWidth;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return reject(new Error('ç„¡æ³•å»ºç«‹åœ–ç‰‡ç•«å¸ƒ'));
+          ctx.translate(canvas.width / 2, canvas.height / 2);
+          ctx.rotate(Math.PI / 2);
+          ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
+          canvas.toBlob(blob => {
+            if (!blob) return reject(new Error('è½‰æ›åœ–ç‰‡å¤±æ•—'));
+            const baseName = (file.name || 'photo').replace(/\.[^.]+$/, '') || 'photo';
+            try { resolve(new File([blob], baseName + '-rotated.jpg', { type: 'image/jpeg', lastModified: Date.now() })); }
+            catch (_) { reject(new Error('æ­¤ç€è¦½å™¨ä¸æ”¯æ´æ—‹è½‰å¾Œçš„åœ–ç‰‡æª”æ¡ˆ')); }
+          }, 'image/jpeg', 0.92);
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('ç„¡æ³•è®€å–åœ–ç‰‡ï¼ˆHEIC æ ¼å¼å¯èƒ½ä¸æ”¯æ´ï¼‰')); };
+        img.src = url;
+      });
+    }
+
     // ========== Upload ==========
     function updatePreview() {
       const previewEl = document.getElementById('preview');
@@ -1526,22 +1580,39 @@
         const url = URL.createObjectURL(f);
         const div = document.createElement('div');
         div.className = 'thumb';
-        div.innerHTML = `<img src="${url}" alt=""><span class="num">${i+1}</span><button type="button" class="rm" data-i="${i}">×</button>`;
+        div.innerHTML = `<img src="${url}" alt=""><span class="num">${i+1}</span><button type="button" class="rm" data-i="${i}" aria-label="ç§»é™¤ç›¸ç‰‡">Ã—</button><button type="button" class="rotate" data-rotate="${i}" aria-label="æ—‹è½‰ç›¸ç‰‡">â†»</button>`;
         previewEl.appendChild(div);
       });
       document.getElementById('btnDoUpload').disabled = !(document.getElementById('gameName').value.trim() && (editingManual || selectedFiles.length || document.getElementById('gameText').value.trim()));
     }
-    document.getElementById('preview').addEventListener('click', e => {
+    document.getElementById('preview').addEventListener('click', async e => {
+      const rotateBtn = e.target.closest('.rotate');
+      if (rotateBtn) {
+        const i = Number(rotateBtn.dataset.rotate);
+        if (!selectedFiles[i]) return;
+        rotateBtn.disabled = true;
+        try {
+          selectedFiles[i] = await rotateImageFile(selectedFiles[i]);
+          updatePreview();
+        } catch (err) {
+          toast('æ—‹è½‰ç›¸ç‰‡å¤±æ•—ï¼š' + (err.message || 'ç„¡æ³•è®€å–åœ–ç‰‡'), 3000, 'err');
+          rotateBtn.disabled = false;
+        }
+        return;
+      }
       const btn = e.target.closest('.rm');
       if (!btn) return;
       selectedFiles.splice(+btn.dataset.i, 1);
       updatePreview();
     });
-    document.getElementById('fileInput').addEventListener('change', () => {
-      selectedFiles = selectedFiles.concat(Array.from(document.getElementById('fileInput').files || []));
-      document.getElementById('fileInput').value = '';
+    function appendSelectedFiles(inputId) {
+      const input = document.getElementById(inputId);
+      selectedFiles = selectedFiles.concat(Array.from(input.files || []));
+      input.value = '';
       updatePreview();
-    });
+    }
+    document.getElementById('cameraInput').addEventListener('change', () => appendSelectedFiles('cameraInput'));
+    document.getElementById('albumInput').addEventListener('change', () => appendSelectedFiles('albumInput'));
     document.getElementById('fileDrop').addEventListener('dragover', e => { e.preventDefault(); document.getElementById('fileDrop').classList.add('dragover'); });
     document.getElementById('fileDrop').addEventListener('dragleave', () => document.getElementById('fileDrop').classList.remove('dragover'));
     document.getElementById('fileDrop').addEventListener('drop', e => {
@@ -1554,7 +1625,7 @@
     document.getElementById('gameText').addEventListener('input', updatePreview);
 
     async function doUpload() {
-      if (!hasConfig()) { toast('請先確認 Supabase 連線'); return; }
+      if (!hasConfig()) { toast('è«‹å…ˆç¢ºèª Supabase é€£ç·š'); return; }
       const name = document.getElementById('gameName').value.trim();
       if (!name) return;
       let slug = editingManual ? editingManual.slug : slugify(name);
@@ -1574,38 +1645,41 @@
       try {
         const existingManual = editingManual || MANUALS.find(m => m.slug === slug);
         const oldSlug = editingManual ? editingManual.slug : null;
-        const newSlug = editingManual ? (name === (editingManual.name || '') ? editingManual.slug : slugify(name)) : slug;
+        const oldSlugIsAscii = /^[\x00-\x7F]*$/.test(editingManual?.slug || '');
+        const newSlug = editingManual
+          ? (name === (editingManual.name || '') && oldSlugIsAscii ? editingManual.slug : slugify(name))
+          : slug;
         let pages = existingManual ? [...(existingManual.files || [])] : [];
 
         // Rename folder by copy + delete
         if (editingManual && newSlug !== oldSlug) {
-          progressText.textContent = '準備重新命名資料夾…';
+          progressText.textContent = 'æº–å‚™é‡æ–°å‘½åè³‡æ–™å¤¾â€¦';
           progressBar.style.width = '5%';
           const collision = MANUALS.find(m => m.slug === newSlug && m.slug !== oldSlug);
-          if (collision) throw new Error(`新名稱的資料夾「${newSlug}」已被另一份說明書使用，請更改名稱。`);
+          if (collision) throw new Error(`æ–°åç¨±çš„è³‡æ–™å¤¾ã€Œ${newSlug}ã€å·²è¢«å¦ä¸€ä»½èªªæ˜Žæ›¸ä½¿ç”¨ï¼Œè«‹æ›´æ”¹åç¨±ã€‚`);
           const oldFolderPath = `${oldSlug}`.replace(/^\/+|\/+$/g, '');
           const newFolderPath = `${newSlug}`.replace(/^\/+|\/+$/g, '');
 
           // Check collision: any files under new slug?
           const existingTarget = await sbListFilesRecursive(newFolderPath);
-          if (existingTarget.length) throw new Error(`雲端已存在「${newSlug}」資料夾，為免覆蓋其他檔案，已取消改名。`);
+          if (existingTarget.length) throw new Error(`é›²ç«¯å·²å­˜åœ¨ã€Œ${newSlug}ã€è³‡æ–™å¤¾ï¼Œç‚ºå…è¦†è“‹å…¶ä»–æª”æ¡ˆï¼Œå·²å–æ¶ˆæ”¹åã€‚`);
 
           const oldFiles = await sbListFilesRecursive(oldFolderPath);
           const copiedNames = [];
 
           if (oldFiles.length === 0) {
-            progressText.textContent = '建立新資料夾…';
+            progressText.textContent = 'å»ºç«‹æ–°è³‡æ–™å¤¾â€¦';
             await sbUploadBase64(`${newFolderPath}/.keep`, btoa('Boardgame manual folder marker'), 'text/plain');
             copiedNames.push('.keep');
           }
           for (let i = 0; i < oldFiles.length; i++) {
             const fileMeta = oldFiles[i];
-            progressText.textContent = `複製檔案 ${i + 1}/${oldFiles.length}…`;
+            progressText.textContent = `è¤‡è£½æª”æ¡ˆ ${i + 1}/${oldFiles.length}â€¦`;
             progressBar.style.width = `${5 + (i / Math.max(oldFiles.length, 1)) * 35}%`;
             const blob = await sbDownloadBlob(fileMeta.path);
-            if (!blob) throw new Error(`無法讀取舊檔案「${fileMeta.path}」，已停止改名，舊資料仍保留。`);
+            if (!blob) throw new Error(`ç„¡æ³•è®€å–èˆŠæª”æ¡ˆã€Œ${fileMeta.path}ã€ï¼Œå·²åœæ­¢æ”¹åï¼ŒèˆŠè³‡æ–™ä»ä¿ç•™ã€‚`);
             const relativeName = fileMeta.name;
-            if (relativeName.includes('/')) throw new Error('資料夾內包含多層子資料夾，為避免搬漏檔案，已停止改名。');
+            if (relativeName.includes('/')) throw new Error('è³‡æ–™å¤¾å…§åŒ…å«å¤šå±¤å­è³‡æ–™å¤¾ï¼Œç‚ºé¿å…æ¬æ¼æª”æ¡ˆï¼Œå·²åœæ­¢æ”¹åã€‚');
             await sbUpload(`${newFolderPath}/${relativeName}`, blob, blob.type || 'application/octet-stream');
             copiedNames.push(relativeName);
           }
@@ -1613,7 +1687,7 @@
           for (const fileName of copiedNames) {
             const checkList = await sbListFilesRecursive(newFolderPath);
             if (!checkList.some(f => f.name === fileName)) {
-              throw new Error(`新資料夾檔案驗證失敗：${fileName}。舊資料仍保留，請重新整理後檢查。`);
+              throw new Error(`æ–°è³‡æ–™å¤¾æª”æ¡ˆé©—è­‰å¤±æ•—ï¼š${fileName}ã€‚èˆŠè³‡æ–™ä»ä¿ç•™ï¼Œè«‹é‡æ–°æ•´ç†å¾Œæª¢æŸ¥ã€‚`);
             }
           }
           slug = newSlug;
@@ -1623,17 +1697,17 @@
 
         const total = selectedFiles.length;
         for (let i = 0; i < total; i++) {
-          progressText.textContent = `轉 JPEG ${i+1}/${total}…`;
+          progressText.textContent = `è½‰ JPEG ${i+1}/${total}â€¦`;
           progressBar.style.width = ((i / Math.max(total, 1)) * 40) + '%';
           const compressed = await compressImage(selectedFiles[i], 1600, 0.82);
           const pageNum = String(pages.length + 1).padStart(3, '0');
           const fileName = `${pageNum}.jpg`;
-          progressText.textContent = `上傳 ${fileName}（${Math.round(compressed.size/1024)} KB）…`;
+          progressText.textContent = `ä¸Šå‚³ ${fileName}ï¼ˆ${Math.round(compressed.size/1024)} KBï¼‰â€¦`;
           progressBar.style.width = (40 + (i / Math.max(total, 1)) * 50) + '%';
           await sbUploadBase64(`${basePath}/${fileName}`, compressed.base64, 'image/jpeg');
           pages.push(fileName);
         }
-        progressText.textContent = '更新索引…';
+        progressText.textContent = 'æ›´æ–°ç´¢å¼•â€¦';
         progressBar.style.width = '92%';
         const existingIdx = MANUALS.findIndex(m => m.slug === (editingManual ? editingManual.slug : slug));
         const entry = {
@@ -1649,11 +1723,11 @@
           await saveIndex(MANUALS, `Add/Update: ${name}`);
         } catch (indexError) {
           MANUALS = previousManuals;
-          throw new Error(`索引更新失敗：${indexError.message}。已保留舊資料夾；若剛才已複製新資料夾，新資料夾也會保留，請檢查後再試。`);
+          throw new Error(`ç´¢å¼•æ›´æ–°å¤±æ•—ï¼š${indexError.message}ã€‚å·²ä¿ç•™èˆŠè³‡æ–™å¤¾ï¼›è‹¥å‰›æ‰å·²è¤‡è£½æ–°è³‡æ–™å¤¾ï¼Œæ–°è³‡æ–™å¤¾ä¹Ÿæœƒä¿ç•™ï¼Œè«‹æª¢æŸ¥å¾Œå†è©¦ã€‚`);
         }
         // Cleanup old folder after rename
         if (editingManual && editingManual.slug !== slug) {
-          progressText.textContent = '新資料夾及索引已確認，清理舊資料夾…';
+          progressText.textContent = 'æ–°è³‡æ–™å¤¾åŠç´¢å¼•å·²ç¢ºèªï¼Œæ¸…ç†èˆŠè³‡æ–™å¤¾â€¦';
           const oldFolderPath = `${editingManual.slug}`.replace(/^\/+|\/+$/g, '');
           try {
             const oldFiles = await sbListFilesRecursive(oldFolderPath);
@@ -1662,15 +1736,15 @@
             }
           } catch (cleanupError) {
             console.warn('New folder and index are saved, but old folder cleanup failed:', cleanupError);
-            toast(`名稱已同步，但舊資料夾清理未完成：${cleanupError.message}`, 5000, 'err');
+            toast(`åç¨±å·²åŒæ­¥ï¼Œä½†èˆŠè³‡æ–™å¤¾æ¸…ç†æœªå®Œæˆï¼š${cleanupError.message}`, 5000, 'err');
           }
         }
         progressBar.style.width = '100%';
-        progressText.textContent = '完成！';
-        toast(`${editingManual ? '已更新' : '已上傳'}「${name}」`, 2600, 'ok');
+        progressText.textContent = 'å®Œæˆï¼';
+        toast(`${editingManual ? 'å·²æ›´æ–°' : 'å·²ä¸Šå‚³'}ã€Œ${name}ã€`, 2600, 'ok');
         editingManual = null;
-        document.querySelector('#uploadModal .modal-header .title').textContent = '🐻 新增桌遊本本';
-        btn.textContent = '上傳到雲端';
+        document.querySelector('#uploadModal .modal-header .title').textContent = 'ðŸ» æ–°å¢žæ¡ŒéŠæœ¬æœ¬';
+        btn.textContent = 'ä¸Šå‚³åˆ°é›²ç«¯';
         renderCats();
         fillCatSelect();
         render();
@@ -1678,9 +1752,9 @@
         setTimeout(() => { closeUpload(); loadIndex().catch(() => {}); }, 500);
       } catch (e) {
         console.error(e);
-        progressText.textContent = '失敗：' + e.message;
-        setStatus('上傳失敗：' + e.message, 'error');
-        toast('上傳失敗', 2800, 'err');
+        progressText.textContent = 'å¤±æ•—ï¼š' + e.message;
+        setStatus('ä¸Šå‚³å¤±æ•—ï¼š' + e.message, 'error');
+        toast('ä¸Šå‚³å¤±æ•—', 2800, 'err');
         btn.disabled = false;
       }
     }
@@ -1689,7 +1763,7 @@
     function openViewer(manual) {
       viewerManual = manual;
       viewerManual = manual;
-      document.getElementById('viewerTitle').textContent = manual.name + (manual.note ? ` · ${manual.note}` : '');
+      document.getElementById('viewerTitle').textContent = manual.name + (manual.note ? ` Â· ${manual.note}` : '');
       const body = document.getElementById('viewerBody');
       body.innerHTML = '';
       viewerText = manual.text || '';
@@ -1717,7 +1791,7 @@
       const next = document.getElementById('viewerNext');
 
       if (total === 0) {
-        body.innerHTML = '<div style="color:#ccc;padding:30px;text-align:center">沒有內容</div>';
+        body.innerHTML = '<div style="color:#ccc;padding:30px;text-align:center">æ²’æœ‰å…§å®¹</div>';
         pageEl.textContent = '0/0';
         prev.disabled = next.disabled = true;
         return;
@@ -1731,14 +1805,17 @@
       } else {
         const imgIdx = hasText ? viewerIndex - 1 : viewerIndex;
         const src = viewerImages[imgIdx];
-        body.innerHTML = `<img class="viewer-page-image" src="${src}" alt="第 ${imgIdx+1} 頁" draggable="false" onerror="this.parentNode.innerHTML='<div style=color:#ccc;padding:30px;text-align:center>載入失敗</div>'" />`;
+        body.innerHTML = `<img class="viewer-page-image" src="${src}" alt="ç¬¬ ${imgIdx+1} é " draggable="false" onerror="this.parentNode.innerHTML='<div style=color:#ccc;padding:30px;text-align:center>è¼‰å…¥å¤±æ•—</div>'" />`;
       }
       pageEl.textContent = `${viewerIndex + 1} / ${total}`;
       prev.disabled = viewerIndex <= 0;
       next.disabled = viewerIndex >= total - 1;
       body.scrollTop = 0;
       imageScale = 1;
+      viewerRotation = 0;
       const shownImage = body.querySelector('.viewer-page-image');
+      const rotateBtn = document.getElementById('viewerRotate');
+      if (rotateBtn) rotateBtn.style.display = shownImage ? '' : 'none';
       if (shownImage) { shownImage.style.transform = ''; shownImage.style.maxWidth = '100%'; }
     }
     function escapeHtml(s) {
@@ -1747,7 +1824,7 @@
     function closeViewer() {
       document.getElementById('viewerModal').classList.remove('open','fullscreen');
       document.body.style.overflow = '';
-      viewerImages = []; viewerText = ''; viewerIndex = 0;
+      viewerImages = []; viewerText = ''; viewerIndex = 0; viewerRotation = 0; imageScale = 1;
     }
 
     // ========== Render Manuals ==========
@@ -1759,7 +1836,7 @@
     }
     function render() {
       let list = MANUALS;
-      if (activeCat && activeCat !== '全部') {
+      if (activeCat && activeCat !== 'å…¨éƒ¨') {
         list = list.filter(m => (m.category || '') === activeCat);
       }
       if (query.trim()) {
@@ -1775,8 +1852,8 @@
 
       if (!list.length) {
         grid.innerHTML = MANUALS.length
-          ? '<div class="empty"><div class="emoji">🔍</div>找不到相關桌遊本本</div>'
-          : '<div class="empty"><div class="emoji">🐻</div>還沒有桌遊本本<br><small>點右下角 ＋ 開始新增</small></div>';
+          ? '<div class="empty"><div class="emoji">ðŸ”</div>æ‰¾ä¸åˆ°ç›¸é—œæ¡ŒéŠæœ¬æœ¬</div>'
+          : '<div class="empty"><div class="emoji">ðŸ»</div>é‚„æ²’æœ‰æ¡ŒéŠæœ¬æœ¬<br><small>é»žå³ä¸‹è§’ ï¼‹ é–‹å§‹æ–°å¢ž</small></div>';
         return;
       }
       grid.innerHTML = list.map(m => `
@@ -1784,11 +1861,11 @@
           <div class="card-top">
             <div style="display:flex;gap:6px;flex-wrap:wrap">
               ${m.category ? `<span class="badge cat">${m.category}</span>` : ''}
-              <span class="badge pages">${m.pages || 0} 頁${m.text ? ' · 有文字' : ''}</span>
+              <span class="badge pages">${m.pages || 0} é ${m.text ? ' Â· æœ‰æ–‡å­—' : ''}</span>
             </div>
             <div class="card-actions">
-              <button type="button" class="card-edit" data-edit-slug="${m.slug}" aria-label="編輯 ${escapeHtml(m.name || '說明書')}">編輯</button>
-              <button type="button" class="card-delete" data-delete-slug="${m.slug}" aria-label="刪除 ${escapeHtml(m.name || '說明書')}">刪除</button>
+              <button type="button" class="card-edit" data-edit-slug="${m.slug}" aria-label="ç·¨è¼¯ ${escapeHtml(m.name || 'èªªæ˜Žæ›¸')}">ç·¨è¼¯</button>
+              <button type="button" class="card-delete" data-delete-slug="${m.slug}" aria-label="åˆªé™¤ ${escapeHtml(m.name || 'èªªæ˜Žæ›¸')}">åˆªé™¤</button>
             </div>
           </div>
           <div class="card-title">${highlight(m.name, query)}</div>
@@ -1808,7 +1885,7 @@
       if (mh) mjHistory = JSON.parse(mh);
     } catch (e) {}
 
-    // 廣東麻雀半辣上：3番=16, 4=32, 5=64… 8番起封頂 512
+    // å»£æ±éº»é›€åŠè¾£ä¸Šï¼š3ç•ª=16, 4=32, 5=64â€¦ 8ç•ªèµ·å°é ‚ 512
     function getMahjongBaseScore(fan) {
       if (fan < 3) return 0;
       if (fan >= 8) return 512;
@@ -1821,8 +1898,8 @@
       const opts = scores.map((p, i) => `<option value="${i}">${p.name}</option>`).join('');
       const w = document.getElementById('mjWinner');
       const l = document.getElementById('mjLoser');
-      if (w) w.innerHTML = opts || '<option value="">請先加入玩家</option>';
-      if (l) l.innerHTML = opts || '<option value="">請先加入玩家</option>';
+      if (w) w.innerHTML = opts || '<option value="">è«‹å…ˆåŠ å…¥çŽ©å®¶</option>';
+      if (l) l.innerHTML = opts || '<option value="">è«‹å…ˆåŠ å…¥çŽ©å®¶</option>';
     }
     function updateMjUndoBtn() {
       const btn = document.getElementById('btnMjUndo');
@@ -1832,25 +1909,25 @@
       const el = document.getElementById('mjHistory');
       if (!el) return;
       if (!mjHistory.length) {
-        el.innerHTML = '<div class="settle-empty">暫無紀錄</div>';
+        el.innerHTML = '<div class="settle-empty">æš«ç„¡ç´€éŒ„</div>';
         updateMjUndoBtn();
         return;
       }
       el.innerHTML = mjHistory.map((h, i) => `
         <div class="settle-line" style="flex-direction:column;align-items:flex-start;gap:2px">
-          <span>${i === 0 ? '🆕 ' : ''}${h.msg}</span>
+          <span>${i === 0 ? 'ðŸ†• ' : ''}${h.msg}</span>
           <span class="hint" style="padding:0">${h.time}</span>
         </div>
       `).join('');
       updateMjUndoBtn();
     }
     function undoLastMjRound() {
-      if (!mjHistory.length) { toast('沒有可還原的紀錄'); return; }
+      if (!mjHistory.length) { toast('æ²’æœ‰å¯é‚„åŽŸçš„ç´€éŒ„'); return; }
       const last = mjHistory[0];
       if (!last.snapshot || !Array.isArray(last.snapshot)) {
-        toast('此紀錄無法還原（舊資料）'); return;
+        toast('æ­¤ç´€éŒ„ç„¡æ³•é‚„åŽŸï¼ˆèˆŠè³‡æ–™ï¼‰'); return;
       }
-      // 還原分數快照
+      // é‚„åŽŸåˆ†æ•¸å¿«ç…§
       const snapMap = {};
       last.snapshot.forEach(s => { snapMap[s.name] = s.score; });
       scores.forEach(p => {
@@ -1866,7 +1943,7 @@
       updateFanHint();
       const sr = document.getElementById('settleResult');
       if (sr) sr.style.display = 'none';
-      toast('已還原上一鋪', 2200, 'ok');
+      toast('å·²é‚„åŽŸä¸Šä¸€é‹ª', 2200, 'ok');
     }
     function updateFanHint() {
       const fan = parseInt((document.getElementById('mjFan') || {}).value, 10) || 3;
@@ -1875,12 +1952,12 @@
       const hint = document.getElementById('mjFanHint');
       if (!hint) return;
       if (base === 0) {
-        hint.textContent = '少於 3 番不能起胡';
+        hint.textContent = 'å°‘æ–¼ 3 ç•ªä¸èƒ½èµ·èƒ¡';
         return;
       }
       const selfDraw = base * Math.max(scores.length - 1, 1);
       const discard = base * 3;
-      hint.textContent = `${fan}番＝${base}分｜自摸每人付 ${base}分（共 +${selfDraw}）｜出沖包 ${discard}分｜約 $${(base * unit).toFixed(1)}／分`;
+      hint.textContent = `${fan}ç•ªï¼${base}åˆ†ï½œè‡ªæ‘¸æ¯äººä»˜ ${base}åˆ†ï¼ˆå…± +${selfDraw}ï¼‰ï½œå‡ºæ²–åŒ… ${discard}åˆ†ï½œç´„ $${(base * unit).toFixed(1)}ï¼åˆ†`;
     }
     function setScoreMode(mode) {
       scoreMode = mode;
@@ -1903,13 +1980,13 @@
       if (settleResult) settleResult.style.display = 'none';
       const unitLabel = document.getElementById('unitLabel');
       const unitHint = document.getElementById('unitHint');
-      if (unitLabel) unitLabel.textContent = '每分金額（$）';
+      if (unitLabel) unitLabel.textContent = 'æ¯åˆ†é‡‘é¡ï¼ˆ$ï¼‰';
       if (unitHint) {
         unitHint.textContent = mode === 'mahjong'
-          ? '半辣上分數 × 每分金額 = 實收。例：3番自摸、每分$1 → 各家付$16'
+          ? 'åŠè¾£ä¸Šåˆ†æ•¸ Ã— æ¯åˆ†é‡‘é¡ = å¯¦æ”¶ã€‚ä¾‹ï¼š3ç•ªè‡ªæ‘¸ã€æ¯åˆ†$1 â†’ å„å®¶ä»˜$16'
           : mode === 'big2'
-            ? '剩牌得分 × 每分金額 = 實收。雙倍／三倍張數可自訂'
-            : '分數 × 每分金額 = 實收金額';
+            ? 'å‰©ç‰Œå¾—åˆ† Ã— æ¯åˆ†é‡‘é¡ = å¯¦æ”¶ã€‚é›™å€ï¼ä¸‰å€å¼µæ•¸å¯è‡ªè¨‚'
+            : 'åˆ†æ•¸ Ã— æ¯åˆ†é‡‘é¡ = å¯¦æ”¶é‡‘é¡';
       }
       renderScores();
       if (mode === 'count') {
@@ -1932,27 +2009,27 @@
     function renderScores() {
       const list = document.getElementById('playerList');
       if (!scores.length) {
-        list.innerHTML = '<div class="empty" style="padding:30px"><div class="emoji">🏆</div>還沒有玩家<br><small>在下方加入名字開始計分</small></div>';
+        list.innerHTML = '<div class="empty" style="padding:30px"><div class="emoji">ðŸ†</div>é‚„æ²’æœ‰çŽ©å®¶<br><small>åœ¨ä¸‹æ–¹åŠ å…¥åå­—é–‹å§‹è¨ˆåˆ†</small></div>';
         fillMjSelects();
         return;
       }
       const sorted = scores.slice().sort((a, b) => b.score - a.score);
-      // 自訂計分用下方計分器，唔喺列表用 ±1，避免同回合總分唔同步
+      // è‡ªè¨‚è¨ˆåˆ†ç”¨ä¸‹æ–¹è¨ˆåˆ†å™¨ï¼Œå””å–ºåˆ—è¡¨ç”¨ Â±1ï¼Œé¿å…åŒå›žåˆç¸½åˆ†å””åŒæ­¥
       const showBtns = false;
       list.innerHTML = sorted.map((p, i) => {
         const cls = p.score > 0 ? 'pos' : (p.score < 0 ? 'neg' : '');
         const unit = parseFloat((document.getElementById('unitPrice') || {}).value) || 1;
         const moneyHint = (scoreMode === 'mahjong' || scoreMode === 'big2') && p.score !== 0
-          ? `<span class="hint" style="display:block;padding:0;margin-top:2px">≈ $${(p.score * unit).toFixed(1)}</span>`
+          ? `<span class="hint" style="display:block;padding:0;margin-top:2px">â‰ˆ $${(p.score * unit).toFixed(1)}</span>`
           : '';
         return `
         <div class="player-row" data-name="${p.name}">
-          <span style="font-size:0.85rem;color:var(--muted);width:22px">${i === 0 && p.score > 0 ? '👑' : (i+1)}</span>
+          <span style="font-size:0.85rem;color:var(--muted);width:22px">${i === 0 && p.score > 0 ? 'ðŸ‘‘' : (i+1)}</span>
           <span class="name">${p.name}${moneyHint}</span>
           <span class="score ${cls}">${p.score > 0 ? '+' : ''}${p.score}</span>
           ${showBtns ? `<div class="score-btns">
-            <button type="button" class="score-btn minus" data-act="minus">−</button>
-            <button type="button" class="score-btn plus" data-act="plus">＋</button>
+            <button type="button" class="score-btn minus" data-act="minus">âˆ’</button>
+            <button type="button" class="score-btn plus" data-act="plus">ï¼‹</button>
           </div>` : ''}
         </div>`;
       }).join('');
@@ -2000,21 +2077,21 @@
     function addPlayer() {
       const name = document.getElementById('newPlayerName').value.trim();
       if (!name) return;
-      if (scores.some(p => p.name === name)) { toast('已經有這個名字'); return; }
+      if (scores.some(p => p.name === name)) { toast('å·²ç¶“æœ‰é€™å€‹åå­—'); return; }
       scores.push({ name, score: 0 });
       document.getElementById('newPlayerName').value = '';
       saveScores();
       renderScores();
-      toast(`已加入 ${name}`);
+      toast(`å·²åŠ å…¥ ${name}`);
     }
     document.getElementById('btnResetScores').addEventListener('click', async () => {
-      const ok = await softConfirm('分數歸零，並清空自訂／麻雀／鋤大D 全部對局紀錄？', {
-        title: '全部歸零', icon: '🔄', okText: '歸零'
+      const ok = await softConfirm('åˆ†æ•¸æ­¸é›¶ï¼Œä¸¦æ¸…ç©ºè‡ªè¨‚ï¼éº»é›€ï¼é‹¤å¤§D å…¨éƒ¨å°å±€ç´€éŒ„ï¼Ÿ', {
+        title: 'å…¨éƒ¨æ­¸é›¶', icon: 'ðŸ”„', okText: 'æ­¸é›¶'
       });
       if (!ok) return;
       scores.forEach(p => p.score = 0);
       saveScores();
-      // 清空三種模式的對局紀錄
+      // æ¸…ç©ºä¸‰ç¨®æ¨¡å¼çš„å°å±€ç´€éŒ„
       countHistory = [];
       mjHistory = [];
       b2History = [];
@@ -2028,11 +2105,11 @@
       if (typeof renderCountInputs === 'function') renderCountInputs();
       const sr = document.getElementById('settleResult');
       if (sr) sr.style.display = 'none';
-      toast('分數與全部紀錄已歸零', 2600, 'ok');
+      toast('åˆ†æ•¸èˆ‡å…¨éƒ¨ç´€éŒ„å·²æ­¸é›¶', 2600, 'ok');
     });
     document.getElementById('btnClearPlayers').addEventListener('click', async () => {
-      const ok = await softConfirm('確定清除所有玩家？此操作無法復原。', {
-        title: '清除玩家', icon: '🧹', okText: '清除'
+      const ok = await softConfirm('ç¢ºå®šæ¸…é™¤æ‰€æœ‰çŽ©å®¶ï¼Ÿæ­¤æ“ä½œç„¡æ³•å¾©åŽŸã€‚', {
+        title: 'æ¸…é™¤çŽ©å®¶', icon: 'ðŸ§¹', okText: 'æ¸…é™¤'
       });
       if (!ok) return;
       scores = [];
@@ -2040,7 +2117,7 @@
       renderScores();
       const sr = document.getElementById('settleResult');
       if (sr) sr.style.display = 'none';
-      toast('已清除所有玩家', 2200, 'info');
+      toast('å·²æ¸…é™¤æ‰€æœ‰çŽ©å®¶', 2200, 'info');
     });
     document.querySelectorAll('#scoreModeSeg button').forEach(btn => {
       btn.addEventListener('click', () => setScoreMode(btn.dataset.mode));
@@ -2054,26 +2131,26 @@
     const btnSettle = document.getElementById('btnSettle');
     if (btnSettle) {
       btnSettle.addEventListener('click', () => {
-        if (scores.length < 2) { toast('至少需要兩位玩家'); return; }
+        if (scores.length < 2) { toast('è‡³å°‘éœ€è¦å…©ä½çŽ©å®¶'); return; }
         const lines = computeSettlement();
         const box = document.getElementById('settleResult');
         const linesEl = document.getElementById('settleLines');
         box.style.display = '';
         if (!lines.length) {
-          linesEl.innerHTML = '<div class="settle-empty">目前無須收付款（分數平衡）</div>';
+          linesEl.innerHTML = '<div class="settle-empty">ç›®å‰ç„¡é ˆæ”¶ä»˜æ¬¾ï¼ˆåˆ†æ•¸å¹³è¡¡ï¼‰</div>';
           return;
         }
-        const modeName = scoreMode === 'mahjong' ? '麻雀' : '鋤大D';
+        const modeName = scoreMode === 'mahjong' ? 'éº»é›€' : 'é‹¤å¤§D';
         linesEl.innerHTML = lines.map(l => `
           <div class="settle-line">
-            <span><strong>${l.from}</strong> → <strong>${l.to}</strong></span>
+            <span><strong>${l.from}</strong> â†’ <strong>${l.to}</strong></span>
             <span class="amount">$${l.amount}</span>
           </div>
-        `).join('') + `<p class="field" style="margin:10px 0 0"><span class="hint">依目前分數 × 每分金額計算（${modeName}）</span></p>`;
+        `).join('') + `<p class="field" style="margin:10px 0 0"><span class="hint">ä¾ç›®å‰åˆ†æ•¸ Ã— æ¯åˆ†é‡‘é¡è¨ˆç®—ï¼ˆ${modeName}ï¼‰</span></p>`;
       });
     }
 
-    // 廣東麻雀本局計算
+    // å»£æ±éº»é›€æœ¬å±€è¨ˆç®—
     const mjWinType = document.getElementById('mjWinType');
     if (mjWinType) {
       mjWinType.addEventListener('change', () => {
@@ -2089,27 +2166,27 @@
     const btnMjCalc = document.getElementById('btnMjCalc');
     if (btnMjCalc) {
       btnMjCalc.addEventListener('click', () => {
-        if (scores.length < 2) { toast('請先加入至少兩位玩家'); return; }
+        if (scores.length < 2) { toast('è«‹å…ˆåŠ å…¥è‡³å°‘å…©ä½çŽ©å®¶'); return; }
         const winnerIdx = parseInt(document.getElementById('mjWinner').value, 10);
         const winType = document.getElementById('mjWinType').value;
         const fan = parseInt(document.getElementById('mjFan').value, 10) || 0;
         const loserIdx = parseInt(document.getElementById('mjLoser').value, 10);
         if (isNaN(winnerIdx) || winnerIdx < 0 || winnerIdx >= scores.length) {
-          toast('請選擇贏家'); return;
+          toast('è«‹é¸æ“‡è´å®¶'); return;
         }
         if (winType === 'discard') {
           if (isNaN(loserIdx) || loserIdx < 0 || loserIdx >= scores.length) {
-            toast('請選擇出沖者'); return;
+            toast('è«‹é¸æ“‡å‡ºæ²–è€…'); return;
           }
           if (winnerIdx === loserIdx) {
-            toast('勝者與放銃者不能為同一人'); return;
+            toast('å‹è€…èˆ‡æ”¾éŠƒè€…ä¸èƒ½ç‚ºåŒä¸€äºº'); return;
           }
         }
         const base = getMahjongBaseScore(fan);
         if (base === 0) {
-          toast('少於 3 番不能起胡'); return;
+          toast('å°‘æ–¼ 3 ç•ªä¸èƒ½èµ·èƒ¡'); return;
         }
-        // 先備份分數，方便還原
+        // å…ˆå‚™ä»½åˆ†æ•¸ï¼Œæ–¹ä¾¿é‚„åŽŸ
         const snapshot = scores.map(p => ({ name: p.name, score: p.score }));
         let logMsg = '';
         if (winType === 'self-draw') {
@@ -2121,13 +2198,13 @@
             }
           });
           scores[winnerIdx].score += totalGain;
-          logMsg = `${scores[winnerIdx].name} 自摸 ${fan}番（+${totalGain}分，各家付 ${base}）`;
+          logMsg = `${scores[winnerIdx].name} è‡ªæ‘¸ ${fan}ç•ªï¼ˆ+${totalGain}åˆ†ï¼Œå„å®¶ä»˜ ${base}ï¼‰`;
         } else {
-          // 出沖：放銃者包三家份（base × 3）
+          // å‡ºæ²–ï¼šæ”¾éŠƒè€…åŒ…ä¸‰å®¶ä»½ï¼ˆbase Ã— 3ï¼‰
           const totalAmount = base * 3;
           scores[loserIdx].score -= totalAmount;
           scores[winnerIdx].score += totalAmount;
-          logMsg = `${scores[winnerIdx].name} 食 ${scores[loserIdx].name} ${fan}番（+${totalAmount}分）`;
+          logMsg = `${scores[winnerIdx].name} é£Ÿ ${scores[loserIdx].name} ${fan}ç•ªï¼ˆ+${totalAmount}åˆ†ï¼‰`;
         }
         mjHistory.unshift({
           msg: logMsg,
@@ -2141,7 +2218,7 @@
         updateFanHint();
         const sr = document.getElementById('settleResult');
         if (sr) sr.style.display = 'none';
-        toast('本局已記入', 2200, 'ok');
+        toast('æœ¬å±€å·²è¨˜å…¥', 2200, 'ok');
       });
     }
 
@@ -2150,19 +2227,19 @@
     const btnMjClearHistory = document.getElementById('btnMjClearHistory');
     if (btnMjClearHistory) {
       btnMjClearHistory.addEventListener('click', async () => {
-        if (!mjHistory.length) { toast('沒有紀錄', 2000, 'info'); return; }
-        const ok = await softConfirm('確定清空對局紀錄？玩家分數不會改變。', {
-          title: '清空紀錄', icon: '📋', okText: '清空'
+        if (!mjHistory.length) { toast('æ²’æœ‰ç´€éŒ„', 2000, 'info'); return; }
+        const ok = await softConfirm('ç¢ºå®šæ¸…ç©ºå°å±€ç´€éŒ„ï¼ŸçŽ©å®¶åˆ†æ•¸ä¸æœƒæ”¹è®Šã€‚', {
+          title: 'æ¸…ç©ºç´€éŒ„', icon: 'ðŸ“‹', okText: 'æ¸…ç©º'
         });
         if (!ok) return;
         mjHistory = [];
         saveMjHistory();
         renderMjHistory();
-        toast('紀錄已清空', 2200, 'ok');
+        toast('ç´€éŒ„å·²æ¸…ç©º', 2200, 'ok');
       });
     }
 
-    // ========== Count / 自訂計分 ==========
+    // ========== Count / è‡ªè¨‚è¨ˆåˆ† ==========
     let countHistory = [];
     try {
       const ch = localStorage.getItem('benben_count_history');
@@ -2175,18 +2252,18 @@
       const el = document.getElementById('countInputs');
       if (!el) return;
       if (!scores.length) {
-        el.innerHTML = '<p class="hint">請先加入玩家</p>';
+        el.innerHTML = '<p class="hint">è«‹å…ˆåŠ å…¥çŽ©å®¶</p>';
         return;
       }
       el.innerHTML = scores.map((p, idx) => `
         <div class="player-row" style="margin-bottom:8px">
           <span class="name">${p.name}</span>
           <div style="display:flex;align-items:center;gap:6px">
-            <button type="button" class="score-btn minus count-adj" data-idx="${idx}" data-d="-1">−</button>
+            <button type="button" class="score-btn minus count-adj" data-idx="${idx}" data-d="-1">âˆ’</button>
             <input type="text" inputmode="text" class="count-delta" data-idx="${idx}" value="" placeholder="0"
               autocomplete="off"
               style="width:72px;padding:8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg-soft);text-align:center;font-family:inherit;font-size:1rem;font-weight:600" />
-            <button type="button" class="score-btn plus count-adj" data-idx="${idx}" data-d="1">＋</button>
+            <button type="button" class="score-btn plus count-adj" data-idx="${idx}" data-d="1">ï¼‹</button>
           </div>
         </div>
       `).join('');
@@ -2200,7 +2277,7 @@
       if (!btn) return;
       const n = countHistory.length;
       const isOpen = open != null ? open : (document.getElementById('countHistoryWrap') || {}).style?.display !== 'none';
-      btn.textContent = `📋 回合紀錄（${n}）` + (isOpen ? ' ▴' : ' ▾');
+      btn.textContent = `ðŸ“‹ å›žåˆç´€éŒ„ï¼ˆ${n}ï¼‰` + (isOpen ? ' â–´' : ' â–¾');
     }
     function openCountHistory() {
       const wrap = document.getElementById('countHistoryWrap');
@@ -2211,32 +2288,32 @@
       const el = document.getElementById('countHistory');
       if (!el) return;
       if (!countHistory.length) {
-        el.innerHTML = '<div class="settle-empty">暫無紀錄</div>';
+        el.innerHTML = '<div class="settle-empty">æš«ç„¡ç´€éŒ„</div>';
         updateCountUndoBtn();
         updateCountHistoryToggleLabel();
         return;
       }
-      // 欄：依目前玩家為主，並補上歷史出現過的名字
+      // æ¬„ï¼šä¾ç›®å‰çŽ©å®¶ç‚ºä¸»ï¼Œä¸¦è£œä¸Šæ­·å²å‡ºç¾éŽçš„åå­—
       const colSet = [];
       scores.forEach(p => { if (!colSet.includes(p.name)) colSet.push(p.name); });
       countHistory.forEach(h => {
         const names = h.names || (h.deltas ? Object.keys(h.deltas) : []);
         names.forEach(n => { if (!colSet.includes(n)) colSet.push(n); });
       });
-      // 列：最舊在上（第 1 回合）
+      // åˆ—ï¼šæœ€èˆŠåœ¨ä¸Šï¼ˆç¬¬ 1 å›žåˆï¼‰
       const rounds = countHistory.slice().reverse();
-      let html = '<div class="score-grid-wrap"><table class="score-grid"><thead><tr><th>回合</th>';
+      let html = '<div class="score-grid-wrap"><table class="score-grid"><thead><tr><th>å›žåˆ</th>';
       colSet.forEach(n => { html += `<th>${n}</th>`; });
       html += '</tr></thead><tbody>';
       rounds.forEach((h, i) => {
-        html += `<tr><td>第 ${i + 1} 回合</td>`;
+        html += `<tr><td>ç¬¬ ${i + 1} å›žåˆ</td>`;
         colSet.forEach(name => {
           let v = null;
           if (h.deltas && Object.prototype.hasOwnProperty.call(h.deltas, name)) {
             v = h.deltas[name];
           }
           if (v == null || v === 0) {
-            html += `<td class="num-zero">${v === 0 ? '0' : '—'}</td>`;
+            html += `<td class="num-zero">${v === 0 ? '0' : 'â€”'}</td>`;
           } else if (v > 0) {
             html += `<td class="num-pos">+${v}</td>`;
           } else {
@@ -2245,8 +2322,8 @@
         });
         html += '</tr>';
       });
-      // 總分列 = 各回合該欄加總（與試算表一致）
-      html += '<tr class="total-row"><td>總分</td>';
+      // ç¸½åˆ†åˆ— = å„å›žåˆè©²æ¬„åŠ ç¸½ï¼ˆèˆ‡è©¦ç®—è¡¨ä¸€è‡´ï¼‰
+      html += '<tr class="total-row"><td>ç¸½åˆ†</td>';
       colSet.forEach(name => {
         let total = 0;
         rounds.forEach(h => {
@@ -2264,10 +2341,10 @@
       updateCountHistoryToggleLabel();
     }
     function undoLastCountRound() {
-      if (!countHistory.length) { toast('沒有可還原的紀錄'); return; }
+      if (!countHistory.length) { toast('æ²’æœ‰å¯é‚„åŽŸçš„ç´€éŒ„'); return; }
       const last = countHistory[0];
       if (!last.snapshot || !Array.isArray(last.snapshot)) {
-        toast('此紀錄無法還原'); return;
+        toast('æ­¤ç´€éŒ„ç„¡æ³•é‚„åŽŸ'); return;
       }
       const snapMap = {};
       last.snapshot.forEach(s => { snapMap[s.name] = s.score; });
@@ -2280,10 +2357,10 @@
       renderScores();
       renderCountInputs();
       renderCountHistory();
-      toast('已還原上一回', 2200, 'ok');
+      toast('å·²é‚„åŽŸä¸Šä¸€å›ž', 2200, 'ok');
     }
     function applyCountRound() {
-      if (!scores.length) { toast('請先加入玩家'); return; }
+      if (!scores.length) { toast('è«‹å…ˆåŠ å…¥çŽ©å®¶'); return; }
       const deltas = [];
       let any = false;
       scores.forEach((p, idx) => {
@@ -2293,7 +2370,7 @@
         deltas.push(d);
         if (d !== 0) any = true;
       });
-      if (!any) { toast('請至少輸入一個非 0 分數（如 +10 或 −5）'); return; }
+      if (!any) { toast('è«‹è‡³å°‘è¼¸å…¥ä¸€å€‹éž 0 åˆ†æ•¸ï¼ˆå¦‚ +10 æˆ– âˆ’5ï¼‰'); return; }
       const snapshot = scores.map(p => ({ name: p.name, score: p.score }));
       const deltaMap = {};
       const details = [];
@@ -2304,7 +2381,7 @@
         if (d !== 0) details.push(`${p.name} ${d > 0 ? '+' : ''}${d}`);
       });
       countHistory.unshift({
-        msg: details.join(' · ') || '本回合無變動',
+        msg: details.join(' Â· ') || 'æœ¬å›žåˆç„¡è®Šå‹•',
         names: scores.map(p => p.name),
         deltas: deltaMap,
         time: new Date().toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
@@ -2315,8 +2392,8 @@
       renderScores();
       renderCountInputs();
       renderCountHistory();
-      openCountHistory(); // 記入後自動展開紀錄
-      toast('本回合已記入', 2200, 'ok');
+      openCountHistory(); // è¨˜å…¥å¾Œè‡ªå‹•å±•é–‹ç´€éŒ„
+      toast('æœ¬å›žåˆå·²è¨˜å…¥', 2200, 'ok');
     }
 
     document.getElementById('countInputs')?.addEventListener('click', e => {
@@ -2337,18 +2414,18 @@
       document.querySelectorAll('.count-delta').forEach(i => { i.value = '5'; });
     });
     document.getElementById('btnCountClearHistory')?.addEventListener('click', async () => {
-      if (!countHistory.length) { toast('沒有紀錄', 2000, 'info'); return; }
-      const ok = await softConfirm('確定清空回合紀錄？玩家分數不會改變。', {
-        title: '清空紀錄', icon: '📋', okText: '清空'
+      if (!countHistory.length) { toast('æ²’æœ‰ç´€éŒ„', 2000, 'info'); return; }
+      const ok = await softConfirm('ç¢ºå®šæ¸…ç©ºå›žåˆç´€éŒ„ï¼ŸçŽ©å®¶åˆ†æ•¸ä¸æœƒæ”¹è®Šã€‚', {
+        title: 'æ¸…ç©ºç´€éŒ„', icon: 'ðŸ“‹', okText: 'æ¸…ç©º'
       });
       if (!ok) return;
       countHistory = [];
       saveCountHistory();
       renderCountHistory();
-      toast('紀錄已清空', 2200, 'ok');
+      toast('ç´€éŒ„å·²æ¸…ç©º', 2200, 'ok');
     });
 
-    // ========== 鋤大D ==========
+    // ========== é‹¤å¤§D ==========
     let b2History = [];
     try {
       const bh = localStorage.getItem('benben_b2_history');
@@ -2383,18 +2460,18 @@
       const doubleAt = parseInt((document.getElementById('b2DoubleAt') || {}).value, 10) || 10;
       const tripleAt = parseInt((document.getElementById('b2TripleAt') || {}).value, 10) || 13;
       const hint = document.getElementById('b2RuleHint');
-      if (hint) hint.textContent = `剩牌 ≥${doubleAt} 雙倍 · ≥${tripleAt} 三倍 · 每張剩 2 再 ×2`;
+      if (hint) hint.textContent = `å‰©ç‰Œ â‰¥${doubleAt} é›™å€ Â· â‰¥${tripleAt} ä¸‰å€ Â· æ¯å¼µå‰© 2 å† Ã—2`;
       const refD = document.getElementById('b2RefDouble');
       const refT = document.getElementById('b2RefTriple');
-      if (refD) refD.textContent = `剩牌 ≥ ${doubleAt} 張`;
-      if (refT) refT.textContent = `剩牌 ≥ ${tripleAt} 張`;
+      if (refD) refD.textContent = `å‰©ç‰Œ â‰¥ ${doubleAt} å¼µ`;
+      if (refT) refT.textContent = `å‰©ç‰Œ â‰¥ ${tripleAt} å¼µ`;
     }
     function fillB2UI() {
       const w = document.getElementById('b2Winner');
       if (!w) return;
       const prev = w.value;
       w.innerHTML = scores.map((p, i) => `<option value="${i}">${p.name}</option>`).join('')
-        || '<option value="">請先加入玩家</option>';
+        || '<option value="">è«‹å…ˆåŠ å…¥çŽ©å®¶</option>';
       if (prev !== '' && +prev < scores.length) w.value = prev;
       renderB2Losers();
     }
@@ -2403,7 +2480,7 @@
       if (!container) return;
       const winnerIdx = parseInt((document.getElementById('b2Winner') || {}).value, 10);
       if (!scores.length || isNaN(winnerIdx)) {
-        container.innerHTML = '<p class="hint">請先加入玩家並選擇勝者</p>';
+        container.innerHTML = '<p class="hint">è«‹å…ˆåŠ å…¥çŽ©å®¶ä¸¦é¸æ“‡å‹è€…</p>';
         return;
       }
       container.innerHTML = scores.map((p, idx) => {
@@ -2412,10 +2489,10 @@
           <div class="player-row" style="margin-bottom:8px" data-b2-loser="${idx}">
             <span class="name">${p.name}</span>
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-              <label class="hint" style="padding:0;margin:0">剩牌</label>
+              <label class="hint" style="padding:0;margin:0">å‰©ç‰Œ</label>
               <input type="number" class="b2-cards" data-idx="${idx}" min="1" max="13" value="1"
                 style="width:52px;padding:6px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg-soft);text-align:center;font-family:inherit;font-size:0.9rem" />
-              <label class="hint" style="padding:0;margin:0">剩2</label>
+              <label class="hint" style="padding:0;margin:0">å‰©2</label>
               <input type="number" class="b2-twos" data-idx="${idx}" min="0" max="4" value="0"
                 style="width:44px;padding:6px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg-soft);text-align:center;font-family:inherit;font-size:0.9rem;color:var(--accent-dark);font-weight:700" />
             </div>
@@ -2430,23 +2507,23 @@
       const el = document.getElementById('b2History');
       if (!el) return;
       if (!b2History.length) {
-        el.innerHTML = '<div class="settle-empty">暫無紀錄</div>';
+        el.innerHTML = '<div class="settle-empty">æš«ç„¡ç´€éŒ„</div>';
         updateB2UndoBtn();
         return;
       }
       el.innerHTML = b2History.map((h, i) => `
         <div class="settle-line" style="flex-direction:column;align-items:flex-start;gap:2px">
-          <span>${i === 0 ? '🆕 ' : ''}${h.msg}</span>
+          <span>${i === 0 ? 'ðŸ†• ' : ''}${h.msg}</span>
           <span class="hint" style="padding:0">${h.time}</span>
         </div>
       `).join('');
       updateB2UndoBtn();
     }
     function undoLastB2Round() {
-      if (!b2History.length) { toast('沒有可還原的紀錄'); return; }
+      if (!b2History.length) { toast('æ²’æœ‰å¯é‚„åŽŸçš„ç´€éŒ„'); return; }
       const last = b2History[0];
       if (!last.snapshot || !Array.isArray(last.snapshot)) {
-        toast('此紀錄無法還原'); return;
+        toast('æ­¤ç´€éŒ„ç„¡æ³•é‚„åŽŸ'); return;
       }
       const snapMap = {};
       last.snapshot.forEach(s => { snapMap[s.name] = s.score; });
@@ -2461,7 +2538,7 @@
       renderB2History();
       const sr = document.getElementById('settleResult');
       if (sr) sr.style.display = 'none';
-      toast('已還原上一鋪', 2200, 'ok');
+      toast('å·²é‚„åŽŸä¸Šä¸€é‹ª', 2200, 'ok');
     }
     function calcB2Loss(cards, twos) {
       const rate = getB2Rate(cards);
@@ -2482,10 +2559,10 @@
     const btnB2Calc = document.getElementById('btnB2Calc');
     if (btnB2Calc) {
       btnB2Calc.addEventListener('click', () => {
-        if (scores.length < 2) { toast('請先加入至少兩位玩家'); return; }
+        if (scores.length < 2) { toast('è«‹å…ˆåŠ å…¥è‡³å°‘å…©ä½çŽ©å®¶'); return; }
         const winnerIdx = parseInt(document.getElementById('b2Winner').value, 10);
         if (isNaN(winnerIdx) || winnerIdx < 0 || winnerIdx >= scores.length) {
-          toast('請選擇勝者'); return;
+          toast('è«‹é¸æ“‡å‹è€…'); return;
         }
         saveB2Thresholds();
         const snapshot = scores.map(p => ({ name: p.name, score: p.score }));
@@ -2499,18 +2576,18 @@
           const cards = Math.min(13, Math.max(0, parseInt((cardsEl || {}).value, 10) || 0));
           const twos = Math.min(4, Math.max(0, parseInt((twosEl || {}).value, 10) || 0));
           if (cards < 1) {
-            toast(`${p.name} 剩牌請填 1–13`);
+            toast(`${p.name} å‰©ç‰Œè«‹å¡« 1â€“13`);
             return;
           }
           const loss = calcB2Loss(cards, twos);
           p.score -= loss;
           totalGain += loss;
           const rate = getB2Rate(cards);
-          details.push(`${p.name} −${loss}（${cards}張${rate > 1 ? '×' + rate : ''}${twos ? ' 剩2×' + Math.pow(2, twos) : ''}）`);
+          details.push(`${p.name} âˆ’${loss}ï¼ˆ${cards}å¼µ${rate > 1 ? 'Ã—' + rate : ''}${twos ? ' å‰©2Ã—' + Math.pow(2, twos) : ''}ï¼‰`);
         }
         scores[winnerIdx].score += totalGain;
         b2History.unshift({
-          msg: `${scores[winnerIdx].name} +${totalGain}｜${details.join(' · ')}`,
+          msg: `${scores[winnerIdx].name} +${totalGain}ï½œ${details.join(' Â· ')}`,
           time: new Date().toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
           snapshot
         });
@@ -2521,7 +2598,7 @@
         renderB2History();
         const sr = document.getElementById('settleResult');
         if (sr) sr.style.display = 'none';
-        toast('本局已記入', 2200, 'ok');
+        toast('æœ¬å±€å·²è¨˜å…¥', 2200, 'ok');
       });
     }
     const btnB2Undo = document.getElementById('btnB2Undo');
@@ -2529,15 +2606,15 @@
     const btnB2ClearHistory = document.getElementById('btnB2ClearHistory');
     if (btnB2ClearHistory) {
       btnB2ClearHistory.addEventListener('click', async () => {
-        if (!b2History.length) { toast('沒有紀錄', 2000, 'info'); return; }
-        const ok = await softConfirm('確定清空對局紀錄？玩家分數不會改變。', {
-          title: '清空紀錄', icon: '📋', okText: '清空'
+        if (!b2History.length) { toast('æ²’æœ‰ç´€éŒ„', 2000, 'info'); return; }
+        const ok = await softConfirm('ç¢ºå®šæ¸…ç©ºå°å±€ç´€éŒ„ï¼ŸçŽ©å®¶åˆ†æ•¸ä¸æœƒæ”¹è®Šã€‚', {
+          title: 'æ¸…ç©ºç´€éŒ„', icon: 'ðŸ“‹', okText: 'æ¸…ç©º'
         });
         if (!ok) return;
         b2History = [];
         saveB2History();
         renderB2History();
-        toast('紀錄已清空', 2200, 'ok');
+        toast('ç´€éŒ„å·²æ¸…ç©º', 2200, 'ok');
       });
     }
 
@@ -2563,12 +2640,12 @@
       const r = size / 2 - 8;
       ctx.clearRect(0, 0, size, size);
 
-      const names = pickerNames.length ? pickerNames : ['加入玩家'];
+      const names = pickerNames.length ? pickerNames : ['åŠ å…¥çŽ©å®¶'];
       const n = names.length;
       const arc = (Math.PI * 2) / n;
 
-      // 指針在下方，0 度為正下方（canvas 預設 0 為右，用 -90° 校正到上；我們要下方指針所以 +90° 從上方起算再轉）
-      // 繪製時：第一格從 -π/2 開始（正上方），指針在下方對應 π/2，轉完後用角度對齊
+      // æŒ‡é‡åœ¨ä¸‹æ–¹ï¼Œ0 åº¦ç‚ºæ­£ä¸‹æ–¹ï¼ˆcanvas é è¨­ 0 ç‚ºå³ï¼Œç”¨ -90Â° æ ¡æ­£åˆ°ä¸Šï¼›æˆ‘å€‘è¦ä¸‹æ–¹æŒ‡é‡æ‰€ä»¥ +90Â° å¾žä¸Šæ–¹èµ·ç®—å†è½‰ï¼‰
+      // ç¹ªè£½æ™‚ï¼šç¬¬ä¸€æ ¼å¾ž -Ï€/2 é–‹å§‹ï¼ˆæ­£ä¸Šæ–¹ï¼‰ï¼ŒæŒ‡é‡åœ¨ä¸‹æ–¹å°æ‡‰ Ï€/2ï¼Œè½‰å®Œå¾Œç”¨è§’åº¦å°é½Š
       for (let i = 0; i < n; i++) {
         const start = -Math.PI / 2 + i * arc;
         const end = start + arc;
@@ -2582,7 +2659,7 @@
         ctx.lineWidth = 3;
         ctx.stroke();
 
-        // 名字
+        // åå­—
         ctx.save();
         ctx.translate(cx, cy);
         ctx.rotate(start + arc / 2);
@@ -2592,12 +2669,12 @@
         ctx.font = `bold ${Math.max(18, Math.min(32, Math.floor(140 / Math.max(n, 2))))}px "Zen Maru Gothic", "Noto Sans TC", sans-serif`;
         ctx.shadowColor = 'rgba(0,0,0,0.35)';
         ctx.shadowBlur = 4;
-        const label = names[i].length > 8 ? names[i].slice(0, 7) + '…' : names[i];
+        const label = names[i].length > 8 ? names[i].slice(0, 7) + 'â€¦' : names[i];
         ctx.fillText(label, r - 22, 0);
         ctx.restore();
       }
 
-      // 外圈光點
+      // å¤–åœˆå…‰é»ž
       const dots = 16;
       for (let i = 0; i < dots; i++) {
         const a = (i / dots) * Math.PI * 2 - Math.PI / 2;
@@ -2612,7 +2689,7 @@
     function renderPicker() {
       const el = document.getElementById('pickerPlayers');
       el.innerHTML = pickerNames.map((n, i) =>
-        `<span class="picker-tag">${n}<button type="button" class="rm" data-i="${i}">×</button></span>`
+        `<span class="picker-tag">${n}<button type="button" class="rm" data-i="${i}">Ã—</button></span>`
       ).join('');
       drawWheel();
       const canvas = document.getElementById('wheelCanvas');
@@ -2633,7 +2710,7 @@
     function addPickerName() {
       const name = document.getElementById('pickerNewName').value.trim();
       if (!name) return;
-      if (pickerNames.includes(name)) { toast('已經有了'); return; }
+      if (pickerNames.includes(name)) { toast('å·²ç¶“æœ‰äº†'); return; }
       pickerNames.push(name);
       document.getElementById('pickerNewName').value = '';
       savePicker();
@@ -2643,11 +2720,11 @@
       pickerNames = scores.map(p => p.name);
       savePicker();
       renderPicker();
-      toast(pickerNames.length ? `已同步 ${pickerNames.length} 人` : '計分板沒有玩家');
+      toast(pickerNames.length ? `å·²åŒæ­¥ ${pickerNames.length} äºº` : 'è¨ˆåˆ†æ¿æ²’æœ‰çŽ©å®¶');
     });
     document.getElementById('btnSpin').addEventListener('click', () => {
       if (pickerNames.length < 1) {
-        toast('請先加入至少一位玩家');
+        toast('è«‹å…ˆåŠ å…¥è‡³å°‘ä¸€ä½çŽ©å®¶');
         return;
       }
       if (wheelSpinning) return;
@@ -2660,12 +2737,12 @@
       const winnerIdx = Math.floor(Math.random() * n);
       const winner = pickerNames[winnerIdx];
 
-      // 指針在正下方：每格 arcDeg，第 i 格中心在 (i+0.5)*arcDeg（由正上方順時針）
-      // 要令該中心對準正下方，需再轉 (180 - centerFromTop) 度，加上多圈
+      // æŒ‡é‡åœ¨æ­£ä¸‹æ–¹ï¼šæ¯æ ¼ arcDegï¼Œç¬¬ i æ ¼ä¸­å¿ƒåœ¨ (i+0.5)*arcDegï¼ˆç”±æ­£ä¸Šæ–¹é †æ™‚é‡ï¼‰
+      // è¦ä»¤è©²ä¸­å¿ƒå°æº–æ­£ä¸‹æ–¹ï¼Œéœ€å†è½‰ (180 - centerFromTop) åº¦ï¼ŒåŠ ä¸Šå¤šåœˆ
       const arcDeg = 360 / n;
       const centerFromTop = (winnerIdx + 0.5) * arcDeg;
       const targetMod = (180 - centerFromTop + 360) % 360;
-      const extraTurns = 5 + Math.floor(Math.random() * 3); // 5–7 圈
+      const extraTurns = 5 + Math.floor(Math.random() * 3); // 5â€“7 åœˆ
       const currentMod = ((wheelRotation % 360) + 360) % 360;
       let delta = targetMod - currentMod;
       if (delta < 0) delta += 360;
@@ -2673,7 +2750,7 @@
 
       wheelSpinning = true;
       btn.disabled = true;
-      result.textContent = '轉緊…';
+      result.textContent = 'è½‰ç·Šâ€¦';
       result.classList.remove('placeholder');
       msg.textContent = '';
       msg.classList.remove('win');
@@ -2695,9 +2772,9 @@
           wheelRotation = finalRot;
           canvas.style.transform = `rotate(${wheelRotation}deg)`;
           result.textContent = winner;
-          msg.textContent = `🎉 由「${winner}」開始！`;
+          msg.textContent = `ðŸŽ‰ ç”±ã€Œ${winner}ã€é–‹å§‹ï¼`;
           msg.classList.add('win');
-          toast(`${winner} 先手！`, 2400, 'ok');
+          toast(`${winner} å…ˆæ‰‹ï¼`, 2400, 'ok');
           wheelSpinning = false;
           btn.disabled = false;
         }
@@ -2705,7 +2782,7 @@
       requestAnimationFrame(frame);
     });
 
-    // ========== 擲骰子 ==========
+    // ========== æ“²éª°å­ ==========
     function loadDicePrefs() {
       try {
         const raw = localStorage.getItem('benben_dice_prefs');
@@ -2734,7 +2811,7 @@
       if (isNaN(max)) max = 6;
       count = Math.min(12, Math.max(1, count));
       if (max < min) {
-        toast('最大點不能小於最小點', 2400, 'err');
+        toast('æœ€å¤§é»žä¸èƒ½å°æ–¼æœ€å°é»ž', 2400, 'err');
         return;
       }
       document.getElementById('diceCount').value = count;
@@ -2749,9 +2826,9 @@
       tray.innerHTML = Array.from({ length: count }, (_, i) =>
         `<div class="die rolling" style="animation-delay:${(i % 5) * 0.06}s">?</div>`
       ).join('');
-      sumEl.textContent = '擲緊…';
+      sumEl.textContent = 'æ“²ç·Šâ€¦';
 
-      // 滾動時快速閃數字，更誇張
+      // æ»¾å‹•æ™‚å¿«é€Ÿé–ƒæ•¸å­—ï¼Œæ›´èª‡å¼µ
       const flashTimer = setInterval(() => {
         tray.querySelectorAll('.die.rolling').forEach(el => {
           el.textContent = rollOneDie(min, max);
@@ -2768,11 +2845,11 @@
         ).join('');
         const total = results.reduce((a, b) => a + b, 0);
         if (count === 1) {
-          sumEl.innerHTML = `結果：<strong>${total}</strong>`;
+          sumEl.innerHTML = `çµæžœï¼š<strong>${total}</strong>`;
         } else {
-          sumEl.innerHTML = `各粒：${results.join(' + ')} ＝ <strong>${total}</strong>`;
+          sumEl.innerHTML = `å„ç²’ï¼š${results.join(' + ')} ï¼ <strong>${total}</strong>`;
         }
-        toast(count === 1 ? `擲到 ${total}` : `總和 ${total}`, 2200, 'ok');
+        toast(count === 1 ? `æ“²åˆ° ${total}` : `ç¸½å’Œ ${total}`, 2200, 'ok');
         btn.disabled = false;
       }, 1100);
     });
@@ -2782,7 +2859,7 @@
     const PAGE_ORDER = ['pageManuals', 'pageScore', 'pageRandom'];
     function goToPage(pageId) {
       if (!PAGE_ORDER.includes(pageId)) return;
-      // 確保可以捲動（避免 modal 關閉後 overflow 卡死）
+      // ç¢ºä¿å¯ä»¥æ²å‹•ï¼ˆé¿å… modal é—œé–‰å¾Œ overflow å¡æ­»ï¼‰
       document.body.style.overflow = '';
       document.documentElement.style.overflow = '';
       document.querySelectorAll('.nav-item').forEach(b => {
@@ -2792,23 +2869,23 @@
       const pageEl = document.getElementById(pageId);
       if (pageEl) pageEl.classList.add('active');
       fabUpload.classList.toggle('show', pageId === 'pageManuals');
-      // 頂欄（標題／icon／設定）在所有分頁都保持顯示
+      // é ‚æ¬„ï¼ˆæ¨™é¡Œï¼iconï¼è¨­å®šï¼‰åœ¨æ‰€æœ‰åˆ†é éƒ½ä¿æŒé¡¯ç¤º
       if (pageId === 'pageScore' && scorePageDirty) setScoreMode(scoreMode);
       if (pageId === 'pageRandom' && pickerPageDirty) renderPicker();
-      // 即時回頂，避免 smooth scroll 期間先短暫顯示舊捲動位置
+      // å³æ™‚å›žé ‚ï¼Œé¿å… smooth scroll æœŸé–“å…ˆçŸ­æš«é¡¯ç¤ºèˆŠæ²å‹•ä½ç½®
       window.scrollTo(0, 0);
     }
     document.querySelectorAll('.nav-item').forEach(btn => {
       btn.addEventListener('click', () => goToPage(btn.dataset.page));
     });
 
-    // 左右滑動切換主分頁（說明書 / 計分 / 抽選）
+    // å·¦å³æ»‘å‹•åˆ‡æ›ä¸»åˆ†é ï¼ˆèªªæ˜Žæ›¸ / è¨ˆåˆ† / æŠ½é¸ï¼‰
     let swipeStartX = null;
     let swipeStartY = null;
     let swipeIgnore = false;
     document.addEventListener('touchstart', e => {
       if (e.touches.length !== 1) return;
-      // 模態開啟時唔轉頁
+      // æ¨¡æ…‹é–‹å•Ÿæ™‚å””è½‰é 
       if (document.querySelector('.modal.open')) { swipeStartX = null; return; }
       const t = e.target;
       if (t.closest('input, select, textarea, button, a, .cats, .modal, .bottom-nav')) {
@@ -2825,17 +2902,17 @@
       const dx = e.changedTouches[0].clientX - swipeStartX;
       const dy = e.changedTouches[0].clientY - swipeStartY;
       swipeStartX = null;
-      // 水平滑動要明顯大於垂直，避免同上下 scroll 衝突
+      // æ°´å¹³æ»‘å‹•è¦æ˜Žé¡¯å¤§æ–¼åž‚ç›´ï¼Œé¿å…åŒä¸Šä¸‹ scroll è¡çª
       if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
       const active = document.querySelector('.page.active');
       const curId = active ? active.id : 'pageManuals';
       const idx = PAGE_ORDER.indexOf(curId);
       if (idx < 0) return;
-      if (dx < 0 && idx < PAGE_ORDER.length - 1) goToPage(PAGE_ORDER[idx + 1]); // 左滑 → 下一頁
-      if (dx > 0 && idx > 0) goToPage(PAGE_ORDER[idx - 1]); // 右滑 → 上一頁
+      if (dx < 0 && idx < PAGE_ORDER.length - 1) goToPage(PAGE_ORDER[idx + 1]); // å·¦æ»‘ â†’ ä¸‹ä¸€é 
+      if (dx > 0 && idx > 0) goToPage(PAGE_ORDER[idx - 1]); // å³æ»‘ â†’ ä¸Šä¸€é 
     }, { passive: true });
 
-    // 摺疊：紀錄 / 計番參考
+    // æ‘ºç–Šï¼šç´€éŒ„ / è¨ˆç•ªåƒè€ƒ
     document.querySelectorAll('.collapsible-toggle').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.dataset.target;
@@ -2846,8 +2923,8 @@
         if (id === 'countHistoryWrap' && typeof updateCountHistoryToggleLabel === 'function') {
           updateCountHistoryToggleLabel(!open);
         } else {
-          const label = btn.textContent.replace(/\s*[▾▴]\s*$/, '');
-          btn.textContent = open ? label + ' ▾' : label + ' ▴';
+          const label = btn.textContent.replace(/\s*[â–¾â–´]\s*$/, '');
+          btn.textContent = open ? label + ' â–¾' : label + ' â–´';
         }
       });
     });
@@ -2878,13 +2955,13 @@
     fabUpload.addEventListener('click', () => {
       if (!hasConfig()) {
         settingsPanel.classList.add('open');
-        toast('請先確認 Supabase 設定');
+        toast('è«‹å…ˆç¢ºèª Supabase è¨­å®š');
         return;
       }
       selectedFiles = [];
       editingManual = null;
-      document.querySelector('#uploadModal .modal-header .title').textContent = '🐻 新增桌遊本本';
-      document.getElementById('btnDoUpload').textContent = '上傳到雲端';
+      document.querySelector('#uploadModal .modal-header .title').textContent = 'ðŸ» æ–°å¢žæ¡ŒéŠæœ¬æœ¬';
+      document.getElementById('btnDoUpload').textContent = 'ä¸Šå‚³åˆ°é›²ç«¯';
       document.getElementById('gameName').value = '';
       document.getElementById('gameNote').value = '';
       document.getElementById('gameText').value = '';
@@ -2906,7 +2983,7 @@
 
     document.getElementById('viewerEdit').addEventListener('click', () => {
       const current = MANUALS.find(m => m.slug === (viewerManual && viewerManual.slug));
-      if (!current) { toast('找不到這份說明書'); return; }
+      if (!current) { toast('æ‰¾ä¸åˆ°é€™ä»½èªªæ˜Žæ›¸'); return; }
       editingManual = current;
       closeViewer();
       selectedFiles = [];
@@ -2915,9 +2992,9 @@
       document.getElementById('gameText').value = current.text || '';
       fillCatSelect();
       document.getElementById('gameCat').value = current.category || '';
-      document.querySelector('#uploadModal .modal-header .title').textContent = '✏️ 編輯桌遊本本';
-      document.getElementById('btnDoUpload').textContent = '儲存修改';
-      document.getElementById('preview').innerHTML = '<div style="grid-column:1/-1;color:var(--muted);font-size:.8rem">現有相片會保留；如需新增相片，請在下方選取。刪除現有相片請先在檢視畫面按「刪相」。</div>';
+      document.querySelector('#uploadModal .modal-header .title').textContent = 'âœï¸ ç·¨è¼¯æ¡ŒéŠæœ¬æœ¬';
+      document.getElementById('btnDoUpload').textContent = 'å„²å­˜ä¿®æ”¹';
+      document.getElementById('preview').innerHTML = '<div style="grid-column:1/-1;color:var(--muted);font-size:.8rem">ç¾æœ‰ç›¸ç‰‡æœƒä¿ç•™ï¼›å¦‚éœ€æ–°å¢žç›¸ç‰‡ï¼Œè«‹åœ¨ä¸‹æ–¹é¸å–ã€‚åˆªé™¤ç¾æœ‰ç›¸ç‰‡è«‹å…ˆåœ¨æª¢è¦–ç•«é¢æŒ‰ã€Œåˆªç›¸ã€ã€‚</div>';
       document.getElementById('progressWrap').classList.remove('show');
       document.getElementById('btnDoUpload').disabled = false;
       document.getElementById('uploadModal').classList.add('open');
@@ -2928,10 +3005,10 @@
       const hasText = !!viewerText;
       const imgIdx = hasText ? viewerIndex - 1 : viewerIndex;
       if (imgIdx < 0 || imgIdx >= viewerImages.length) return;
-      if (!(await softConfirm('確定刪除此頁相片？此操作會直接刪除雲端上的檔案。',{title:'刪除相片',icon:'🗑️'}))) return;
+      if (!(await softConfirm('ç¢ºå®šåˆªé™¤æ­¤é ç›¸ç‰‡ï¼Ÿæ­¤æ“ä½œæœƒç›´æŽ¥åˆªé™¤é›²ç«¯ä¸Šçš„æª”æ¡ˆã€‚',{title:'åˆªé™¤ç›¸ç‰‡',icon:'ðŸ—‘ï¸'}))) return;
       try {
         const fileName = (viewerManual.files || [])[imgIdx];
-        if (!fileName) throw new Error('找不到相片檔名');
+        if (!fileName) throw new Error('æ‰¾ä¸åˆ°ç›¸ç‰‡æª”å');
         const path = `${viewerManual.slug}/${fileName}`;
         await sbDelete(path);
         viewerManual.files.splice(imgIdx,1);
@@ -2940,28 +3017,28 @@
         viewerImages.splice(imgIdx,1);
         const newTotal = viewerImages.length + (hasText ? 1 : 0);
         viewerIndex = Math.max(0,Math.min(viewerIndex,newTotal-1));
-        showViewerPage(); render(); toast('相片已刪除','', 'ok');
-      } catch(err) { toast('刪除失敗：'+err.message,3200,'err'); }
+        showViewerPage(); render(); toast('ç›¸ç‰‡å·²åˆªé™¤','', 'ok');
+      } catch(err) { toast('åˆªé™¤å¤±æ•—ï¼š'+err.message,3200,'err'); }
     }
     document.getElementById('viewerDeletePhoto').addEventListener('click', deleteCurrentPhoto);
 
     async function deleteManualFromList(manual, button) {
       if (!manual) return;
       const accepted = await softConfirm(
-        `確定從雲端刪除「${manual.name || manual.slug}」？這會刪除該說明書 folder 內的所有檔案，並從索引移除，無法直接復原。`,
-        { title: '刪除整份說明書', icon: '🗑️', okText: '刪除全部檔案' }
+        `ç¢ºå®šå¾žé›²ç«¯åˆªé™¤ã€Œ${manual.name || manual.slug}ã€ï¼Ÿé€™æœƒåˆªé™¤è©²èªªæ˜Žæ›¸ folder å…§çš„æ‰€æœ‰æª”æ¡ˆï¼Œä¸¦å¾žç´¢å¼•ç§»é™¤ï¼Œç„¡æ³•ç›´æŽ¥å¾©åŽŸã€‚`,
+        { title: 'åˆªé™¤æ•´ä»½èªªæ˜Žæ›¸', icon: 'ðŸ—‘ï¸', okText: 'åˆªé™¤å…¨éƒ¨æª”æ¡ˆ' }
       );
       if (!accepted) return;
-      if (!hasConfig()) { toast('請先確認 Supabase 連線', 3000, 'err'); return; }
+      if (!hasConfig()) { toast('è«‹å…ˆç¢ºèª Supabase é€£ç·š', 3000, 'err'); return; }
       const originalText = button ? button.textContent : '';
-      if (button) { button.disabled = true; button.textContent = '刪除中…'; }
+      if (button) { button.disabled = true; button.textContent = 'åˆªé™¤ä¸­â€¦'; }
       try {
         const folderPath = `${manual.slug}`.replace(/^\/+|\/+$/g, '');
         let files = [];
         try {
           files = await sbListFilesRecursive(folderPath);
         } catch (e) {
-          if (!/not found|404|不存在/i.test(String(e.message || e))) throw e;
+          if (!/not found|404|ä¸å­˜åœ¨/i.test(String(e.message || e))) throw e;
           files = [];
         }
         for (const file of files) {
@@ -2985,13 +3062,13 @@
         renderCats();
         fillCatSelect();
         render();
-        toast(files.length ? `已刪除說明書及 ${files.length} 個檔案，索引已同步` : '說明書已從索引移除', 3200, 'ok');
+        toast(files.length ? `å·²åˆªé™¤èªªæ˜Žæ›¸åŠ ${files.length} å€‹æª”æ¡ˆï¼Œç´¢å¼•å·²åŒæ­¥` : 'èªªæ˜Žæ›¸å·²å¾žç´¢å¼•ç§»é™¤', 3200, 'ok');
       } catch (err) {
         console.error(err);
-        toast('刪除未完全完成：' + err.message, 5000, 'err');
+        toast('åˆªé™¤æœªå®Œå…¨å®Œæˆï¼š' + err.message, 5000, 'err');
         try { await loadIndex(); } catch (_) {}
       } finally {
-        if (button) { button.disabled = false; button.textContent = originalText || '刪除'; }
+        if (button) { button.disabled = false; button.textContent = originalText || 'åˆªé™¤'; }
       }
     }
         grid.addEventListener('click', e => {
@@ -3036,15 +3113,27 @@
     let pinchStartDistance = 0;
     let pinchStartScale = 1;
     let imageScale = 1;
+    let viewerRotation = 0;
     const viewerBodyEl = document.getElementById('viewerBody');
     function touchDistance(t1, t2) {
       const dx = t1.clientX - t2.clientX, dy = t1.clientY - t2.clientY;
       return Math.sqrt(dx * dx + dy * dy);
     }
+    function applyViewerImageTransform() {
+      const img = viewerBodyEl.querySelector('.viewer-page-image');
+      if (!img) return;
+      img.style.maxWidth = (imageScale > 1 || viewerRotation % 180 !== 0) ? 'none' : '100%';
+      img.style.transform = `rotate(${viewerRotation}deg) scale(${imageScale})`;
+    }
+    function rotateViewerImage() {
+      if (!viewerBodyEl.querySelector('.viewer-page-image')) return;
+      viewerRotation = (viewerRotation + 90) % 360;
+      applyViewerImageTransform();
+    }
+    document.getElementById('viewerRotate').addEventListener('click', rotateViewerImage);
     function resetViewerImageZoom() {
       imageScale = 1;
-      const img = viewerBodyEl.querySelector('.viewer-page-image');
-      if (img) { img.style.transform = ''; img.style.maxWidth = '100%'; }
+      applyViewerImageTransform();
     }
     viewerBodyEl.addEventListener('touchstart', e => {
       if (e.touches.length >= 2) {
@@ -3060,7 +3149,7 @@
       const ratio = touchDistance(e.touches[0], e.touches[1]) / pinchStartDistance;
       imageScale = Math.min(5, Math.max(1, pinchStartScale * ratio));
       img.style.maxWidth = 'none';
-      img.style.transform = `scale(${imageScale})`;
+      img.style.transform = `rotate(${viewerRotation}deg) scale(${imageScale})`;
       e.preventDefault();
     }, { passive: false });
     viewerBodyEl.addEventListener('touchend', e => {
