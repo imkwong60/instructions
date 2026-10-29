@@ -1,361 +1,3228 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="description" content="安全密碼與資料管理 PWA，資料儲存在本地瀏覽器，支援離線使用。">
-    <title>分享本本</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#F7F1E8" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="桌遊本本" />
+  <title>桌遊本本</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F7F1E8;
+      --bg-soft: #FBF7F0;
+      --panel: #FFFFFF;
+      --card: #FFFFFF;
+      --card-hover: #FFF9F0;
+      --border: #E8DFD0;
+      --text: #4A3F35;
+      --muted: #9A8B7A;
+      --accent: #E8A87C;
+      --accent-dark: #D4896A;
+      --accent-soft: rgba(232, 168, 124, 0.18);
+      --pink: #F2B5C0;
+      --pink-soft: rgba(242, 181, 192, 0.2);
+      --mint: #A8D5C0;
+      --mint-soft: rgba(168, 213, 192, 0.25);
+      --lavender: #C9B1E8;
+      --sky: #A8C8E8;
+      --danger: #E88B8B;
+      --radius: 18px;
+      --radius-sm: 12px;
+      --radius-xs: 8px;
+      --shadow: 0 4px 20px rgba(74, 63, 53, 0.06);
+      --shadow-sm: 0 2px 10px rgba(74, 63, 53, 0.05);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html {
+      height: auto;
+      min-height: 100%;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    html, body {
+      background: var(--bg); color: var(--text);
+      font-family: "Noto Sans TC", -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", sans-serif;
+      line-height: 1.5; -webkit-font-smoothing: antialiased;
+    }
+    body {
+      min-height: 100dvh;
+      height: auto;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 14px;
+      padding-top: calc(78px + env(safe-area-inset-top));
+      padding-bottom: max(140px, env(safe-area-inset-bottom) + 110px);
+      overflow-x: hidden;
+      overflow-y: visible;
+      -webkit-overflow-scrolling: touch;
+      background-image:
+        radial-gradient(ellipse at 10% 0%, rgba(242, 181, 192, 0.12) 0%, transparent 45%),
+        radial-gradient(ellipse at 90% 20%, rgba(168, 213, 192, 0.1) 0%, transparent 40%);
+    }
 
-    <!-- PWA -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="分享本本">
-    <!-- 改為淺色主題，避免狀態列 / 下拉 overscroll 出現藍色 -->
-    <meta name="theme-color" content="#fbfbfd">
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fbfbfd">
-    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
-    <link rel="icon" href="favicon.ico">
+    /* ===== Header ===== */
+    .topbar {
+      position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+      width: min(calc(100% - 28px), 452px); z-index: 100;
+      background: var(--bg);
+      padding: max(8px, env(safe-area-inset-top)) 0 6px;
+      box-shadow: 0 5px 12px rgba(74,63,53,0.035);
+    }
+    .title-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .brand-icon {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: #E53935;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow-sm);
+      border: 2.5px solid #fff;
+      overflow: hidden;
+      flex-shrink: 0;
+      padding: 0;
+    }
+    .brand-icon img {
+      width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%;
+    }
+    .mini-kuma {
+      width: 22px; height: 22px; border-radius: 50%; overflow: hidden; display: inline-block; vertical-align: middle;
+      border: 1.5px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    .mini-kuma img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .segment {
+      display: flex; background: var(--bg-soft); border-radius: 12px; padding: 3px; margin-bottom: 12px;
+      border: 1.5px solid var(--border);
+    }
+    .segment button {
+      flex: 1; padding: 8px 4px; border: none; border-radius: 10px;
+      background: transparent; font-size: 0.8rem; font-weight: 500;
+      font-family: inherit; color: var(--muted); cursor: pointer;
+    }
+    .segment button.active {
+      background: var(--panel); color: var(--accent-dark); font-weight: 700;
+      box-shadow: var(--shadow-sm);
+    }
+    .unit-row {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+      background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+      padding: 10px 14px;
+    }
+    .unit-row label { font-size: 0.82rem; color: var(--muted); white-space: nowrap; font-weight: 500; }
+    .unit-row input {
+      flex: 1; border: none; background: transparent; font-size: 1rem;
+      font-family: inherit; outline: none; text-align: right; color: var(--text); font-weight: 600;
+    }
+    .settle-card {
+      background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--radius);
+      padding: 14px 16px; margin-top: 12px; box-shadow: var(--shadow-sm);
+    }
+    .settle-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; font-family: "Zen Maru Gothic", sans-serif; }
+    .settle-line {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem;
+    }
+    .settle-line:last-child { border-bottom: none; }
+    .settle-line .amount { font-weight: 700; color: var(--accent-dark); font-family: "Zen Maru Gothic", sans-serif; }
+    .settle-empty { color: var(--muted); font-size: 0.85rem; text-align: center; padding: 12px 0; }
+    .player-row .score.pos { color: #3d7a5c; }
+    .player-row .score.neg { color: var(--danger); }
+    .fan-table {
+      border: 1.5px solid var(--border); border-radius: var(--radius-sm); overflow: hidden;
+      background: var(--bg-soft);
+    }
+    .score-grid-wrap {
+      overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -2px;
+    }
+    .score-grid {
+      width: 100%; border-collapse: collapse; font-size: 0.82rem;
+      min-width: 280px; background: var(--panel);
+    }
+    .score-grid th, .score-grid td {
+      border: 1px solid var(--border); padding: 8px 6px; text-align: center;
+      white-space: nowrap;
+    }
+    .score-grid th {
+      background: var(--bg-soft); font-weight: 700; color: var(--muted);
+      font-size: 0.75rem;
+    }
+    .score-grid th:first-child, .score-grid td:first-child {
+      text-align: left; font-weight: 600; color: var(--text); position: sticky; left: 0;
+      background: var(--bg-soft); z-index: 1;
+    }
+    .score-grid td:first-child { background: var(--panel); }
+    .score-grid .num-pos { color: #3d7a5c; font-weight: 700; }
+    .score-grid .num-neg { color: var(--danger); font-weight: 700; }
+    .score-grid .num-zero { color: var(--muted); }
+    .score-grid tr.total-row th, .score-grid tr.total-row td {
+      background: var(--accent-soft); font-weight: 700; border-top: 2px solid var(--accent);
+    }
+    .score-grid tr.total-row td:first-child { background: var(--accent-soft); }
+    .fan-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 12px; border-bottom: 1px solid var(--border);
+      font-size: 0.82rem;
+    }
+    .fan-row:last-child { border-bottom: none; }
+    .fan-row span:last-child {
+      font-weight: 700; color: var(--accent-dark); font-family: "Zen Maru Gothic", sans-serif;
+      min-width: 36px; text-align: right;
+    }
+    .fan-row.fan-head {
+      background: var(--accent-soft); font-weight: 700; font-size: 0.75rem; color: var(--muted);
+    }
+    .fan-row.fan-head span:last-child { color: var(--muted); }
+    .brand h1 {
+      font-family: "Zen Maru Gothic", "Noto Sans TC", sans-serif;
+      font-size: 1.25rem; font-weight: 700; color: var(--text);
+      letter-spacing: 0.02em;
+    }
+    .brand h1 span { color: var(--accent-dark); }
+    .title-actions { display: flex; gap: 6px; }
+    .icon-btn {
+      width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid var(--border);
+      background: var(--panel); color: var(--text); display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all .15s; font-size: 1rem; box-shadow: var(--shadow-sm);
+    }
+    .icon-btn:active { transform: scale(0.92); background: var(--card-hover); }
+    .icon-btn.spin svg { animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- Phosphor Icons -->
-    <script src="https://unpkg.com/@phosphor-icons/web@2.1.2"></script>
+    .search-box { position: relative; margin-bottom: 8px; }
+    .search-box input {
+      width: 100%; padding: 12px 40px 12px 42px; border-radius: 999px;
+      border: 1.5px solid var(--border); background: var(--panel); color: var(--text);
+      font-size: 15px; outline: none; transition: border-color .15s, box-shadow .15s;
+      box-shadow: var(--shadow-sm);
+    }
+    .search-box input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .search-box input::placeholder { color: var(--muted); }
+    .search-box .icon {
+      position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+      color: var(--muted); pointer-events: none; font-size: 15px;
+    }
+    .search-box .clear {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: var(--muted); width: 28px; height: 28px;
+      border-radius: 50%; display: none; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 16px;
+    }
+    .search-box .clear.show { display: flex; }
 
-    <!-- App assets (app.js MUST load before Alpine.js so alpine:init listener is registered) -->
-    <link rel="stylesheet" href="styles.css">
-    <!-- Keep the original app logic: this file still expects the existing app.js and styles.css alongside it. -->
-    <script src="app.js"></script>
+    /* Category chips */
+    .cats {
+      display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 10px;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    .cats::-webkit-scrollbar { display: none; }
+    .cat-chip {
+      flex-shrink: 0; padding: 7px 14px; border-radius: 999px;
+      border: 1.5px solid var(--border); background: var(--panel);
+      font-size: 0.8rem; color: var(--muted); cursor: pointer;
+      transition: all .15s; white-space: nowrap;
+    }
+    .cat-chip.active {
+      background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600;
+      box-shadow: 0 2px 8px rgba(232, 168, 124, 0.35);
+    }
+    .cat-chip.add {
+      border-style: dashed; color: var(--accent-dark);
+    }
 
-    <!-- J.Law Synthesis Lab-inspired, mobile-first presentation -->
-    <style>
-      :root {
-        color-scheme: light;
-        --lab-bg: #fbfbfd;
-        --lab-surface: #ffffff;
-        --lab-text: #1d1d1f;
-        --lab-muted: #86868b;
-        --lab-border: #d2d2d7;
-        --lab-blue: #0071e3;
-        --lab-blue-soft: #eaf3ff;
-        --lab-radius: 18px;
-      }
-      [x-cloak] { display: none !important; }
-      /* 強制整頁（含 overscroll）都用同一淺色，避免滑動時出現藍色 */
-      html {
-        background: var(--lab-bg) !important;
-        -webkit-text-size-adjust: 100%;
-        overscroll-behavior-y: none;
-      }
-      body {
-        margin: 0;
-        background: var(--lab-bg) !important;
-        color: var(--lab-text) !important;
-        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-        -webkit-tap-highlight-color: transparent;
-        min-height: 100dvh;
-        overscroll-behavior-y: none;
-      }
-      button, input, textarea { font: inherit; }
-      button, label[for] { touch-action: manipulation; }
-      button { min-height: 42px; }
-      input, textarea {
-        font-size: 16px !important; /* prevents iOS Safari zooming into fields */
-        border-color: var(--lab-border) !important;
-        border-radius: 13px !important;
-        box-shadow: none !important;
-      }
-      input:focus, textarea:focus {
-        outline: none !important; border-color: var(--lab-blue) !important;
-        box-shadow: 0 0 0 3px rgba(0,113,227,.12) !important;
-      }
-      #app-header {
-        background: #fbfbfd !important; /* 不透明，避免滑動時透出其他顏色 */
-        border-color: rgba(210,210,215,.78) !important;
-        box-shadow: 0 1px 0 rgba(0,0,0,.025) !important;
-        -webkit-backdrop-filter: none;
-        backdrop-filter: none;
-      }
-      #app-header > div { max-width: 760px; padding-left: 16px; padding-right: 16px; }
-      #app-header h1 { color: var(--lab-text) !important; letter-spacing: -.035em; }
-      #app-header p { color: var(--lab-muted) !important; }
-      #app-header .bg-blue-600 {
-        background: var(--lab-text) !important; border-radius: 15px !important;
-        box-shadow: none !important;
-      }
-      #app-header button, #app-header label {
-        min-height: 42px; border-radius: 12px !important;
-        border-color: var(--lab-border) !important; box-shadow: none !important;
-      }
-      #app-header input { background: #fff !important; }
-      #main-content { max-width: 760px; }
-      #main-content > .bg-white,
-      #main-content > div.bg-white {
-        border-color: rgba(210,210,215,.8) !important;
-        border-radius: var(--lab-radius) !important;
-        box-shadow: 0 3px 16px rgba(29,29,31,.035) !important;
-      }
-      #main-content ul > li { transition: background-color .15s ease; }
-      #main-content h3 { color: var(--lab-text) !important; letter-spacing: -.015em; }
-      #main-content .bg-blue-50, #main-content .bg-blue-100 {
-        background: var(--lab-blue-soft) !important;
-      }
-      #main-content .text-blue-600 { color: var(--lab-blue) !important; }
-      #main-content button { min-width: 42px; min-height: 42px; }
-      .fab {
-        position: fixed; z-index: 40; right: 20px;
-        bottom: max(20px, calc(env(safe-area-inset-bottom) + 14px));
-        width: 58px; height: 58px; min-height: 58px; border: 0;
-        border-radius: 20px; display: flex; align-items: center; justify-content: center;
-        background: var(--lab-blue); color: #fff; font-size: 25px;
-        box-shadow: 0 8px 24px rgba(0,113,227,.24);
-        transition: transform .15s ease, background .15s ease;
-      }
-      .fab:active { transform: scale(.96); background: #0062c4; }
-      .modal-panel {
-        border-radius: 24px !important; border: 1px solid rgba(210,210,215,.65);
-        box-shadow: 0 20px 70px rgba(0,0,0,.18) !important;
-      }
-      .modal-panel form > div:last-child { background: #f5f5f7 !important; }
-      .modal-panel button[type="submit"] {
-        background: var(--lab-blue) !important; border-radius: 12px !important;
-        box-shadow: none !important; min-height: 46px;
-      }
-      .modal-panel button[type="button"] { border-radius: 12px !important; min-height: 46px; }
-      .toast-item {
-        border: 1px solid rgba(210,210,215,.35) !important;
-        border-radius: 15px !important; box-shadow: 0 8px 30px rgba(0,0,0,.15) !important;
-      }
-      @media (max-width: 639px) {
-        #app-header > div { padding-left: 14px; padding-right: 14px; padding-bottom: 12px; }
-        #app-header > div > div:first-child { gap: 10px; }
-        #app-header .flex.flex-col.sm\\:flex-row {
-          gap: 10px !important;
-        }
-        #app-header .flex.flex-wrap.gap-2 {
-          display: grid !important; grid-template-columns: 1fr 1fr; gap: 8px !important;
-        }
-        #app-header .flex.flex-wrap.gap-2 > button,
-        #app-header .flex.flex-wrap.gap-2 > label {
-          width: 100%; padding: 9px 8px !important; font-size: 12px !important;
-        }
-        #app-header .flex.flex-wrap.gap-2 > button:last-of-type {
-          grid-column: 1 / -1;
-        }
-        #app-header .relative.mt-3 { margin-top: 10px !important; }
-        #app-header input { padding-top: 11px !important; padding-bottom: 11px !important; }
-        #main-content {
-          padding-left: 12px !important;
-          padding-right: 12px !important;
-          /* 手機 header 高度約 190–220px，再加一點緩衝 */
-          padding-top: max(220px, calc(env(safe-area-inset-top) + 200px)) !important;
-        }
-        #main-content > div.mb-4 { margin-bottom: 10px; }
-        #main-content .overflow-hidden.mb-16 { margin-bottom: 90px; }
-        #main-content ul > li { padding: 15px 13px !important; }
-        /* 手機：帳號/密碼列仍稍微內縮，對齊標題文字 */
-        #main-content .pl-11 { padding-left: 2.75rem !important; }
-        #main-content .pl-11 .text-xs { font-size: 12px !important; }
-        #main-content .pl-11 .w-12 { width: 42px !important; }
-        #main-content .pwd-mono { max-width: calc(100vw - 160px); }
-        .modal-panel { width: calc(100vw - 20px) !important; max-width: 520px; }
-        .modal-panel form > div:first-child { padding: 20px 16px 16px !important; }
-        .modal-panel form > div:first-child > div > div:first-child { display: none; }
-        .modal-panel form > div:first-child > div > div:last-child { margin: 0 !important; text-align: left !important; }
-        .modal-panel #modal-title { font-size: 20px; letter-spacing: -.03em; }
-        .modal-panel form > div:last-child { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)) !important; }
-        .modal-panel form > div:last-child button { width: 100%; margin: 0 !important; }
-        .modal-panel form > div:last-child { display: flex; flex-direction: column; gap: 8px; }
-        .fixed.bottom-4.right-4 { right: 12px; }
-      }
-      @media (prefers-reduced-motion: reduce) {
-        *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
-      }
-    </style>
+    /* Settings Panel */
+    .settings-panel {
+      background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--radius);
+      padding: 16px; margin-bottom: 12px; display: none; box-shadow: var(--shadow);
+    }
+    .settings-panel.open { display: block; }
+    .settings-panel h3 {
+      font-size: 0.88rem; margin-bottom: 12px; color: var(--muted); font-weight: 600;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .field { margin-bottom: 12px; }
+    .field label {
+      display: block; font-size: 0.72rem; color: var(--muted); margin-bottom: 5px; font-weight: 500;
+    }
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 11px 13px; border-radius: var(--radius-xs);
+      border: 1.5px solid var(--border); background: var(--bg-soft); color: var(--text);
+      font-size: 0.9rem; outline: none; font-family: inherit;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    .field textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
+    .field .hint { font-size: 0.68rem; color: var(--muted); margin-top: 4px; opacity: 0.9; }
+    .settings-actions { display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
+    .btn {
+      padding: 10px 16px; border-radius: 999px; border: 1.5px solid var(--border);
+      background: var(--panel); color: var(--muted); font-size: 0.82rem; cursor: pointer;
+      white-space: nowrap; transition: all .15s; font-weight: 500;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn.primary {
+      background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600;
+      box-shadow: 0 3px 12px rgba(232, 168, 124, 0.35);
+    }
+    .btn.primary:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+    .btn.mint { background: var(--mint); color: #2d5a45; border-color: var(--mint); }
+    .btn.pink { background: var(--pink); color: #7a3d4a; border-color: var(--pink); }
+    .btn.ghost.active, .btn.ghost:hover {
+      border-color: var(--accent); color: var(--accent-dark); background: var(--accent-soft);
+    }
+    .btn.danger { border-color: rgba(232, 139, 139, 0.5); color: var(--danger); }
 
+    /* Toolbar */
+    .toolbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 2px 0 10px;
+    }
+    .toolbar .count { font-size: 0.8rem; color: var(--muted); }
+    .toolbar .count strong { color: var(--accent-dark); font-weight: 600; }
+    .status-bar {
+      font-size: 0.72rem; color: var(--muted); padding: 0 2px 8px; min-height: 1.1em;
+    }
+    .status-bar.error { color: var(--danger); }
+    .status-bar.ok { color: #5a9e7a; }
+
+    /* Grid */
+    .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .card {
+      background: var(--card); border: 1.5px solid var(--border); border-radius: var(--radius);
+      padding: 14px 16px; display: flex; flex-direction: column; gap: 6px;
+      box-shadow: var(--shadow-sm); cursor: pointer; transition: all .15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .card:active { background: var(--card-hover); transform: scale(0.985); }
+    .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .badge {
+      display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px;
+      font-size: 0.68rem; font-weight: 600;
+      background: var(--accent-soft); color: var(--accent-dark);
+      border: 1px solid rgba(232, 168, 124, 0.3);
+    }
+    .badge.cat {
+      background: var(--mint-soft); color: #3d7a5c; border-color: rgba(168, 213, 192, 0.4);
+    }
+    .badge.pages {
+      background: var(--pink-soft); color: #9a5a6a; border-color: rgba(242, 181, 192, 0.4);
+    }
+    .card-title {
+      font-size: 1.05rem; font-weight: 700; line-height: 1.3; word-break: break-word;
+      font-family: "Zen Maru Gothic", "Noto Sans TC", sans-serif;
+    }
+    .card-sub { font-size: 0.8rem; color: var(--muted); }
+    .card-meta { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+    .card-edit, .card-delete {
+      appearance:none; -webkit-appearance:none; border:1px solid; border-radius:999px;
+      padding:5px 10px; font-family:inherit; font-size:.72rem; font-weight:700;
+      line-height:1.35; white-space:nowrap; cursor:pointer; flex-shrink:0;
+    }
+    .card-edit { border-color:#9fc9b3; background:#effaf3; color:#347451; }
+    .card-delete { border-color:#e7a4a4; background:#fff1f1; color:#a33b3b; }
+    .card-delete:disabled { opacity: .55; cursor: wait; }
+    .empty, .loading {
+      text-align: center; padding: 48px 16px; color: var(--muted);
+    }
+    .empty .emoji { font-size: 2.8rem; margin-bottom: 10px; }
+    .loading .spinner {
+      width: 30px; height: 30px; border: 3px solid var(--border); border-top-color: var(--accent);
+      border-radius: 50%; margin: 0 auto 12px; animation: spin 0.7s linear infinite;
+    }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed; left: 50%; transform: translateX(-50%);
+      bottom: 0; width: 100%; max-width: 480px;
+      background: var(--panel); border-top: 1.5px solid var(--border);
+      display: flex; justify-content: space-around; padding: 8px 0 max(10px, env(safe-area-inset-bottom));
+      z-index: 50; box-shadow: 0 -4px 20px rgba(74, 63, 53, 0.06);
+    }
+    .nav-item {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+      padding: 6px 0; background: none; border: none; color: var(--muted);
+      font-size: 0.68rem; cursor: pointer; transition: color .15s;
+    }
+    .nav-item .nav-icon { font-size: 1.35rem; line-height: 1; }
+    .nav-item.active { color: var(--accent-dark); font-weight: 600; }
+    .nav-item.active .nav-icon { transform: scale(1.08); }
+
+    /* FAB */
+    .fab {
+      position: fixed; right: max(16px, calc(50% - 224px)); bottom: max(78px, env(safe-area-inset-bottom) + 68px);
+      width: 54px; height: 54px; border-radius: 50%;
+      background: linear-gradient(145deg, #E8A87C, #F2B5C0); color: #fff;
+      border: 3px solid #fff; font-size: 1.5rem;
+      box-shadow: 0 6px 20px rgba(232, 168, 124, 0.4);
+      display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 45;
+    }
+    .fab.show { display: flex; }
+    .fab:active { transform: scale(0.94); }
+
+    /* Toast */
+    .toast {
+      position: fixed; left: 50%; bottom: max(100px, calc(env(safe-area-inset-bottom) + 90px));
+      transform: translateX(-50%) translateY(12px);
+      background: rgba(74, 63, 53, 0.92); color: #fff;
+      padding: 12px 18px; border-radius: 16px; font-size: 0.88rem;
+      box-shadow: 0 10px 28px rgba(74, 63, 53, 0.22);
+      opacity: 0; pointer-events: none;
+      transition: opacity .28s ease, transform .28s ease;
+      z-index: 120; max-width: min(92vw, 360px);
+      text-align: center; line-height: 1.45;
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.ok { background: rgba(61, 122, 92, 0.95); }
+    .toast.err { background: rgba(200, 90, 90, 0.95); }
+    .toast.info { background: rgba(74, 63, 53, 0.92); }
+
+    /* Soft confirm dialog */
+    .soft-overlay {
+      position: fixed; inset: 0; z-index: 130;
+      background: rgba(74, 63, 53, 0.35);
+      display: none; align-items: center; justify-content: center;
+      padding: 24px; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    }
+    .soft-overlay.open { display: flex; }
+    .soft-card {
+      width: 100%; max-width: 320px;
+      background: var(--panel); border-radius: 20px;
+      padding: 22px 20px 16px;
+      box-shadow: 0 16px 48px rgba(74, 63, 53, 0.2);
+      border: 1.5px solid var(--border);
+      animation: soft-in .22s ease;
+    }
+    @keyframes soft-in {
+      from { opacity: 0; transform: scale(0.94) translateY(8px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .soft-card .soft-icon { font-size: 1.6rem; text-align: center; margin-bottom: 6px; }
+    .soft-card .soft-title {
+      font-family: "Zen Maru Gothic", sans-serif;
+      font-size: 1.05rem; font-weight: 700; text-align: center; margin-bottom: 6px;
+    }
+    .soft-card .soft-msg {
+      font-size: 0.88rem; color: var(--muted); text-align: center;
+      line-height: 1.5; margin-bottom: 18px;
+    }
+    .soft-actions { display: flex; gap: 10px; }
+    .soft-actions .btn { flex: 1; padding: 11px 12px; border-radius: 12px; }
+
+    /* Modal */
+    .modal {
+      position: fixed; inset: 0; z-index: 100; background: rgba(74, 63, 53, 0.45);
+      display: none; flex-direction: column; align-items: center; justify-content: flex-end;
+      padding-top: env(safe-area-inset-top);
+    }
+    .modal.open { display: flex; }
+    .modal-sheet {
+      width: 100%; max-width: 480px; max-height: 92dvh;
+      background: var(--bg); border-radius: 24px 24px 0 0;
+      display: flex; flex-direction: column; overflow: hidden;
+      box-shadow: 0 -8px 40px rgba(74, 63, 53, 0.15);
+    }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px; gap: 10px; flex-shrink: 0;
+      border-bottom: 1px solid var(--border); background: var(--panel);
+    }
+    .modal-header .title {
+      font-size: 1rem; font-weight: 700; flex: 1; overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap;
+      font-family: "Zen Maru Gothic", sans-serif;
+    }
+    .modal-header .close {
+      width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--border);
+      background: var(--bg-soft); color: var(--text); font-size: 1.1rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-body {
+      flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+      padding: 16px; display: flex; flex-direction: column; gap: 12px;
+    }
+
+    /* Upload */
+    .upload-preview {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px;
+    }
+    .upload-preview .thumb {
+      aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: var(--bg-soft);
+      position: relative; border: 1.5px solid var(--border);
+    }
+    .upload-preview .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .upload-preview .thumb .num {
+      position: absolute; top: 4px; left: 4px; background: rgba(74,63,53,0.7);
+      color: #fff; font-size: 0.62rem; padding: 1px 6px; border-radius: 999px;
+    }
+    .upload-preview .thumb .rm {
+      position: absolute; top: 4px; right: 4px; width: 22px; height: 22px;
+      border-radius: 50%; background: var(--danger); color: #fff;
+      border: none; font-size: 12px; cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+    }
+    .upload-preview .thumb .rotate {
+      position: absolute; bottom: 4px; right: 4px; width: 28px; height: 28px;
+      border-radius: 50%; background: rgba(74,63,53,.82); color: #fff;
+      border: 1px solid rgba(255,255,255,.85); font-size: 17px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .photo-pick-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
+    .photo-pick-actions .file-input-btn { padding:14px 8px; font-size:.88rem; text-align:center; }
+    .photo-pick-actions .file-input-btn span { display:block; }
+
+    .progress-wrap {
+      background: var(--panel); border-radius: 12px; padding: 12px; display: none;
+      border: 1.5px solid var(--border);
+    }
+    .progress-wrap.show { display: block; }
+    .progress-bar {
+      height: 8px; background: var(--border); border-radius: 999px; overflow: hidden; margin-top: 8px;
+    }
+    .progress-bar > div {
+      height: 100%; background: linear-gradient(90deg, var(--accent), var(--pink));
+      width: 0%; transition: width .3s; border-radius: 999px;
+    }
+    .file-input-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 18px; border: 2px dashed var(--border); border-radius: var(--radius);
+      background: var(--bg-soft); color: var(--muted); font-size: 0.95rem;
+      cursor: pointer; transition: all .15s;
+    }
+    .file-input-btn:active, .file-input-btn.dragover {
+      border-color: var(--accent); color: var(--accent-dark); background: var(--accent-soft);
+    }
+
+    /* Viewer */
+    /* Photo viewer: edge-to-edge image, with only persistent photo navigation controls. */
+    #viewerModal.fullscreen { position:fixed; inset:0; width:100vw; height:100vh; height:100dvh; padding:0; margin:0; display:none; align-items:stretch; justify-content:stretch; overflow:hidden; background:#000; z-index:9999; }
+    #viewerModal.fullscreen.open { display:flex; }
+    #viewerModal.fullscreen .modal-sheet { position:relative; display:flex; flex-direction:column; width:100%; max-width:none; height:100vh; height:100dvh; min-height:0; max-height:none !important; margin:0; padding:0; border:0; border-radius:0; background:#000; overflow:hidden; }
+    #viewerModal.fullscreen .modal-header { display:none !important; }
+    #viewerModal.fullscreen .viewer-body { position:absolute; inset:0; padding:0; margin:0; gap:0; min-height:0; height:100%; width:100%; display:flex; align-items:center; justify-content:center; overflow:auto; background:#000; touch-action:pan-x pan-y; overscroll-behavior:contain; }
+    #viewerModal.fullscreen .viewer-body img { display:block; width:100%; height:100%; max-width:100%; max-height:100%; object-fit:contain; border-radius:0; flex:0 0 auto; transform-origin:center center; user-select:none; -webkit-user-select:none; -webkit-user-drag:none; }
+    #viewerModal.fullscreen .viewer-text { display:block !important; width:100%; max-width:760px; margin:auto; box-sizing:border-box; border-radius:0; min-height:100%; padding:24px 18px 100px; background:#111; color:#fff; font-size:1.05rem; line-height:1.8; overflow-wrap:anywhere; }
+    #viewerModal.fullscreen .viewer-nav { position:absolute; left:0; right:0; bottom:0; z-index:10; padding:10px 14px calc(10px + env(safe-area-inset-bottom)); border:0; background:linear-gradient(transparent,rgba(0,0,0,.72)); color:#fff; }
+    #viewerModal.fullscreen .viewer-nav .page { color:#fff; }
+    #viewerModal.fullscreen .viewer-nav #viewerBack { margin-right:auto; padding:0; }
+    #viewerModal.fullscreen .viewer-body:has(.viewer-text) { align-items:stretch; justify-content:flex-start; overflow-y:auto; }
+    #viewerModal.fullscreen .viewer-body:has(.viewer-text) .viewer-text { flex:1 0 auto; }
+    #viewerModal.fullscreen .viewer-nav button { min-width:44px; min-height:42px; background:rgba(40,40,40,.75); color:#fff; border:1px solid rgba(255,255,255,.35); border-radius:10px; }
+    #viewerModal.fullscreen .viewer-nav button { -webkit-tap-highlight-color:transparent; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; touch-action:manipulation; flex-shrink:0; }
+    #viewerModal.fullscreen .viewer-nav #viewerBack { min-width:40px; width:40px; min-height:40px; height:40px; padding:0; display:flex; align-items:center; justify-content:center; font-family:Arial,sans-serif; font-size:1.55rem; line-height:1; font-weight:400; border-radius:50%; background:rgba(20,20,20,.65); border:1px solid rgba(255,255,255,.45); box-shadow:none; }
+    .card-actions { display:flex; gap:6px; align-items:center; flex-shrink:0; }
+    .card-edit, .card-delete { -webkit-tap-highlight-color:transparent; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; touch-action:manipulation; }
+    .viewer-nav, .viewer-nav * { -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent; }
+    .viewer-body {
+      flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+      padding: 12px; display: flex; flex-direction: column; gap: 12px; align-items: center;
+      background: #2a2420;
+    }
+    .viewer-body img {
+      width: 100%; max-width: 640px; height: auto; border-radius: 8px;
+      background: #111; display: block;
+    }
+    .viewer-text {
+      width: 100%; max-width: 640px; background: var(--panel); border-radius: 12px;
+      padding: 14px; font-size: 0.9rem; line-height: 1.65; color: var(--text);
+      white-space: pre-wrap; word-break: break-word;
+    }
+    .viewer-nav {
+      position:relative; z-index:5; display: flex; align-items: center; justify-content: center; gap: 16px;
+      padding: 10px 14px; border-top: 1px solid var(--border); flex-shrink: 0;
+      background: var(--panel);
+    }
+    .viewer-nav .page { font-size: 0.85rem; color: var(--muted); min-width: 70px; text-align: center; }
+    .viewer-nav button {
+      width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--border);
+      background: var(--bg-soft); color: var(--text); font-size: 1.15rem; cursor: pointer;
+    }
+    .viewer-nav button:disabled { opacity: 0.3; cursor: default; }
+
+    /* ===== Score Page ===== */
+    .page { display: none; padding-bottom: 32px; }
+    .page.active { display: block; }
+    .page.active { display: block; }
+    .score-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
+    }
+    .score-header h2 {
+      font-family: "Zen Maru Gothic", sans-serif; font-size: 1.15rem; font-weight: 700;
+    }
+    .player-list { display: flex; flex-direction: column; gap: 10px; }
+    .player-row {
+      background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--radius);
+      padding: 12px 14px; display: flex; align-items: center; gap: 10px;
+      box-shadow: var(--shadow-sm);
+    }
+    .player-row .name {
+      flex: 1; font-weight: 600; font-size: 0.95rem; min-width: 0;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .player-row .score {
+      font-size: 1.25rem; font-weight: 700; color: var(--accent-dark);
+      min-width: 36px; text-align: center;
+      font-family: "Zen Maru Gothic", sans-serif;
+    }
+    .player-row .score-btns { display: flex; gap: 6px; }
+    .score-btn {
+      width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--border);
+      background: var(--bg-soft); color: var(--text); font-size: 1.1rem; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .score-btn.plus { background: var(--mint-soft); border-color: var(--mint); color: #2d5a45; }
+    .score-btn.minus { background: var(--pink-soft); border-color: var(--pink); color: #7a3d4a; }
+    .add-player-row {
+      display: flex; gap: 8px; margin-top: 12px;
+    }
+    .add-player-row input {
+      flex: 1; padding: 11px 13px; border-radius: 999px;
+      border: 1.5px solid var(--border); background: var(--panel); font-size: 0.9rem;
+      outline: none;
+    }
+    .add-player-row input:focus { border-color: var(--accent); }
+    .score-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+
+    /* ===== Random Picker ===== */
+    .picker-area {
+      text-align: center; padding: 20px 0 10px;
+    }
+    .wheel-wrap {
+      position: relative;
+      width: min(300px, 86vw);
+      height: min(300px, 86vw);
+      margin: 8px auto 18px;
+    }
+    .wheel-canvas {
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      display: block;
+      box-shadow:
+        0 0 0 10px #F5C842,
+        0 0 0 14px #F0B429,
+        0 10px 28px rgba(74, 63, 53, 0.18);
+      transition: transform 0s;
+      background: #fff;
+    }
+    .wheel-lights {
+      position: absolute; inset: -6px;
+      border-radius: 50%;
+      pointer-events: none;
+      background: radial-gradient(circle at 50% 50%, transparent 62%, transparent 62%);
+      z-index: 2;
+    }
+    .wheel-pointer {
+      position: absolute;
+      left: 50%; bottom: -6px;
+      transform: translateX(-50%);
+      z-index: 5;
+      width: 0; height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-bottom: 28px solid #fff;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+    }
+    .wheel-pointer::after {
+      content: '';
+      position: absolute;
+      left: -10px; top: 4px;
+      width: 0; height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-bottom: 20px solid #E85D4C;
+    }
+    .wheel-hub {
+      position: absolute;
+      left: 50%; top: 50%;
+      width: 36px; height: 36px;
+      margin: -18px 0 0 -18px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #FFE566, #F5A623 60%, #E08A10);
+      border: 3px solid #fff;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+      z-index: 4;
+      pointer-events: none;
+    }
+    .picker-result {
+      font-family: "Zen Maru Gothic", sans-serif;
+      font-size: 1.25rem; font-weight: 700; color: var(--text);
+      max-width: 90%; margin: 0 auto 4px; word-break: break-word; line-height: 1.35;
+      min-height: 1.5em;
+    }
+    .picker-result.placeholder { color: var(--muted); font-size: 1rem; font-weight: 500; }
+    .picker-players {
+      display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 16px 0;
+    }
+    .picker-tag {
+      padding: 8px 14px; border-radius: 999px; background: var(--panel);
+      border: 1.5px solid var(--border); font-size: 0.85rem; font-weight: 500;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .picker-tag .rm {
+      width: 18px; height: 18px; border-radius: 50%; background: var(--danger);
+      color: #fff; border: none; font-size: 11px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .picker-actions { display: flex; gap: 10px; justify-content: center; margin-top: 8px; flex-wrap: wrap; }
+    .picker-msg {
+      margin-top: 16px; font-size: 0.9rem; color: var(--muted); min-height: 1.4em;
+    }
+    .dice-section {
+      margin-top: 28px; padding-top: 22px;
+      border-top: 1.5px dashed var(--border);
+    }
+    .dice-controls {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
+      margin: 12px 0 14px; max-width: 360px; margin-left: auto; margin-right: auto;
+    }
+    .dice-controls .field { margin: 0; }
+    .dice-controls label { font-size: 0.72rem; color: var(--muted); display: block; margin-bottom: 4px; }
+    .dice-controls input {
+      width: 100%; padding: 10px 8px; border-radius: 10px; border: 1.5px solid var(--border);
+      background: var(--bg-soft); text-align: center; font-family: inherit; font-size: 1rem; font-weight: 600;
+    }
+    .dice-tray {
+      display: flex; flex-wrap: wrap; gap: 14px; justify-content: center;
+      min-height: 110px; align-items: center; margin: 12px 0 16px;
+      padding: 8px 0;
+    }
+    .die {
+      width: 92px; height: 92px; border-radius: 18px;
+      background: linear-gradient(145deg, #fffef9, #f0e6d8);
+      border: 2.5px solid var(--border);
+      box-shadow:
+        0 6px 0 rgba(74, 63, 53, 0.12),
+        0 10px 24px rgba(74, 63, 53, 0.14);
+      display: flex; align-items: center; justify-content: center;
+      font-family: "Zen Maru Gothic", sans-serif;
+      font-size: 2.35rem; font-weight: 700; color: var(--text);
+      transition: transform .2s, box-shadow .2s;
+      user-select: none;
+    }
+    .die.rolling {
+      animation: die-tumble 0.28s ease-in-out infinite;
+      box-shadow: 0 2px 8px rgba(74, 63, 53, 0.2);
+    }
+    @keyframes die-tumble {
+      0%   { transform: rotate(0deg) scale(1) translateY(0); }
+      20%  { transform: rotate(-28deg) scale(1.18) translateY(-18px); }
+      40%  { transform: rotate(32deg) scale(0.88) translateY(6px); }
+      60%  { transform: rotate(-22deg) scale(1.14) translateY(-22px); }
+      80%  { transform: rotate(26deg) scale(0.92) translateY(4px); }
+      100% { transform: rotate(0deg) scale(1) translateY(0); }
+    }
+    .die.land {
+      animation: die-land 0.55s cubic-bezier(0.22, 1.4, 0.36, 1) both;
+    }
+    @keyframes die-land {
+      0%   { transform: scale(0.4) rotate(-40deg); opacity: 0.6; }
+      55%  { transform: scale(1.22) rotate(8deg); opacity: 1; }
+      75%  { transform: scale(0.94) rotate(-4deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+    .dice-sum {
+      text-align: center; font-size: 1.05rem; color: var(--muted); min-height: 1.5em;
+    }
+    .dice-sum strong {
+      color: var(--accent-dark); font-family: "Zen Maru Gothic", sans-serif; font-size: 1.45rem;
+    }
+    .picker-msg.win {
+      color: var(--accent-dark); font-weight: 600; font-size: 1.05rem;
+    }
+
+    .highlight { background: rgba(232, 168, 124, 0.35); border-radius: 3px; padding: 0 2px; }
+
+    .section-title {
+      font-family: "Zen Maru Gothic", sans-serif;
+      font-size: 0.95rem; font-weight: 700; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+  </style>
 </head>
-<body class="bg-[#fbfbfd] text-[#1d1d1f] font-sans antialiased min-h-screen" style="background:#fbfbfd;" x-data="passwordManager()" x-cloak>
-
-    <!-- ============ FIXED HEADER (title + buttons + search, all pinned together) ============ -->
-    <header id="app-header" class="fixed top-0 left-0 right-0 z-30 border-b border-slate-200" style="padding-top:max(0.75rem,env(safe-area-inset-top)); background:#fbfbfd;">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-3">
-            <!-- Row 1: logo + title + buttons -->
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <div class="flex items-center gap-3">
-                    <div class="bg-blue-600 text-white p-2.5 rounded-xl shadow-lg shadow-indigo-200 shrink-0">
-                        <i class="ph ph-shield-check text-2xl sm:text-3xl"></i>
-                    </div>
-                    <div class="min-w-0">
-                        <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">分享本本</h1>
-                        <p class="text-xs sm:text-sm text-slate-500">安全密碼與資料管理（PWA 離線支援）</p>
-                    </div>
-                </div>
-                <div class="flex flex-wrap gap-2 w-full sm:w-auto">
-                    <button @click="exportToJson()" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3.5 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm">
-                        <i class="ph ph-file-js text-lg"></i><span>匯出 JSON</span>
-                    </button>
-                    <label class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3.5 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm cursor-pointer">
-                        <i class="ph ph-upload-simple text-lg"></i><span>匯入 JSON</span>
-                        <input type="file" accept=".json,application/json" class="hidden" @change="importFromJson($event)">
-                    </label>
-                    <button @click="exportToHtml()" class="flex-none flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3.5 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm" title="匯出 HTML">
-                        <i class="ph ph-download-simple text-lg"></i><span>匯出 HTML</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Row 2: search bar -->
-            <div class="relative mt-3">
-                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <i class="ph ph-magnifying-glass text-slate-400 text-lg"></i>
-                </div>
-                <input type="text" x-model="searchQuery" placeholder="搜尋網站、帳號或備忘錄..." class="w-full pl-11 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm text-sm sm:text-base">
-            </div>
+<body>
+  <!-- ===== TOPBAR (shared) ===== -->
+  <div class="topbar" id="topbar">
+    <div class="title-row">
+      <div class="brand">
+        <div class="brand-icon" title="Kumamon">
+          <img src="data:image/jpeg;base64,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" alt="Kumamon" />
         </div>
-    </header>
+        <h1>桌遊<span>本本</span></h1>
+      </div>
+      <div class="title-actions">
+        <button class="icon-btn" id="btnSettings" type="button" title="設定" aria-label="設定">⚙️</button>
+        <button class="icon-btn" id="btnRefresh" type="button" title="重新載入" aria-label="重新載入">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
 
-    <!-- ============ MAIN CONTENT ============ -->
-    <!-- 手機 header 較高（按鈕變兩排），預留足夠空間避免卡片被擋 -->
-    <main class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8" id="main-content" style="padding-top: max(200px, calc(env(safe-area-inset-top) + 180px))">
-        <!-- Stats -->
-        <div class="mb-4 text-xs sm:text-sm text-slate-500 flex justify-between items-center px-1">
-            <span>共 <span class="font-semibold text-slate-700" x-text="filteredPasswords.length"></span> 筆項目</span>
-            <span x-show="searchQuery" class="text-blue-600">（搜尋過濾中）</span>
+  <!-- Settings -->
+  <div class="settings-panel" id="settingsPanel">
+    <h3>☁️ 儲存</h3>
+    <div class="settings-actions">
+      <button class="btn primary" id="btnTestConnection" type="button">測試連線</button>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin:16px 0 12px">
+    <h3>📁 自訂分區</h3>
+    <div class="field">
+      <label>分區名稱（用逗號分隔）</label>
+      <input type="text" id="catInput" placeholder="策略, 派對, 家庭, 合作" />
+      <div class="hint">會顯示在說明書頁上方，方便分類</div>
+    </div>
+    <button class="btn mint" id="btnSaveCats" type="button" style="margin-top:4px">儲存分區</button>
+  </div>
+
+  <!-- ===== PAGE: Manuals ===== -->
+  <div class="page active" id="pageManuals">
+    <div class="search-box">
+      <span class="icon">🔍</span>
+      <input id="q" type="search" placeholder="搜尋遊戲名稱…" autocomplete="off" enterkeyhint="search" />
+      <button class="clear" id="clearBtn" type="button" aria-label="清除">×</button>
+    </div>
+    <div class="cats" id="cats"></div>
+    <div class="toolbar">
+      <div class="count">顯示 <strong id="shown">0</strong> / <span id="total">0</span> 本</div>
+    </div>
+    <div class="status-bar" id="status"></div>
+    <div class="grid" id="grid">
+      <div class="loading"><div class="spinner"></div>載入中…</div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE: Score ===== -->
+  <div class="page" id="pageScore">
+    <div class="score-header">
+      <h2>🏆 計分板</h2>
+      <button class="btn ghost" id="btnResetScores" type="button" style="padding:6px 12px;font-size:0.75rem">全部歸零</button>
+    </div>
+    <div class="segment" id="scoreModeSeg">
+      <button type="button" class="active" data-mode="count">自訂計分</button>
+      <button type="button" data-mode="mahjong">麻雀</button>
+      <button type="button" data-mode="big2">鋤大D</button>
+    </div>
+
+    <!-- 金額單位：麻雀／鋤大D 顯示 -->
+    <div id="unitWrap" style="display:none">
+      <div class="unit-row">
+        <label id="unitLabel">每分金額（$）</label>
+        <input type="number" id="unitPrice" inputmode="decimal" placeholder="1" value="1" min="0" step="0.5" />
+      </div>
+      <p class="field" style="margin:-4px 0 10px"><span class="hint" id="unitHint">分數 × 每分金額 = 實收金額</span></p>
+    </div>
+
+    <div class="player-list" id="playerList"></div>
+    <div class="add-player-row" id="addPlayerRow">
+      <input type="text" id="newPlayerName" placeholder="輸入玩家名稱…" enterkeyhint="done" />
+      <button class="btn primary" id="btnAddPlayer" type="button">加入</button>
+    </div>
+    <div class="score-actions">
+      <button class="btn ghost" id="btnClearPlayers" type="button">清除所有玩家</button>
+    </div>
+
+    <!-- Count / 自訂計分：每回合輸入 -->
+    <div id="countPanel" style="display:none;margin-top:14px">
+      <div class="settle-card" style="margin-top:0">
+        <h3>🧮 本回合計分器</h3>
+        <p class="hint" style="padding:0;margin-bottom:10px">為每位玩家輸入本回合增減，例如 +10、−5、0。可留空＝0。</p>
+        <div id="countInputs"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+          <button class="btn ghost" id="btnCountQuickP5" type="button" style="padding:8px 12px">全 +5</button>
+          <button class="btn ghost" id="btnCountQuick0" type="button" style="padding:8px 12px">全清零</button>
         </div>
-
-        <!-- Empty -->
-        <div x-show="filteredPasswords.length === 0" class="text-center p-12 bg-white rounded-2xl border border-slate-200 shadow-sm my-6">
-            <i class="ph ph-lock-key text-5xl text-slate-300 mb-3"></i>
-            <p class="text-slate-500 text-sm" x-text="searchQuery ? '找不到符合的項目' : '尚無密碼資料，請點擊右下角 + 新增或匯入 JSON'"></p>
+        <button class="btn primary" id="btnCountApply" type="button" style="width:100%;margin-top:12px;padding:12px">記入本回合</button>
+        <button class="btn ghost" id="btnCountUndo" type="button" style="width:100%;margin-top:8px;padding:10px" disabled>↩ 還原上一回</button>
+      </div>
+      <button class="btn ghost collapsible-toggle" type="button" id="btnCountHistoryToggle" data-target="countHistoryWrap" style="width:100%;margin-top:10px;padding:10px">📋 回合紀錄（0）▾</button>
+      <div id="countHistoryWrap" class="collapsible-body" style="display:none">
+        <div class="settle-card" style="margin-top:8px">
+          <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:8px">
+            <button class="btn ghost" id="btnCountClearHistory" type="button" style="padding:4px 10px;font-size:0.72rem">清空紀錄</button>
+          </div>
+          <div id="countHistory" class="settle-empty" style="max-height:min(55vh,420px);overflow:auto;-webkit-overflow-scrolling:touch">暫無紀錄</div>
         </div>
+      </div>
+    </div>
 
-        <!-- List -->
-        <div x-show="filteredPasswords.length > 0" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-16">
-            <ul class="divide-y divide-slate-100">
-                <template x-for="item in filteredPasswords" :key="item.id">
-                    <li class="p-4 sm:p-5 hover:bg-slate-50/80 transition-colors group">
-                        <!-- 標題列 + 右上角編輯/刪除（手機也同一行） -->
-                        <div class="flex items-start justify-between gap-2 mb-2">
-                            <div class="flex items-center gap-2.5 min-w-0 flex-1">
-                                <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm shrink-0 shadow-inner">
-                                    <span x-text="(item.siteName || '?').charAt(0).toUpperCase()"></span>
-                                </div>
-                                <h3 class="text-base font-semibold text-slate-900 truncate" x-text="item.siteName"></h3>
-                                <a x-show="item.url" :href="item.url.startsWith('http') ? item.url : 'https://' + item.url" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-blue-600 transition-colors p-1 shrink-0" title="開啟網站">
-                                    <i class="ph ph-link text-base"></i>
-                                </a>
-                            </div>
-                            <div class="flex items-center gap-0.5 shrink-0 -mr-1">
-                                <button @click="editItem(item)" class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="編輯">
-                                    <i class="ph ph-pencil-simple text-lg"></i>
-                                </button>
-                                <button @click="deleteItem(item.id)" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="刪除">
-                                    <i class="ph ph-trash text-lg"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <!-- 帳號 / 密碼 / 備忘 -->
-                        <div class="pl-11 space-y-1.5">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs sm:text-sm font-medium text-slate-400 w-12 shrink-0">帳號:</span>
-                                <span class="text-xs sm:text-sm text-slate-700 truncate select-all font-mono min-w-0" x-text="item.username"></span>
-                                <button @click="copyToClipboard(item.username, '帳號已複製')" class="text-slate-300 hover:text-blue-600 p-1.5 rounded hover:bg-blue-50 transition-colors shrink-0" title="複製帳號">
-                                    <i class="ph ph-copy text-sm"></i>
-                                </button>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs sm:text-sm font-medium text-slate-400 w-12 shrink-0">密碼:</span>
-                                <span class="text-xs sm:text-sm text-slate-800 font-mono select-all bg-slate-100/70 px-2 py-0.5 rounded pwd-mono truncate min-w-0" x-text="item.password"></span>
-                                <button @click="copyToClipboard(item.password, '密碼已複製')" class="text-slate-300 hover:text-blue-600 p-1.5 rounded hover:bg-blue-50 transition-colors shrink-0" title="複製密碼">
-                                    <i class="ph ph-copy text-sm"></i>
-                                </button>
-                            </div>
-                            <div x-show="item.notes" class="mt-2 text-xs text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-100 whitespace-pre-wrap leading-relaxed">
-                                <i class="ph ph-note-pencil mr-1 text-blue-500"></i> <span x-text="item.notes"></span>
-                            </div>
-                        </div>
-                    </li>
-                </template>
-            </ul>
+    <!-- 廣東麻雀：本局結算 -->
+    <div id="mahjongPanel" style="display:none;margin-top:14px">
+      <div class="settle-card" style="margin-top:0">
+        <h3>🀄 本局結算（三番起胡 · 半辣上）</h3>
+        <div class="field" style="margin-bottom:10px">
+          <label>贏家（食胡者）</label>
+          <select id="mjWinner"></select>
         </div>
-    </main>
+        <div class="field" style="margin-bottom:10px">
+          <label>食胡方式</label>
+          <select id="mjWinType">
+            <option value="self-draw">自摸</option>
+            <option value="discard">出沖（放銃）</option>
+          </select>
+        </div>
+        <div class="field" id="mjLoserWrap" style="display:none;margin-bottom:10px">
+          <label>出沖者（出銃家）</label>
+          <select id="mjLoser"></select>
+        </div>
+        <div class="field" style="margin-bottom:10px">
+          <label>番數（最少 3 番）</label>
+          <input type="number" id="mjFan" min="3" max="13" value="3" inputmode="numeric" />
+          <div class="hint" id="mjFanHint">3番＝16分 · 4番＝32分 · 5番＝64分…（半辣上）</div>
+        </div>
+        <button class="btn primary" id="btnMjCalc" type="button" style="width:100%;padding:12px">計算並記入本局</button>
+        <button class="btn ghost" id="btnMjUndo" type="button" style="width:100%;margin-top:8px;padding:10px" disabled>↩ 還原上一鋪</button>
+      </div>
+      <button class="btn ghost collapsible-toggle" type="button" data-target="mjHistoryWrap" style="width:100%;margin-top:10px;padding:10px">📋 對局紀錄 ▾</button>
+      <div id="mjHistoryWrap" class="collapsible-body" style="display:none">
+        <div class="settle-card" style="margin-top:8px">
+          <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:8px">
+            <button class="btn ghost" id="btnMjClearHistory" type="button" style="padding:4px 10px;font-size:0.72rem">清空紀錄</button>
+          </div>
+          <div id="mjHistory" class="settle-empty" style="max-height:220px;overflow-y:auto;-webkit-overflow-scrolling:touch">暫無紀錄</div>
+        </div>
+      </div>
+      <button class="btn ghost collapsible-toggle" type="button" data-target="mjFanWrap" style="width:100%;margin-top:8px;padding:10px">📖 計番參考 ▾</button>
+      <div id="mjFanWrap" class="collapsible-body" style="display:none">
+        <div class="settle-card" style="margin-top:8px">
+          <h3>廣東麻雀計番參考（常見）</h3>
+          <p class="hint" style="padding:0;margin-bottom:8px">三番起胡 · 可疊加 · 實際以牌局約定為準</p>
+          <div class="fan-table" id="fanTable">
+            <div class="fan-row fan-head"><span>牌型／條件</span><span>番數</span></div>
+            <div class="fan-row"><span>平胡</span><span>1</span></div>
+            <div class="fan-row"><span>自摸</span><span>1</span></div>
+            <div class="fan-row"><span>門清</span><span>1</span></div>
+            <div class="fan-row"><span>單騎／邊張／坎張</span><span>1</span></div>
+            <div class="fan-row"><span>無花／正花</span><span>1</span></div>
+            <div class="fan-row"><span>箭刻（中發白）</span><span>1</span></div>
+            <div class="fan-row"><span>風刻（圈風／門風）</span><span>1</span></div>
+            <div class="fan-row"><span>搶槓</span><span>1</span></div>
+            <div class="fan-row"><span>槓上開花</span><span>1</span></div>
+            <div class="fan-row"><span>海底撈月／河底撈魚</span><span>1</span></div>
+            <div class="fan-row"><span>對對胡（碰碰胡）</span><span>3</span></div>
+            <div class="fan-row"><span>混一色</span><span>3</span></div>
+            <div class="fan-row"><span>小三元</span><span>3</span></div>
+            <div class="fan-row"><span>一條龍（清龍）</span><span>3</span></div>
+            <div class="fan-row"><span>七對子</span><span>4</span></div>
+            <div class="fan-row"><span>清一色</span><span>6～7</span></div>
+            <div class="fan-row"><span>小四喜</span><span>6</span></div>
+            <div class="fan-row"><span>大三元</span><span>8</span></div>
+            <div class="fan-row"><span>大四喜</span><span>8+</span></div>
+            <div class="fan-row"><span>十三么</span><span>8+</span></div>
+            <div class="fan-row"><span>天胡／地胡</span><span>8+</span></div>
+          </div>
+          <p class="hint" style="padding:0;margin-top:8px">半辣上分數：3番＝16 · 4＝32 · 5＝64 · 6＝128 · 7＝256 · 8番起＝512（封頂）</p>
+        </div>
+      </div>
+    </div>
 
-    <!-- Floating "+" button -->
-    <button type="button" class="fab" @click.prevent.stop="openModal()" title="新增項目" aria-label="新增項目">
-        <i class="ph ph-plus"></i>
+    <!-- 鋤大D：本局結算 -->
+    <div id="big2Panel" style="display:none;margin-top:14px">
+      <div class="settle-card" style="margin-top:0">
+        <h3>♠️ 本局結算（剩牌計分）</h3>
+        <div class="field" style="margin-bottom:10px">
+          <label>勝者（出清者）</label>
+          <select id="b2Winner"></select>
+        </div>
+        <div id="b2Losers"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0">
+          <div class="field" style="margin:0">
+            <label>雙倍起算張數</label>
+            <input type="number" id="b2DoubleAt" min="2" max="13" value="10" inputmode="numeric" />
+          </div>
+          <div class="field" style="margin:0">
+            <label>三倍起算張數</label>
+            <input type="number" id="b2TripleAt" min="2" max="13" value="13" inputmode="numeric" />
+          </div>
+        </div>
+        <p class="hint" style="padding:0;margin-bottom:10px" id="b2RuleHint">剩牌 ≥10 雙倍 · ≥13 三倍 · 每張剩 2 再 ×2</p>
+        <button class="btn primary" id="btnB2Calc" type="button" style="width:100%;padding:12px">計算並記入本局</button>
+        <button class="btn ghost" id="btnB2Undo" type="button" style="width:100%;margin-top:8px;padding:10px" disabled>↩ 還原上一鋪</button>
+      </div>
+      <button class="btn ghost collapsible-toggle" type="button" data-target="b2HistoryWrap" style="width:100%;margin-top:10px;padding:10px">📋 對局紀錄 ▾</button>
+      <div id="b2HistoryWrap" class="collapsible-body" style="display:none">
+        <div class="settle-card" style="margin-top:8px">
+          <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:8px">
+            <button class="btn ghost" id="btnB2ClearHistory" type="button" style="padding:4px 10px;font-size:0.72rem">清空紀錄</button>
+          </div>
+          <div id="b2History" class="settle-empty" style="max-height:220px;overflow-y:auto;-webkit-overflow-scrolling:touch">暫無紀錄</div>
+        </div>
+      </div>
+      <button class="btn ghost collapsible-toggle" type="button" data-target="b2RuleWrap" style="width:100%;margin-top:8px;padding:10px">📖 計分方法 ▾</button>
+      <div id="b2RuleWrap" class="collapsible-body" style="display:none">
+        <div class="settle-card" style="margin-top:8px">
+          <h3>鋤大D 計分方法</h3>
+          <div class="fan-table">
+            <div class="fan-row fan-head"><span>條件</span><span>倍數</span></div>
+            <div class="fan-row"><span>一般剩牌</span><span>×1</span></div>
+            <div class="fan-row"><span id="b2RefDouble">剩牌 ≥ 10 張</span><span>×2</span></div>
+            <div class="fan-row"><span id="b2RefTriple">剩牌 ≥ 13 張</span><span>×3</span></div>
+            <div class="fan-row"><span>每張剩餘的「2」</span><span>再 ×2</span></div>
+          </div>
+          <p class="hint" style="padding:0;margin-top:8px">公式：損失 = 剩牌數 × 張數倍數 × 2<sup>剩2張數</sup><br>勝者收取所有輸家損失總和。雙倍／三倍張數可自行設定。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 金錢結算（麻雀／鋤大D） -->
+    <div id="settleSection" style="display:none">
+      <button class="btn primary" id="btnSettle" type="button" style="width:100%;margin-top:12px;padding:12px">💰 金錢結算 — 誰付誰多少</button>
+      <div class="settle-card" id="settleResult" style="display:none">
+        <h3>結算結果</h3>
+        <div id="settleLines"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE: Random ===== -->
+  <div class="page" id="pageRandom">
+    <div class="picker-area">
+      <div class="section-title" style="justify-content:center">🎡 誰先開始？</div>
+      <div class="picker-result placeholder" id="pickerResult">加入玩家後撳抽選</div>
+      <div class="wheel-wrap" id="wheelWrap">
+        <canvas class="wheel-canvas" id="wheelCanvas" width="600" height="600"></canvas>
+        <div class="wheel-hub"></div>
+        <div class="wheel-pointer" aria-hidden="true"></div>
+      </div>
+      <div class="picker-players" id="pickerPlayers"></div>
+      <div class="add-player-row" style="max-width:320px;margin:0 auto">
+        <input type="text" id="pickerNewName" placeholder="加入玩家…" enterkeyhint="done" />
+        <button class="btn primary" id="btnPickerAdd" type="button">加入</button>
+      </div>
+      <div class="picker-actions">
+        <button class="btn primary" id="btnSpin" type="button" style="padding:12px 28px;font-size:0.95rem">🎡 轉盤抽選</button>
+        <button class="btn ghost" id="btnSyncFromScore" type="button">從計分板同步</button>
+      </div>
+      <div class="picker-msg" id="pickerMsg"></div>
+    </div>
+
+    <div class="dice-section">
+      <div class="section-title" style="justify-content:center">🎲 擲骰子</div>
+      <div class="dice-controls">
+        <div class="field">
+          <label>粒數</label>
+          <input type="number" id="diceCount" min="1" max="12" value="1" inputmode="numeric" />
+        </div>
+        <div class="field">
+          <label>最小點</label>
+          <input type="number" id="diceMin" min="0" max="999" value="1" inputmode="numeric" />
+        </div>
+        <div class="field">
+          <label>最大點</label>
+          <input type="number" id="diceMax" min="1" max="999" value="6" inputmode="numeric" />
+        </div>
+      </div>
+      <p class="hint" style="text-align:center;padding:0;margin-bottom:8px">預設 1–6 · 可改成 0–9、1–20 等</p>
+      <div class="dice-tray" id="diceTray">
+        <div class="die" style="opacity:0.45">?</div>
+      </div>
+      <div class="dice-sum" id="diceSum"></div>
+      <div class="picker-actions">
+        <button class="btn primary" id="btnRollDice" type="button" style="padding:12px 28px;font-size:0.95rem">🎲 擲骰</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAB -->
+  <button class="fab show" id="fabUpload" type="button" title="上傳說明書" aria-label="上傳">＋</button>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-page="pageManuals" type="button">
+      <span class="nav-icon">📖</span>
+      <span>說明書</span>
     </button>
+    <button class="nav-item" data-page="pageScore" type="button">
+      <span class="nav-icon">🏆</span>
+      <span>計分</span>
+    </button>
+    <button class="nav-item" data-page="pageRandom" type="button">
+      <span class="nav-icon">🎲</span>
+      <span>抽選</span>
+    </button>
+  </nav>
 
-    <!-- Modal -->
-    <div x-show="isModalOpen" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true" style="display:none">
-        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div x-show="isModalOpen" x-transition.opacity class="fixed inset-0 bg-slate-900 bg-opacity-50 backdrop-blur-xs transition-opacity" @click="closeModal()"></div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div x-show="isModalOpen" x-transition class="modal-panel inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
-                <form @submit.prevent="saveItem">
-                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <div class="sm:flex sm:items-start">
-                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
-                                <i class="ph text-blue-600 text-xl" :class="editingId ? 'ph-pencil-simple' : 'ph-plus'"></i>
-                            </div>
-                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                                <h3 class="text-lg leading-6 font-medium text-slate-900" id="modal-title" x-text="editingId ? '編輯項目' : '新增密碼項目'"></h3>
-                                <div class="mt-4 space-y-3.5">
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-600 mb-1">網站/服務名稱 <span class="text-red-500">*</span></label>
-                                        <input type="text" x-model="formData.siteName" required class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-600 mb-1">網址 (選填)</label>
-                                        <input type="text" x-model="formData.url" placeholder="ex: example.com" class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-600 mb-1">帳號/使用者名稱 <span class="text-red-500">*</span></label>
-                                        <input type="text" x-model="formData.username" required class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-600 mb-1">密碼 <span class="text-red-500">*</span></label>
-                                        <div class="relative">
-                                            <input :type="showPasswordInModal ? 'text' : 'password'" x-model="formData.password" required class="w-full border border-slate-300 rounded-lg px-3.5 py-2 pr-10 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            <button type="button" @click="showPasswordInModal = !showPasswordInModal" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
-                                                <i class="ph text-lg" :class="showPasswordInModal ? 'ph-eye-slash' : 'ph-eye'"></i>
-                                            </button>
-                                        </div>
-                                        <div class="mt-2">
-                                            <button type="button" @click="generatePassword" class="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 font-medium">
-                                                <i class="ph ph-magic-wand text-sm"></i> 產生安全隨機密碼
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-600 mb-1">備忘錄 (選填)</label>
-                                        <textarea x-model="formData.notes" rows="2" class="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-slate-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse rounded-b-2xl gap-2">
-                        <button type="submit" class="w-full sm:w-auto inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">儲存</button>
-                        <button type="button" @click="closeModal()" class="mt-3 sm:mt-0 w-full sm:w-auto inline-flex justify-center rounded-lg border border-slate-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">取消</button>
-                    </div>
-                </form>
-            </div>
+  <div class="toast" id="toast"></div>
+
+  <!-- Soft confirm -->
+  <div class="soft-overlay" id="softConfirm" role="dialog" aria-modal="true">
+    <div class="soft-card">
+      <div class="soft-icon" id="softIcon">🐻</div>
+      <div class="soft-title" id="softTitle">請確認</div>
+      <div class="soft-msg" id="softMsg"></div>
+      <div class="soft-actions">
+        <button type="button" class="btn ghost" id="softCancel">取消</button>
+        <button type="button" class="btn primary" id="softOk">確定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload Modal -->
+  <div class="modal" id="uploadModal">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <div class="title">🐻 新增桌遊本本</div>
+        <button class="close" id="uploadClose" type="button">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label>遊戲名稱（必填）</label>
+          <input type="text" id="gameName" placeholder="例如：卡坦島" />
         </div>
+        <div class="field">
+          <label>分區</label>
+          <select id="gameCat"></select>
+        </div>
+        <div class="field">
+          <label>備註（可選）</label>
+          <input type="text" id="gameNote" placeholder="例如：繁中版、第二版…" />
+        </div>
+        <div class="field">
+          <label>文字說明（可直接貼上規則重點）</label>
+          <textarea id="gameText" placeholder="在這裡貼上或輸入文字說明、規則重點、注意事項…"></textarea>
+        </div>
+        <div class="photo-pick-actions">
+          <label class="file-input-btn" for="cameraInput">📷 <span>即時拍照</span></label>
+          <label class="file-input-btn" for="albumInput">🖼️ <span>從相簿選取</span></label>
+        </div>
+        <input type="file" id="cameraInput" accept="image/*,image/heic,image/heif" capture="environment" style="display:none" />
+        <input type="file" id="albumInput" accept="image/*,image/heic,image/heif" multiple style="display:none" />
+        <label class="file-input-btn" id="fileDrop">
+          或將相片拖放到這裡（可多選）
+          <span style="display:block;font-size:0.75rem;color:var(--muted);margin-top:6px;font-weight:500">上傳前會自動轉成 JPEG 並壓縮；可在預覽圖按 ↻ 旋轉</span>
+        </label>
+        <div class="upload-preview" id="preview"></div>
+        <div class="progress-wrap" id="progressWrap">
+          <div style="font-size:0.8rem;color:var(--muted)" id="progressText">準備中…</div>
+          <div class="progress-bar"><div id="progressBar"></div></div>
+        </div>
+        <button class="btn primary" id="btnDoUpload" type="button" style="width:100%;padding:14px" disabled>
+          上傳到雲端
+        </button>
+      </div>
     </div>
+  </div>
 
-    <!-- Toasts -->
-    <div class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none" style="bottom:max(1rem,calc(env(safe-area-inset-bottom) + 1rem))">
-        <template x-for="toast in toasts" :key="toast.id">
-            <div class="toast-item bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 min-w-[220px] pointer-events-auto border border-slate-800">
-                <i class="ph text-xl shrink-0" :class="toast.type === 'success' ? 'ph-check-circle text-emerald-400' : (toast.type === 'error' ? 'ph-warning-circle text-rose-400' : 'ph-info text-sky-400')"></i>
-                <span x-text="toast.message" class="text-sm font-medium"></span>
+  <!-- Viewer Modal -->
+  <div class="modal" id="viewerModal">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <div class="title" id="viewerTitle">說明書</div>
+        <button class="btn ghost" id="viewerEdit" type="button" style="padding:7px 10px">編輯</button>
+        <button class="btn danger" id="viewerDeletePhoto" type="button" style="padding:7px 10px;display:none">刪相</button>
+        <button class="close" id="viewerClose" type="button">×</button>
+      </div>
+      <div class="viewer-body" id="viewerBody"></div>
+      <div class="viewer-nav">
+        <button type="button" id="viewerBack" aria-label="返回主畫面" title="返回主畫面">←</button>
+        <button type="button" id="viewerRotate" aria-label="旋轉相片" title="順時針旋轉 90 度" style="font-size:1.2rem">↻</button>
+        <button type="button" id="viewerPrev">‹</button>
+        <div class="page" id="viewerPage">—</div>
+        <button type="button" id="viewerNext">›</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========== Config & State ==========
+    // Supabase（個人自用，已寫死）
+    const SUPABASE_URL = 'https://adnpuxmbnoakuxemfaaa.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkbnB1eG1ibm9ha3V4ZW1mYWFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI2NTc4NjQsImV4cCI6MjEwODIzMzg2NH0.v1qBON4dO3_ltIBdLWko6kEkstFw2CXTddc89giYsZI';
+    const BUCKET = 'manuals';
+    const INDEX_FILE = 'index.json';
+
+    const LS_SCORE = 'benben_scores_v1';
+    const LS_PICKER = 'benben_picker_v1';
+    const LS_CATS = 'benben_cats_v1';
+    const LS_MODE = 'benben_score_mode';
+    const LS_UNIT = 'benben_unit_price';
+
+    // path prefix inside bucket (empty = bucket root)
+    const STORAGE_ROOT = '';
+
+    let MANUALS = [];
+    let CATEGORIES = ['全部', '策略', '派對', '家庭'];
+    let activeCat = '全部';
+    let query = '';
+    let selectedFiles = [];
+    let viewerImages = [];
+    let viewerText = '';
+    let viewerIndex = 0;
+    let editingManual = null;
+    let viewerManual = null;
+    let scores = []; // {name, score}
+    let pickerNames = [];
+    let scoreMode = 'count'; // count | mahjong | big2
+    // 分頁重繪 dirty flags：只在首次進入或資料確實變更時重建大型區塊
+    let scorePageDirty = true;
+    let pickerPageDirty = true;
+
+    // DOM
+    const qEl = document.getElementById('q');
+    const clearBtn = document.getElementById('clearBtn');
+    const grid = document.getElementById('grid');
+    const shownEl = document.getElementById('shown');
+    const totalEl = document.getElementById('total');
+    const statusEl = document.getElementById('status');
+    const toastEl = document.getElementById('toast');
+    const settingsPanel = document.getElementById('settingsPanel');
+    const catsEl = document.getElementById('cats');
+    const fabUpload = document.getElementById('fabUpload');
+
+    // ========== Utils ==========
+    function toast(msg, ms, type) {
+      toastEl.textContent = msg;
+      toastEl.className = 'toast show' + (type ? ' ' + type : '');
+      clearTimeout(toastEl._t);
+      toastEl._t = setTimeout(() => {
+        toastEl.classList.remove('show');
+      }, ms || 2600);
+    }
+    function softConfirm(message, opts) {
+      opts = opts || {};
+      return new Promise(resolve => {
+        const overlay = document.getElementById('softConfirm');
+        const titleEl = document.getElementById('softTitle');
+        const msgEl = document.getElementById('softMsg');
+        const iconEl = document.getElementById('softIcon');
+        const okBtn = document.getElementById('softOk');
+        const cancelBtn = document.getElementById('softCancel');
+        titleEl.textContent = opts.title || '請確認';
+        msgEl.textContent = message || '';
+        iconEl.textContent = opts.icon || '🐻';
+        okBtn.textContent = opts.okText || '確定';
+        cancelBtn.textContent = opts.cancelText || '取消';
+        overlay.classList.add('open');
+        const close = (val) => {
+          overlay.classList.remove('open');
+          okBtn.onclick = null;
+          cancelBtn.onclick = null;
+          overlay.onclick = null;
+          resolve(val);
+        };
+        okBtn.onclick = () => close(true);
+        cancelBtn.onclick = () => close(false);
+        overlay.onclick = (e) => { if (e.target === overlay) close(false); };
+      });
+    }
+    function setStatus(msg, type) {
+      statusEl.textContent = msg || '';
+      statusEl.className = 'status-bar' + (type ? ' ' + type : '');
+    }
+    function loadSettings() {
+      try {
+        const c = localStorage.getItem(LS_CATS);
+        if (c) CATEGORIES = JSON.parse(c);
+      } catch (e) {}
+      const catInput = document.getElementById('catInput');
+      if (catInput) catInput.value = CATEGORIES.filter(x => x !== '全部').join(', ');
+      try {
+        const s = localStorage.getItem(LS_SCORE);
+        if (s) scores = JSON.parse(s);
+      } catch (e) {}
+      try {
+        const p = localStorage.getItem(LS_PICKER);
+        if (p) pickerNames = JSON.parse(p);
+      } catch (e) {}
+      scoreMode = localStorage.getItem(LS_MODE) || 'count';
+      try {
+        const up = localStorage.getItem(LS_UNIT);
+        if (up != null && document.getElementById('unitPrice')) document.getElementById('unitPrice').value = up;
+      } catch (e) {}
+    }
+    async function saveCats() {
+      const btn = document.getElementById('btnSaveCats');
+      const raw = document.getElementById('catInput').value;
+      const list = [...new Set(raw.split(/[,，、]/).map(s => s.trim()).filter(Boolean).filter(s => s !== '全部'))];
+      const nextCategories = ['全部', ...list];
+      const oldCategories = CATEGORIES.slice();
+      btn.disabled = true;
+      btn.textContent = '同步中…';
+      try {
+        // Read the latest cloud index first, so changing categories does not overwrite
+        // manuals that may have been added from another device.
+        const remoteText = await sbDownloadText(INDEX_FILE);
+        let remotePayload = {};
+        if (remoteText) {
+          try { remotePayload = JSON.parse(remoteText); }
+          catch (_) { throw new Error('雲端 index.json 格式錯誤，未有修改任何資料'); }
+        }
+        const remoteManuals = Array.isArray(remotePayload.manuals)
+          ? remotePayload.manuals
+          : (Array.isArray(remotePayload) ? remotePayload : MANUALS);
+        const payload = {
+          updated: new Date().toISOString(),
+          manuals: remoteManuals,
+          categories: nextCategories.filter(c => c !== '全部')
+        };
+        await sbUpload(INDEX_FILE, new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }), 'application/json');
+        const verifyText = await sbDownloadText(INDEX_FILE);
+        if (!verifyText) throw new Error('已上傳，但重新讀取不到雲端索引');
+        const verifyPayload = JSON.parse(verifyText);
+        const savedCategories = Array.isArray(verifyPayload.categories) ? verifyPayload.categories : [];
+        if (JSON.stringify(savedCategories) !== JSON.stringify(payload.categories)) {
+          throw new Error('雲端類別驗證失敗，請重新整理後再試');
+        }
+        CATEGORIES = nextCategories;
+        MANUALS = remoteManuals;
+        localStorage.setItem(LS_CATS, JSON.stringify(CATEGORIES));
+        const catInput = document.getElementById('catInput');
+        if (catInput) catInput.value = CATEGORIES.filter(x => x !== '全部').join(', ');
+        renderCats();
+        fillCatSelect();
+        render();
+        toast('分區已同步至雲端', 2600, 'ok');
+      } catch (e) {
+        CATEGORIES = oldCategories;
+        const catInput = document.getElementById('catInput');
+        if (catInput) catInput.value = CATEGORIES.filter(x => x !== '全部').join(', ');
+        renderCats();
+        fillCatSelect();
+        toast('分區同步失敗：' + e.message, 4200, 'err');
+        setStatus('分區同步失敗：' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '儲存分區';
+      }
+    }
+    function hasConfig() {
+      return true; // Supabase credentials are hardcoded
+    }
+    function slugify(name) {
+      const cleaned = name.trim()
+        .replace(/[\/\\?%*:|"<>]/g, '-')
+        .replace(/\s+/g, '_')
+        .replace(/_+/g, '_')
+        .slice(0, 80) || 'untitled';
+      // Keep ordinary English slugs readable. For any non-ASCII name, use a
+      // deterministic ASCII-only UTF-8 hex slug so Storage object keys are safe.
+      if (/^[\x00-\x7F]*$/.test(cleaned)) return cleaned;
+      const bytes = new TextEncoder().encode(cleaned);
+      return 'zh-' + Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+    }
+    // ========== Supabase Storage ==========
+    function sbHeaders(extra) {
+      return Object.assign({
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'apikey': SUPABASE_ANON_KEY
+      }, extra || {});
+    }
+    function storagePath(path) {
+      // Normalize: no leading slash; STORAGE_ROOT optional prefix
+      const p = String(path || '').replace(/^\/+|\/+$/g, '');
+      if (!STORAGE_ROOT) return p;
+      return (STORAGE_ROOT.replace(/^\/+|\/+$/g, '') + '/' + p).replace(/\/+/g, '/');
+    }
+    function encodeStoragePath(path) {
+      // Encode each object-key segment independently; keep '/' as separators.
+      return storagePath(path).split('/').map(segment => encodeURIComponent(segment)).join('/');
+    }
+    function publicUrl(path) {
+      const p = encodeStoragePath(path);
+      return SUPABASE_URL + '/storage/v1/object/public/' + BUCKET + '/' + p;
+    }
+    function rawUrl(path) {
+      // Compat alias used by viewer
+      return publicUrl(path);
+    }
+    function base64ToBlob(b64, mime) {
+      const binary = atob(b64);
+      const len = binary.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
+      return new Blob([bytes], { type: mime || 'application/octet-stream' });
+    }
+
+    async function sbUpload(path, body, contentType) {
+      const p = storagePath(path);
+      const isIndex = p === INDEX_FILE;
+      const extraHeaders = {
+        'Content-Type': contentType || 'application/octet-stream',
+        'x-upsert': 'true'
+      };
+      // index.json changes frequently; prevent browser/CDN caching of stale names.
+      if (isIndex) extraHeaders['Cache-Control'] = 'no-cache, no-store, max-age=0';
+      const res = await fetch(SUPABASE_URL + '/storage/v1/object/' + BUCKET + '/' + encodeStoragePath(p), {
+        method: 'POST',
+        headers: sbHeaders(extraHeaders),
+        cache: isIndex ? 'no-store' : 'default',
+        body: body
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || err.error || ('Upload HTTP ' + res.status));
+      }
+      return res.json().catch(() => ({}));
+    }
+    async function sbUploadBase64(path, contentBase64, contentType) {
+      const blob = base64ToBlob(contentBase64, contentType || 'application/octet-stream');
+      return sbUpload(path, blob, contentType || 'application/octet-stream');
+    }
+    async function sbDownloadText(path) {
+      const p = storagePath(path);
+      // Add a unique query for the index so a renamed entry is not hidden by a stale cached response.
+      const cacheBust = p === INDEX_FILE ? ('?v=' + Date.now()) : '';
+      const requestUrl = SUPABASE_URL + '/storage/v1/object/public/' + BUCKET + '/' + encodeStoragePath(p) + cacheBust;
+      const res = await fetch(requestUrl, {
+        headers: sbHeaders({ 'Cache-Control': 'no-cache' }),
+        cache: 'no-store'
+      });
+      if (res.status === 404) return null;
+      if (!res.ok) {
+        // try authenticated endpoint (private buckets)
+        const res2 = await fetch(SUPABASE_URL + '/storage/v1/object/' + BUCKET + '/' + encodeStoragePath(p) + cacheBust, {
+          headers: sbHeaders({ 'Cache-Control': 'no-cache' }),
+          cache: 'no-store'
+        });
+        if (res2.status === 404) return null;
+        if (!res2.ok) {
+          const err = await res2.json().catch(() => ({}));
+          throw new Error(err.message || err.error || ('Download HTTP ' + res2.status));
+        }
+        return await res2.text();
+      }
+      return await res.text();
+    }
+    async function sbDownloadBlob(path) {
+      const p = storagePath(path);
+      let res = await fetch(SUPABASE_URL + '/storage/v1/object/public/' + BUCKET + '/' + encodeStoragePath(p), {
+        headers: sbHeaders()
+      });
+      if (!res.ok) {
+        res = await fetch(SUPABASE_URL + '/storage/v1/object/' + BUCKET + '/' + encodeStoragePath(p), {
+          headers: sbHeaders()
+        });
+      }
+      if (res.status === 404) return null;
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || err.error || ('Download HTTP ' + res.status));
+      }
+      return await res.blob();
+    }
+    async function sbDelete(path) {
+      const p = storagePath(path);
+      // Storage delete accepts JSON body with prefixes array
+      const res = await fetch(SUPABASE_URL + '/storage/v1/object/' + BUCKET, {
+        method: 'DELETE',
+        headers: sbHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ prefixes: [p] })
+      });
+      if (!res.ok && res.status !== 404) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || err.error || ('Delete HTTP ' + res.status));
+      }
+      return true;
+    }
+    async function sbList(prefix) {
+      const pref = storagePath(prefix || '');
+      const res = await fetch(SUPABASE_URL + '/storage/v1/object/list/' + BUCKET, {
+        method: 'POST',
+        headers: sbHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          prefix: pref ? (pref.endsWith('/') ? pref : pref + '/') : '',
+          limit: 1000,
+          offset: 0
+        })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || err.error || ('List HTTP ' + res.status));
+      }
+      const data = await res.json();
+      return Array.isArray(data) ? data : [];
+    }
+    async function sbListFilesRecursive(prefix) {
+      // List one level; for manuals we only use single-level folders
+      const items = await sbList(prefix);
+      const pref = storagePath(prefix || '');
+      const files = [];
+      for (const item of items) {
+        if (!item || !item.name) continue;
+        // folders appear as name without id sometimes; files have id/metadata
+        const isFolder = item.id == null && (item.metadata == null);
+        const full = (pref ? pref + '/' : '') + item.name;
+        if (isFolder) {
+          // skip nested for safety (manuals are flat)
+          continue;
+        }
+        files.push({ name: item.name, path: full, id: item.id, metadata: item.metadata });
+      }
+      return files;
+    }
+
+    async function testConnection() {
+      setStatus('測試連線中…');
+      try {
+        // List root of bucket
+        const res = await fetch(SUPABASE_URL + '/storage/v1/object/list/' + BUCKET, {
+          method: 'POST',
+          headers: sbHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({ prefix: '', limit: 1 })
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.message || err.error || ('HTTP ' + res.status + ' — 請確認 bucket「' + BUCKET + '」存在且 policies 允許 anon'));
+        }
+        setStatus('連線成功：Supabase bucket「' + BUCKET + '」', 'ok');
+        toast('連線成功', 2400, 'ok');
+      } catch (e) {
+        setStatus('連線失敗：' + e.message, 'error');
+        toast('連線失敗：' + e.message, 3600, 'err');
+      }
+    }
+
+    // ========== Index ==========
+    async function loadIndex() {
+      document.getElementById('btnRefresh').classList.add('spin');
+      setStatus('載入中…');
+      try {
+        const textContent = await sbDownloadText(INDEX_FILE);
+        if (!textContent) {
+          MANUALS = [];
+          setStatus('尚未有任何桌遊本本');
+        } else {
+          const json = JSON.parse(textContent);
+          MANUALS = Array.isArray(json.manuals) ? json.manuals : (Array.isArray(json) ? json : []);
+          if (json.categories && Array.isArray(json.categories)) {
+            // Cloud categories are the shared source of truth. Do not merge local-only
+            // categories, otherwise deleted categories would reappear on other devices.
+            CATEGORIES = ['全部', ...new Set(json.categories.filter(c => typeof c === 'string' && c.trim() && c !== '全部').map(c => c.trim()))];
+            localStorage.setItem(LS_CATS, JSON.stringify(CATEGORIES));
+            const catInput = document.getElementById('catInput');
+            if (catInput) catInput.value = CATEGORIES.filter(x => x !== '全部').join(', ');
+          } else {
+            // Backward compatibility with older index.json files that have no categories.
+            const catInput = document.getElementById('catInput');
+            if (catInput) catInput.value = CATEGORIES.filter(x => x !== '全部').join(', ');
+          }
+          setStatus('');
+        }
+        renderCats();
+        fillCatSelect();
+        render();
+      } catch (e) {
+        console.error(e);
+        MANUALS = [];
+        setStatus('載入失敗：' + e.message, 'error');
+        grid.innerHTML = `<div class="empty"><div class="emoji">😿</div>無法載入<br><small>${e.message}</small></div>`;
+      } finally {
+        document.getElementById('btnRefresh').classList.remove('spin');
+      }
+    }
+    async function saveIndex(manuals, commitMsg) {
+      const payload = {
+        updated: new Date().toISOString(),
+        manuals: manuals,
+        categories: CATEGORIES.filter(c => c !== '全部')
+      };
+      const jsonStr = JSON.stringify(payload, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      await sbUpload(INDEX_FILE, blob, 'application/json');
+      // Verify the newly uploaded index is readable and contains the same current entries.
+      const savedText = await sbDownloadText(INDEX_FILE);
+      if (!savedText) throw new Error('索引已上傳，但重新讀取時找不到 index.json');
+      let savedPayload;
+      try { savedPayload = JSON.parse(savedText); }
+      catch (_) { throw new Error('索引已上傳，但讀回的 index.json 不是有效 JSON'); }
+      const savedManuals = Array.isArray(savedPayload.manuals) ? savedPayload.manuals : (Array.isArray(savedPayload) ? savedPayload : []);
+      const savedCategories = Array.isArray(savedPayload.categories) ? savedPayload.categories : [];
+      const expectedCategories = CATEGORIES.filter(c => c !== '全部');
+      if (JSON.stringify(savedCategories) !== JSON.stringify(expectedCategories)) {
+        throw new Error('索引驗證失敗：雲端讀回的類別與剛才儲存的類別不同');
+      }
+      const expected = new Map(manuals.map(m => [m.slug, m.name]));
+      const actual = new Map(savedManuals.map(m => [m.slug, m.name]));
+      for (const [key, value] of expected) {
+        if (actual.get(key) !== value) throw new Error('索引驗證失敗：雲端讀回的名稱與剛才儲存的名稱不同，請重新整理後檢查');
+      }
+    }
+
+    // ========== Compress → 一律轉 JPEG ==========
+    function compressImage(file, maxWidth, quality) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          let w = img.width, h = img.height;
+          if (!w || !h) return reject(new Error('圖片尺寸無效'));
+          // 長邊限制，手機大圖會縮小
+          const maxSide = maxWidth || 1600;
+          if (w > maxSide || h > maxSide) {
+            if (w >= h) {
+              h = Math.round(h * maxSide / w);
+              w = maxSide;
+            } else {
+              w = Math.round(w * maxSide / h);
+              h = maxSide;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          // JPEG 無透明：白底，避免 PNG／透明圖變黑
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, w, h);
+          ctx.drawImage(img, 0, 0, w, h);
+          // 強制 image/jpeg
+          const q = typeof quality === 'number' ? quality : 0.82;
+          canvas.toBlob(blob => {
+            if (!blob) return reject(new Error('轉 JPEG 失敗'));
+            const reader = new FileReader();
+            reader.onload = () => resolve({
+              base64: reader.result.split(',')[1],
+              size: blob.size,
+              mime: 'image/jpeg',
+              ext: 'jpg'
+            });
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          }, 'image/jpeg', q);
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error('無法讀取圖片（若為 iPhone HEIC，請用系統轉成照片或 JPG 後再試）'));
+        };
+        img.src = url;
+      });
+    }
+
+    // ========== Cats ==========
+    function renderCats() {
+      catsEl.innerHTML = CATEGORIES.map(c =>
+        `<button type="button" class="cat-chip ${c === activeCat ? 'active' : ''}" data-cat="${c}">${c}</button>`
+      ).join('');
+    }
+    function fillCatSelect() {
+      const sel = document.getElementById('gameCat');
+      const opts = CATEGORIES.filter(c => c !== '全部');
+      sel.innerHTML = '<option value="">未分類</option>' +
+        opts.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+    catsEl.addEventListener('click', e => {
+      const btn = e.target.closest('.cat-chip');
+      if (!btn) return;
+      activeCat = btn.dataset.cat;
+      renderCats();
+      render();
+    });
+
+    // Rotate a selected photo 90 degrees clockwise and keep the rotated pixels for upload.
+    function rotateImageFile(file) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalHeight;
+          canvas.height = img.naturalWidth;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return reject(new Error('無法建立圖片畫布'));
+          ctx.translate(canvas.width / 2, canvas.height / 2);
+          ctx.rotate(Math.PI / 2);
+          ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
+          canvas.toBlob(blob => {
+            if (!blob) return reject(new Error('轉換圖片失敗'));
+            const baseName = (file.name || 'photo').replace(/\.[^.]+$/, '') || 'photo';
+            try { resolve(new File([blob], baseName + '-rotated.jpg', { type: 'image/jpeg', lastModified: Date.now() })); }
+            catch (_) { reject(new Error('此瀏覽器不支援旋轉後的圖片檔案')); }
+          }, 'image/jpeg', 0.92);
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('無法讀取圖片（HEIC 格式可能不支援）')); };
+        img.src = url;
+      });
+    }
+
+    // ========== Upload ==========
+    function updatePreview() {
+      const previewEl = document.getElementById('preview');
+      previewEl.innerHTML = '';
+      selectedFiles.forEach((f, i) => {
+        const url = URL.createObjectURL(f);
+        const div = document.createElement('div');
+        div.className = 'thumb';
+        div.innerHTML = `<img src="${url}" alt=""><span class="num">${i+1}</span><button type="button" class="rm" data-i="${i}" aria-label="移除相片">×</button><button type="button" class="rotate" data-rotate="${i}" aria-label="旋轉相片">↻</button>`;
+        previewEl.appendChild(div);
+      });
+      // Enable the button as soon as a name is entered. Validate the content on click
+      // and show a helpful message instead of leaving the button looking unresponsive.
+      document.getElementById('btnDoUpload').disabled = !document.getElementById('gameName').value.trim();
+    }
+    document.getElementById('preview').addEventListener('click', async e => {
+      const rotateBtn = e.target.closest('.rotate');
+      if (rotateBtn) {
+        const i = Number(rotateBtn.dataset.rotate);
+        if (!selectedFiles[i]) return;
+        rotateBtn.disabled = true;
+        try {
+          selectedFiles[i] = await rotateImageFile(selectedFiles[i]);
+          updatePreview();
+        } catch (err) {
+          toast('旋轉相片失敗：' + (err.message || '無法讀取圖片'), 3000, 'err');
+          rotateBtn.disabled = false;
+        }
+        return;
+      }
+      const btn = e.target.closest('.rm');
+      if (!btn) return;
+      selectedFiles.splice(+btn.dataset.i, 1);
+      updatePreview();
+    });
+    function appendSelectedFiles(inputId) {
+      const input = document.getElementById(inputId);
+      selectedFiles = selectedFiles.concat(Array.from(input.files || []));
+      input.value = '';
+      updatePreview();
+    }
+    document.getElementById('cameraInput').addEventListener('change', () => appendSelectedFiles('cameraInput'));
+    document.getElementById('albumInput').addEventListener('change', () => appendSelectedFiles('albumInput'));
+    document.getElementById('fileDrop').addEventListener('dragover', e => { e.preventDefault(); document.getElementById('fileDrop').classList.add('dragover'); });
+    document.getElementById('fileDrop').addEventListener('dragleave', () => document.getElementById('fileDrop').classList.remove('dragover'));
+    document.getElementById('fileDrop').addEventListener('drop', e => {
+      e.preventDefault();
+      document.getElementById('fileDrop').classList.remove('dragover');
+      selectedFiles = selectedFiles.concat(Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')));
+      updatePreview();
+    });
+    document.getElementById('gameName').addEventListener('input', updatePreview);
+    document.getElementById('gameText').addEventListener('input', updatePreview);
+
+    async function doUpload() {
+      if (!hasConfig()) { toast('請先確認 Supabase 連線'); return; }
+      const name = document.getElementById('gameName').value.trim();
+      if (!name) {
+        toast('請先輸入遊戲名稱', 2600, 'err');
+        document.getElementById('gameName').focus();
+        return;
+      }
+      const textContent = document.getElementById('gameText').value.trim();
+      // A title-only manual is valid; photos and description text are optional.
+      let slug = editingManual ? editingManual.slug : slugify(name);
+      const note = document.getElementById('gameNote').value.trim();
+      const cat = document.getElementById('gameCat').value;
+      let basePath = `${slug}`;
+      const btn = document.getElementById('btnDoUpload');
+      const progressWrap = document.getElementById('progressWrap');
+      const progressText = document.getElementById('progressText');
+      const progressBar = document.getElementById('progressBar');
+
+      btn.disabled = true;
+      progressWrap.classList.add('show');
+      progressBar.style.width = '0%';
+
+      try {
+        const existingManual = editingManual || MANUALS.find(m => m.slug === slug);
+        // Keep the storage slug stable when editing. Display-name changes must never move/delete photo files.
+        if (editingManual) {
+          slug = editingManual.slug;
+          basePath = editingManual.slug;
+        }
+        let pages = existingManual ? [...(existingManual.files || [])] : [];
+
+        const total = selectedFiles.length;
+        for (let i = 0; i < total; i++) {
+          progressText.textContent = `轉 JPEG ${i+1}/${total}…`;
+          progressBar.style.width = ((i / Math.max(total, 1)) * 40) + '%';
+          const compressed = await compressImage(selectedFiles[i], 1600, 0.82);
+          const pageNum = String(pages.length + 1).padStart(3, '0');
+          const fileName = `${pageNum}.jpg`;
+          progressText.textContent = `上傳 ${fileName}（${Math.round(compressed.size/1024)} KB）…`;
+          progressBar.style.width = (40 + (i / Math.max(total, 1)) * 50) + '%';
+          await sbUploadBase64(`${basePath}/${fileName}`, compressed.base64, 'image/jpeg');
+          pages.push(fileName);
+        }
+        progressText.textContent = '更新索引…';
+        progressBar.style.width = '92%';
+        const existingIdx = MANUALS.findIndex(m => m.slug === (editingManual ? editingManual.slug : slug));
+        const entry = {
+          name, slug, note, category: cat || '',
+          pages: pages.length, files: pages,
+          text: textContent || '',
+          updated: new Date().toISOString()
+        };
+        const previousManuals = MANUALS.map(m => ({...m}));
+        if (existingIdx >= 0) MANUALS[existingIdx] = entry;
+        else MANUALS.unshift(entry);
+        try {
+          await saveIndex(MANUALS, `Add/Update: ${name}`);
+        } catch (indexError) {
+          MANUALS = previousManuals;
+          throw new Error(`索引更新失敗：${indexError.message}。已保留舊資料夾；若剛才已複製新資料夾，新資料夾也會保留，請檢查後再試。`);
+        }
+        // No storage cleanup on rename: photos remain at their original paths.
+        progressBar.style.width = '100%';
+        progressText.textContent = '完成！';
+        toast(`${editingManual ? '已更新' : '已上傳'}「${name}」`, 2600, 'ok');
+        editingManual = null;
+        document.querySelector('#uploadModal .modal-header .title').textContent = '🐻 新增桌遊本本';
+        btn.textContent = '上傳到雲端';
+        renderCats();
+        fillCatSelect();
+        render();
+        setStatus('');
+        setTimeout(() => { closeUpload(); loadIndex().catch(() => {}); }, 500);
+      } catch (e) {
+        console.error(e);
+        progressText.textContent = '失敗：' + e.message;
+        setStatus('上傳失敗：' + e.message, 'error');
+        toast('上傳失敗', 2800, 'err');
+        btn.disabled = false;
+      }
+    }
+
+        // ========== Viewer ==========
+    function openViewer(manual) {
+      viewerManual = manual;
+      viewerManual = manual;
+      document.getElementById('viewerTitle').textContent = manual.name + (manual.note ? ` · ${manual.note}` : '');
+      const body = document.getElementById('viewerBody');
+      body.innerHTML = '';
+      viewerText = manual.text || '';
+      const base = `${manual.slug}`;
+      viewerImages = (manual.files || []).map(f => rawUrl(`${base}/${f}`));
+      if (!viewerImages.length && manual.pages) {
+        for (let i = 1; i <= manual.pages; i++) {
+          viewerImages.push(rawUrl(`${base}/${String(i).padStart(3,'0')}.jpg`));
+        }
+      }
+      viewerIndex = 0;
+      // If has text, show text first as "page 0"
+      showViewerPage();
+      document.getElementById('viewerModal').classList.add('open','fullscreen');
+      document.body.style.overflow = 'hidden';
+    }
+    function showViewerPage() {
+      const body = document.getElementById('viewerBody');
+      const delPhotoBtn = document.getElementById('viewerDeletePhoto');
+      const hasText = !!viewerText;
+      delPhotoBtn.style.display = (!hasText || viewerIndex > 0) && viewerImages.length ? '' : 'none';
+      const total = viewerImages.length + (hasText ? 1 : 0);
+      const pageEl = document.getElementById('viewerPage');
+      const prev = document.getElementById('viewerPrev');
+      const next = document.getElementById('viewerNext');
+
+      if (total === 0) {
+        body.innerHTML = '<div style="color:#ccc;padding:30px;text-align:center">沒有內容</div>';
+        pageEl.textContent = '0/0';
+        prev.disabled = next.disabled = true;
+        return;
+      }
+
+      if (hasText && viewerIndex === 0) {
+        body.innerHTML = `<div class="viewer-text">${escapeHtml(viewerText)}</div>`;
+        if (viewerImages.length === 0) {
+          // only text
+        }
+      } else {
+        const imgIdx = hasText ? viewerIndex - 1 : viewerIndex;
+        const src = viewerImages[imgIdx];
+        body.innerHTML = `<img class="viewer-page-image" src="${src}" alt="第 ${imgIdx+1} 頁" draggable="false" onerror="this.parentNode.innerHTML='<div style=color:#ccc;padding:30px;text-align:center>載入失敗</div>'" />`;
+      }
+      pageEl.textContent = `${viewerIndex + 1} / ${total}`;
+      prev.disabled = viewerIndex <= 0;
+      next.disabled = viewerIndex >= total - 1;
+      body.scrollTop = 0;
+      imageScale = 1;
+      viewerRotation = 0;
+      const shownImage = body.querySelector('.viewer-page-image');
+      const rotateBtn = document.getElementById('viewerRotate');
+      if (rotateBtn) rotateBtn.style.display = shownImage ? '' : 'none';
+      if (shownImage) { shownImage.style.transform = ''; shownImage.style.maxWidth = '100%'; }
+    }
+    function escapeHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+    }
+    function closeViewer() {
+      document.getElementById('viewerModal').classList.remove('open','fullscreen');
+      document.body.style.overflow = '';
+      viewerImages = []; viewerText = ''; viewerIndex = 0; viewerRotation = 0; imageScale = 1;
+    }
+
+    // ========== Render Manuals ==========
+    function highlight(text, q) {
+      if (!q || !text) return text || '';
+      try {
+        return text.replace(new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'), '<span class="highlight">$1</span>');
+      } catch (e) { return text; }
+    }
+    function render() {
+      let list = MANUALS;
+      if (activeCat && activeCat !== '全部') {
+        list = list.filter(m => (m.category || '') === activeCat);
+      }
+      if (query.trim()) {
+        const q = query.trim().toLowerCase();
+        list = list.filter(m =>
+          (m.name || '').toLowerCase().includes(q) ||
+          (m.note || '').toLowerCase().includes(q) ||
+          (m.text || '').toLowerCase().includes(q)
+        );
+      }
+      totalEl.textContent = MANUALS.length;
+      shownEl.textContent = list.length;
+
+      if (!list.length) {
+        grid.innerHTML = MANUALS.length
+          ? '<div class="empty"><div class="emoji">🔍</div>找不到相關桌遊本本</div>'
+          : '<div class="empty"><div class="emoji">🐻</div>還沒有桌遊本本<br><small>點右下角 ＋ 開始新增</small></div>';
+        return;
+      }
+      grid.innerHTML = list.map(m => `
+        <article class="card" data-slug="${m.slug}">
+          <div class="card-top">
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              ${m.category ? `<span class="badge cat">${m.category}</span>` : ''}
+              <span class="badge pages">${m.pages || 0} 頁${m.text ? ' · 有文字' : ''}</span>
             </div>
-        </template>
-    </div>
+            <div class="card-actions">
+              <button type="button" class="card-edit" data-edit-slug="${m.slug}" aria-label="編輯 ${escapeHtml(m.name || '說明書')}">編輯</button>
+              <button type="button" class="card-delete" data-delete-slug="${m.slug}" aria-label="刪除 ${escapeHtml(m.name || '說明書')}">刪除</button>
+            </div>
+          </div>
+          <div class="card-title">${highlight(m.name, query)}</div>
+          ${m.note ? `<div class="card-sub">${highlight(m.note, query)}</div>` : ''}
+          <div class="card-meta">${m.updated ? new Date(m.updated).toLocaleDateString('zh-HK') : ''}</div>
+        </article>
+      `).join('');
+    }
 
+    // ========== Score ==========
+    function saveScores() {
+      localStorage.setItem(LS_SCORE, JSON.stringify(scores));
+    }
+    let mjHistory = [];
+    try {
+      const mh = localStorage.getItem('benben_mj_history');
+      if (mh) mjHistory = JSON.parse(mh);
+    } catch (e) {}
+
+    // 廣東麻雀半辣上：3番=16, 4=32, 5=64… 8番起封頂 512
+    function getMahjongBaseScore(fan) {
+      if (fan < 3) return 0;
+      if (fan >= 8) return 512;
+      return 16 * Math.pow(2, fan - 3);
+    }
+    function saveMjHistory() {
+      localStorage.setItem('benben_mj_history', JSON.stringify(mjHistory.slice(0, 50)));
+    }
+    function fillMjSelects() {
+      const opts = scores.map((p, i) => `<option value="${i}">${p.name}</option>`).join('');
+      const w = document.getElementById('mjWinner');
+      const l = document.getElementById('mjLoser');
+      if (w) w.innerHTML = opts || '<option value="">請先加入玩家</option>';
+      if (l) l.innerHTML = opts || '<option value="">請先加入玩家</option>';
+    }
+    function updateMjUndoBtn() {
+      const btn = document.getElementById('btnMjUndo');
+      if (btn) btn.disabled = !mjHistory.length;
+    }
+    function renderMjHistory() {
+      const el = document.getElementById('mjHistory');
+      if (!el) return;
+      if (!mjHistory.length) {
+        el.innerHTML = '<div class="settle-empty">暫無紀錄</div>';
+        updateMjUndoBtn();
+        return;
+      }
+      el.innerHTML = mjHistory.map((h, i) => `
+        <div class="settle-line" style="flex-direction:column;align-items:flex-start;gap:2px">
+          <span>${i === 0 ? '🆕 ' : ''}${h.msg}</span>
+          <span class="hint" style="padding:0">${h.time}</span>
+        </div>
+      `).join('');
+      updateMjUndoBtn();
+    }
+    function undoLastMjRound() {
+      if (!mjHistory.length) { toast('沒有可還原的紀錄'); return; }
+      const last = mjHistory[0];
+      if (!last.snapshot || !Array.isArray(last.snapshot)) {
+        toast('此紀錄無法還原（舊資料）'); return;
+      }
+      // 還原分數快照
+      const snapMap = {};
+      last.snapshot.forEach(s => { snapMap[s.name] = s.score; });
+      scores.forEach(p => {
+        if (Object.prototype.hasOwnProperty.call(snapMap, p.name)) {
+          p.score = snapMap[p.name];
+        }
+      });
+      mjHistory.shift();
+      saveMjHistory();
+      saveScores();
+      renderScores();
+      renderMjHistory();
+      updateFanHint();
+      const sr = document.getElementById('settleResult');
+      if (sr) sr.style.display = 'none';
+      toast('已還原上一鋪', 2200, 'ok');
+    }
+    function updateFanHint() {
+      const fan = parseInt((document.getElementById('mjFan') || {}).value, 10) || 3;
+      const base = getMahjongBaseScore(fan);
+      const unit = parseFloat((document.getElementById('unitPrice') || {}).value) || 1;
+      const hint = document.getElementById('mjFanHint');
+      if (!hint) return;
+      if (base === 0) {
+        hint.textContent = '少於 3 番不能起胡';
+        return;
+      }
+      const selfDraw = base * Math.max(scores.length - 1, 1);
+      const discard = base * 3;
+      hint.textContent = `${fan}番＝${base}分｜自摸每人付 ${base}分（共 +${selfDraw}）｜出沖包 ${discard}分｜約 $${(base * unit).toFixed(1)}／分`;
+    }
+    function setScoreMode(mode) {
+      scoreMode = mode;
+      localStorage.setItem(LS_MODE, mode);
+      document.querySelectorAll('#scoreModeSeg button').forEach(b => {
+        b.classList.toggle('active', b.dataset.mode === mode);
+      });
+      const isMoney = mode === 'mahjong' || mode === 'big2';
+      const unitWrap = document.getElementById('unitWrap');
+      const settleSection = document.getElementById('settleSection');
+      const mahjongPanel = document.getElementById('mahjongPanel');
+      const big2Panel = document.getElementById('big2Panel');
+      const countPanel = document.getElementById('countPanel');
+      if (unitWrap) unitWrap.style.display = isMoney ? '' : 'none';
+      if (settleSection) settleSection.style.display = isMoney ? '' : 'none';
+      if (mahjongPanel) mahjongPanel.style.display = mode === 'mahjong' ? '' : 'none';
+      if (big2Panel) big2Panel.style.display = mode === 'big2' ? '' : 'none';
+      if (countPanel) countPanel.style.display = mode === 'count' ? '' : 'none';
+      const settleResult = document.getElementById('settleResult');
+      if (settleResult) settleResult.style.display = 'none';
+      const unitLabel = document.getElementById('unitLabel');
+      const unitHint = document.getElementById('unitHint');
+      if (unitLabel) unitLabel.textContent = '每分金額（$）';
+      if (unitHint) {
+        unitHint.textContent = mode === 'mahjong'
+          ? '半辣上分數 × 每分金額 = 實收。例：3番自摸、每分$1 → 各家付$16'
+          : mode === 'big2'
+            ? '剩牌得分 × 每分金額 = 實收。雙倍／三倍張數可自訂'
+            : '分數 × 每分金額 = 實收金額';
+      }
+      renderScores();
+      if (mode === 'count') {
+        renderCountInputs();
+        renderCountHistory();
+      }
+      if (mode === 'mahjong') {
+        fillMjSelects();
+        renderMjHistory();
+        updateFanHint();
+      }
+      if (mode === 'big2') {
+        loadB2Thresholds();
+        fillB2UI();
+        renderB2History();
+        updateB2RuleHint();
+      }
+      scorePageDirty = false;
+    }
+    function renderScores() {
+      const list = document.getElementById('playerList');
+      if (!scores.length) {
+        list.innerHTML = '<div class="empty" style="padding:30px"><div class="emoji">🏆</div>還沒有玩家<br><small>在下方加入名字開始計分</small></div>';
+        fillMjSelects();
+        return;
+      }
+      const sorted = scores.slice().sort((a, b) => b.score - a.score);
+      // 自訂計分用下方計分器，唔喺列表用 ±1，避免同回合總分唔同步
+      const showBtns = false;
+      list.innerHTML = sorted.map((p, i) => {
+        const cls = p.score > 0 ? 'pos' : (p.score < 0 ? 'neg' : '');
+        const unit = parseFloat((document.getElementById('unitPrice') || {}).value) || 1;
+        const moneyHint = (scoreMode === 'mahjong' || scoreMode === 'big2') && p.score !== 0
+          ? `<span class="hint" style="display:block;padding:0;margin-top:2px">≈ $${(p.score * unit).toFixed(1)}</span>`
+          : '';
+        return `
+        <div class="player-row" data-name="${p.name}">
+          <span style="font-size:0.85rem;color:var(--muted);width:22px">${i === 0 && p.score > 0 ? '👑' : (i+1)}</span>
+          <span class="name">${p.name}${moneyHint}</span>
+          <span class="score ${cls}">${p.score > 0 ? '+' : ''}${p.score}</span>
+          ${showBtns ? `<div class="score-btns">
+            <button type="button" class="score-btn minus" data-act="minus">−</button>
+            <button type="button" class="score-btn plus" data-act="plus">＋</button>
+          </div>` : ''}
+        </div>`;
+      }).join('');
+      fillMjSelects();
+      if (scoreMode === 'big2') fillB2UI();
+      if (scoreMode === 'count') renderCountInputs();
+    }
+    function computeSettlement() {
+      const unit = parseFloat((document.getElementById('unitPrice') || {}).value) || 1;
+      const people = scores.map(p => ({ name: p.name, money: p.score * unit }));
+      const creditors = people.filter(p => p.money > 0.001).map(p => ({ ...p })).sort((a, b) => b.money - a.money);
+      const debtors = people.filter(p => p.money < -0.001).map(p => ({ ...p, money: -p.money })).sort((a, b) => b.money - a.money);
+      const lines = [];
+      let i = 0, j = 0;
+      while (i < debtors.length && j < creditors.length) {
+        const pay = Math.min(debtors[i].money, creditors[j].money);
+        if (pay > 0.001) {
+          lines.push({ from: debtors[i].name, to: creditors[j].name, amount: Math.round(pay * 100) / 100 });
+        }
+        debtors[i].money -= pay;
+        creditors[j].money -= pay;
+        if (debtors[i].money < 0.001) i++;
+        if (creditors[j].money < 0.001) j++;
+      }
+      return lines;
+    }
+    document.getElementById('playerList').addEventListener('click', e => {
+      const btn = e.target.closest('.score-btn');
+      if (!btn) return;
+      const row = btn.closest('.player-row');
+      const name = row.dataset.name;
+      const p = scores.find(x => x.name === name);
+      if (!p) return;
+      if (btn.dataset.act === 'plus') p.score++;
+      else p.score--;
+      saveScores();
+      renderScores();
+      const sr = document.getElementById('settleResult');
+      if (sr) sr.style.display = 'none';
+    });
+    document.getElementById('btnAddPlayer').addEventListener('click', addPlayer);
+    document.getElementById('newPlayerName').addEventListener('keydown', e => {
+      if (e.key === 'Enter') addPlayer();
+    });
+    function addPlayer() {
+      const name = document.getElementById('newPlayerName').value.trim();
+      if (!name) return;
+      if (scores.some(p => p.name === name)) { toast('已經有這個名字'); return; }
+      scores.push({ name, score: 0 });
+      document.getElementById('newPlayerName').value = '';
+      saveScores();
+      renderScores();
+      toast(`已加入 ${name}`);
+    }
+    document.getElementById('btnResetScores').addEventListener('click', async () => {
+      const ok = await softConfirm('分數歸零，並清空自訂／麻雀／鋤大D 全部對局紀錄？', {
+        title: '全部歸零', icon: '🔄', okText: '歸零'
+      });
+      if (!ok) return;
+      scores.forEach(p => p.score = 0);
+      saveScores();
+      // 清空三種模式的對局紀錄
+      countHistory = [];
+      mjHistory = [];
+      b2History = [];
+      saveCountHistory();
+      saveMjHistory();
+      saveB2History();
+      renderScores();
+      if (typeof renderCountHistory === 'function') renderCountHistory();
+      if (typeof renderMjHistory === 'function') renderMjHistory();
+      if (typeof renderB2History === 'function') renderB2History();
+      if (typeof renderCountInputs === 'function') renderCountInputs();
+      const sr = document.getElementById('settleResult');
+      if (sr) sr.style.display = 'none';
+      toast('分數與全部紀錄已歸零', 2600, 'ok');
+    });
+    document.getElementById('btnClearPlayers').addEventListener('click', async () => {
+      const ok = await softConfirm('確定清除所有玩家？此操作無法復原。', {
+        title: '清除玩家', icon: '🧹', okText: '清除'
+      });
+      if (!ok) return;
+      scores = [];
+      saveScores();
+      renderScores();
+      const sr = document.getElementById('settleResult');
+      if (sr) sr.style.display = 'none';
+      toast('已清除所有玩家', 2200, 'info');
+    });
+    document.querySelectorAll('#scoreModeSeg button').forEach(btn => {
+      btn.addEventListener('click', () => setScoreMode(btn.dataset.mode));
+    });
+    const unitPriceEl = document.getElementById('unitPrice');
+    if (unitPriceEl) {
+      unitPriceEl.addEventListener('change', () => {
+        localStorage.setItem(LS_UNIT, unitPriceEl.value);
+      });
+    }
+    const btnSettle = document.getElementById('btnSettle');
+    if (btnSettle) {
+      btnSettle.addEventListener('click', () => {
+        if (scores.length < 2) { toast('至少需要兩位玩家'); return; }
+        const lines = computeSettlement();
+        const box = document.getElementById('settleResult');
+        const linesEl = document.getElementById('settleLines');
+        box.style.display = '';
+        if (!lines.length) {
+          linesEl.innerHTML = '<div class="settle-empty">目前無須收付款（分數平衡）</div>';
+          return;
+        }
+        const modeName = scoreMode === 'mahjong' ? '麻雀' : '鋤大D';
+        linesEl.innerHTML = lines.map(l => `
+          <div class="settle-line">
+            <span><strong>${l.from}</strong> → <strong>${l.to}</strong></span>
+            <span class="amount">$${l.amount}</span>
+          </div>
+        `).join('') + `<p class="field" style="margin:10px 0 0"><span class="hint">依目前分數 × 每分金額計算（${modeName}）</span></p>`;
+      });
+    }
+
+    // 廣東麻雀本局計算
+    const mjWinType = document.getElementById('mjWinType');
+    if (mjWinType) {
+      mjWinType.addEventListener('change', () => {
+        const wrap = document.getElementById('mjLoserWrap');
+        if (wrap) wrap.style.display = mjWinType.value === 'discard' ? '' : 'none';
+      });
+    }
+    const mjFan = document.getElementById('mjFan');
+    if (mjFan) mjFan.addEventListener('input', updateFanHint);
+    const unitPriceEl2 = document.getElementById('unitPrice');
+    if (unitPriceEl2) unitPriceEl2.addEventListener('input', updateFanHint);
+
+    const btnMjCalc = document.getElementById('btnMjCalc');
+    if (btnMjCalc) {
+      btnMjCalc.addEventListener('click', () => {
+        if (scores.length < 2) { toast('請先加入至少兩位玩家'); return; }
+        const winnerIdx = parseInt(document.getElementById('mjWinner').value, 10);
+        const winType = document.getElementById('mjWinType').value;
+        const fan = parseInt(document.getElementById('mjFan').value, 10) || 0;
+        const loserIdx = parseInt(document.getElementById('mjLoser').value, 10);
+        if (isNaN(winnerIdx) || winnerIdx < 0 || winnerIdx >= scores.length) {
+          toast('請選擇贏家'); return;
+        }
+        if (winType === 'discard') {
+          if (isNaN(loserIdx) || loserIdx < 0 || loserIdx >= scores.length) {
+            toast('請選擇出沖者'); return;
+          }
+          if (winnerIdx === loserIdx) {
+            toast('勝者與放銃者不能為同一人'); return;
+          }
+        }
+        const base = getMahjongBaseScore(fan);
+        if (base === 0) {
+          toast('少於 3 番不能起胡'); return;
+        }
+        // 先備份分數，方便還原
+        const snapshot = scores.map(p => ({ name: p.name, score: p.score }));
+        let logMsg = '';
+        if (winType === 'self-draw') {
+          let totalGain = 0;
+          scores.forEach((p, idx) => {
+            if (idx !== winnerIdx) {
+              p.score -= base;
+              totalGain += base;
+            }
+          });
+          scores[winnerIdx].score += totalGain;
+          logMsg = `${scores[winnerIdx].name} 自摸 ${fan}番（+${totalGain}分，各家付 ${base}）`;
+        } else {
+          // 出沖：放銃者包三家份（base × 3）
+          const totalAmount = base * 3;
+          scores[loserIdx].score -= totalAmount;
+          scores[winnerIdx].score += totalAmount;
+          logMsg = `${scores[winnerIdx].name} 食 ${scores[loserIdx].name} ${fan}番（+${totalAmount}分）`;
+        }
+        mjHistory.unshift({
+          msg: logMsg,
+          time: new Date().toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          snapshot
+        });
+        saveMjHistory();
+        saveScores();
+        renderScores();
+        renderMjHistory();
+        updateFanHint();
+        const sr = document.getElementById('settleResult');
+        if (sr) sr.style.display = 'none';
+        toast('本局已記入', 2200, 'ok');
+      });
+    }
+
+    const btnMjUndo = document.getElementById('btnMjUndo');
+    if (btnMjUndo) btnMjUndo.addEventListener('click', undoLastMjRound);
+    const btnMjClearHistory = document.getElementById('btnMjClearHistory');
+    if (btnMjClearHistory) {
+      btnMjClearHistory.addEventListener('click', async () => {
+        if (!mjHistory.length) { toast('沒有紀錄', 2000, 'info'); return; }
+        const ok = await softConfirm('確定清空對局紀錄？玩家分數不會改變。', {
+          title: '清空紀錄', icon: '📋', okText: '清空'
+        });
+        if (!ok) return;
+        mjHistory = [];
+        saveMjHistory();
+        renderMjHistory();
+        toast('紀錄已清空', 2200, 'ok');
+      });
+    }
+
+    // ========== Count / 自訂計分 ==========
+    let countHistory = [];
+    try {
+      const ch = localStorage.getItem('benben_count_history');
+      if (ch) countHistory = JSON.parse(ch);
+    } catch (e) {}
+    function saveCountHistory() {
+      localStorage.setItem('benben_count_history', JSON.stringify(countHistory.slice(0, 50)));
+    }
+    function renderCountInputs() {
+      const el = document.getElementById('countInputs');
+      if (!el) return;
+      if (!scores.length) {
+        el.innerHTML = '<p class="hint">請先加入玩家</p>';
+        return;
+      }
+      el.innerHTML = scores.map((p, idx) => `
+        <div class="player-row" style="margin-bottom:8px">
+          <span class="name">${p.name}</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <button type="button" class="score-btn minus count-adj" data-idx="${idx}" data-d="-1">−</button>
+            <input type="text" inputmode="text" class="count-delta" data-idx="${idx}" value="" placeholder="0"
+              autocomplete="off"
+              style="width:72px;padding:8px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg-soft);text-align:center;font-family:inherit;font-size:1rem;font-weight:600" />
+            <button type="button" class="score-btn plus count-adj" data-idx="${idx}" data-d="1">＋</button>
+          </div>
+        </div>
+      `).join('');
+    }
+    function updateCountUndoBtn() {
+      const btn = document.getElementById('btnCountUndo');
+      if (btn) btn.disabled = !countHistory.length;
+    }
+    function updateCountHistoryToggleLabel(open) {
+      const btn = document.getElementById('btnCountHistoryToggle');
+      if (!btn) return;
+      const n = countHistory.length;
+      const isOpen = open != null ? open : (document.getElementById('countHistoryWrap') || {}).style?.display !== 'none';
+      btn.textContent = `📋 回合紀錄（${n}）` + (isOpen ? ' ▴' : ' ▾');
+    }
+    function openCountHistory() {
+      const wrap = document.getElementById('countHistoryWrap');
+      if (wrap) wrap.style.display = '';
+      updateCountHistoryToggleLabel(true);
+    }
+    function renderCountHistory() {
+      const el = document.getElementById('countHistory');
+      if (!el) return;
+      if (!countHistory.length) {
+        el.innerHTML = '<div class="settle-empty">暫無紀錄</div>';
+        updateCountUndoBtn();
+        updateCountHistoryToggleLabel();
+        return;
+      }
+      // 欄：依目前玩家為主，並補上歷史出現過的名字
+      const colSet = [];
+      scores.forEach(p => { if (!colSet.includes(p.name)) colSet.push(p.name); });
+      countHistory.forEach(h => {
+        const names = h.names || (h.deltas ? Object.keys(h.deltas) : []);
+        names.forEach(n => { if (!colSet.includes(n)) colSet.push(n); });
+      });
+      // 列：最舊在上（第 1 回合）
+      const rounds = countHistory.slice().reverse();
+      let html = '<div class="score-grid-wrap"><table class="score-grid"><thead><tr><th>回合</th>';
+      colSet.forEach(n => { html += `<th>${n}</th>`; });
+      html += '</tr></thead><tbody>';
+      rounds.forEach((h, i) => {
+        html += `<tr><td>第 ${i + 1} 回合</td>`;
+        colSet.forEach(name => {
+          let v = null;
+          if (h.deltas && Object.prototype.hasOwnProperty.call(h.deltas, name)) {
+            v = h.deltas[name];
+          }
+          if (v == null || v === 0) {
+            html += `<td class="num-zero">${v === 0 ? '0' : '—'}</td>`;
+          } else if (v > 0) {
+            html += `<td class="num-pos">+${v}</td>`;
+          } else {
+            html += `<td class="num-neg">${v}</td>`;
+          }
+        });
+        html += '</tr>';
+      });
+      // 總分列 = 各回合該欄加總（與試算表一致）
+      html += '<tr class="total-row"><td>總分</td>';
+      colSet.forEach(name => {
+        let total = 0;
+        rounds.forEach(h => {
+          if (h.deltas && Object.prototype.hasOwnProperty.call(h.deltas, name)) {
+            total += Number(h.deltas[name]) || 0;
+          }
+        });
+        const cls = total > 0 ? 'num-pos' : (total < 0 ? 'num-neg' : 'num-zero');
+        const text = total > 0 ? '+' + total : String(total);
+        html += `<td class="${cls}">${text}</td>`;
+      });
+      html += '</tr></tbody></table></div>';
+      el.innerHTML = html;
+      updateCountUndoBtn();
+      updateCountHistoryToggleLabel();
+    }
+    function undoLastCountRound() {
+      if (!countHistory.length) { toast('沒有可還原的紀錄'); return; }
+      const last = countHistory[0];
+      if (!last.snapshot || !Array.isArray(last.snapshot)) {
+        toast('此紀錄無法還原'); return;
+      }
+      const snapMap = {};
+      last.snapshot.forEach(s => { snapMap[s.name] = s.score; });
+      scores.forEach(p => {
+        if (Object.prototype.hasOwnProperty.call(snapMap, p.name)) p.score = snapMap[p.name];
+      });
+      countHistory.shift();
+      saveCountHistory();
+      saveScores();
+      renderScores();
+      renderCountInputs();
+      renderCountHistory();
+      toast('已還原上一回', 2200, 'ok');
+    }
+    function applyCountRound() {
+      if (!scores.length) { toast('請先加入玩家'); return; }
+      const deltas = [];
+      let any = false;
+      scores.forEach((p, idx) => {
+        const input = document.querySelector(`.count-delta[data-idx="${idx}"]`);
+        const raw = (input && input.value !== '') ? parseFloat(input.value) : 0;
+        const d = isNaN(raw) ? 0 : raw;
+        deltas.push(d);
+        if (d !== 0) any = true;
+      });
+      if (!any) { toast('請至少輸入一個非 0 分數（如 +10 或 −5）'); return; }
+      const snapshot = scores.map(p => ({ name: p.name, score: p.score }));
+      const deltaMap = {};
+      const details = [];
+      scores.forEach((p, idx) => {
+        const d = deltas[idx];
+        deltaMap[p.name] = d;
+        p.score += d;
+        if (d !== 0) details.push(`${p.name} ${d > 0 ? '+' : ''}${d}`);
+      });
+      countHistory.unshift({
+        msg: details.join(' · ') || '本回合無變動',
+        names: scores.map(p => p.name),
+        deltas: deltaMap,
+        time: new Date().toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        snapshot
+      });
+      saveCountHistory();
+      saveScores();
+      renderScores();
+      renderCountInputs();
+      renderCountHistory();
+      openCountHistory(); // 記入後自動展開紀錄
+      toast('本回合已記入', 2200, 'ok');
+    }
+
+    document.getElementById('countInputs')?.addEventListener('click', e => {
+      const btn = e.target.closest('.count-adj');
+      if (!btn) return;
+      const idx = btn.dataset.idx;
+      const input = document.querySelector(`.count-delta[data-idx="${idx}"]`);
+      if (!input) return;
+      const cur = parseFloat(input.value) || 0;
+      input.value = cur + parseInt(btn.dataset.d, 10);
+    });
+    document.getElementById('btnCountApply')?.addEventListener('click', applyCountRound);
+    document.getElementById('btnCountUndo')?.addEventListener('click', undoLastCountRound);
+    document.getElementById('btnCountQuick0')?.addEventListener('click', () => {
+      document.querySelectorAll('.count-delta').forEach(i => { i.value = ''; });
+    });
+    document.getElementById('btnCountQuickP5')?.addEventListener('click', () => {
+      document.querySelectorAll('.count-delta').forEach(i => { i.value = '5'; });
+    });
+    document.getElementById('btnCountClearHistory')?.addEventListener('click', async () => {
+      if (!countHistory.length) { toast('沒有紀錄', 2000, 'info'); return; }
+      const ok = await softConfirm('確定清空回合紀錄？玩家分數不會改變。', {
+        title: '清空紀錄', icon: '📋', okText: '清空'
+      });
+      if (!ok) return;
+      countHistory = [];
+      saveCountHistory();
+      renderCountHistory();
+      toast('紀錄已清空', 2200, 'ok');
+    });
+
+    // ========== 鋤大D ==========
+    let b2History = [];
+    try {
+      const bh = localStorage.getItem('benben_b2_history');
+      if (bh) b2History = JSON.parse(bh);
+    } catch (e) {}
+    function saveB2History() {
+      localStorage.setItem('benben_b2_history', JSON.stringify(b2History.slice(0, 50)));
+    }
+    function loadB2Thresholds() {
+      const d = localStorage.getItem('benben_b2_double');
+      const t = localStorage.getItem('benben_b2_triple');
+      const dEl = document.getElementById('b2DoubleAt');
+      const tEl = document.getElementById('b2TripleAt');
+      if (dEl && d != null) dEl.value = d;
+      if (tEl && t != null) tEl.value = t;
+    }
+    function saveB2Thresholds() {
+      const dEl = document.getElementById('b2DoubleAt');
+      const tEl = document.getElementById('b2TripleAt');
+      if (dEl) localStorage.setItem('benben_b2_double', dEl.value);
+      if (tEl) localStorage.setItem('benben_b2_triple', tEl.value);
+      updateB2RuleHint();
+    }
+    function getB2Rate(cards) {
+      const tripleAt = parseInt((document.getElementById('b2TripleAt') || {}).value, 10) || 13;
+      const doubleAt = parseInt((document.getElementById('b2DoubleAt') || {}).value, 10) || 10;
+      if (cards >= tripleAt) return 3;
+      if (cards >= doubleAt) return 2;
+      return 1;
+    }
+    function updateB2RuleHint() {
+      const doubleAt = parseInt((document.getElementById('b2DoubleAt') || {}).value, 10) || 10;
+      const tripleAt = parseInt((document.getElementById('b2TripleAt') || {}).value, 10) || 13;
+      const hint = document.getElementById('b2RuleHint');
+      if (hint) hint.textContent = `剩牌 ≥${doubleAt} 雙倍 · ≥${tripleAt} 三倍 · 每張剩 2 再 ×2`;
+      const refD = document.getElementById('b2RefDouble');
+      const refT = document.getElementById('b2RefTriple');
+      if (refD) refD.textContent = `剩牌 ≥ ${doubleAt} 張`;
+      if (refT) refT.textContent = `剩牌 ≥ ${tripleAt} 張`;
+    }
+    function fillB2UI() {
+      const w = document.getElementById('b2Winner');
+      if (!w) return;
+      const prev = w.value;
+      w.innerHTML = scores.map((p, i) => `<option value="${i}">${p.name}</option>`).join('')
+        || '<option value="">請先加入玩家</option>';
+      if (prev !== '' && +prev < scores.length) w.value = prev;
+      renderB2Losers();
+    }
+    function renderB2Losers() {
+      const container = document.getElementById('b2Losers');
+      if (!container) return;
+      const winnerIdx = parseInt((document.getElementById('b2Winner') || {}).value, 10);
+      if (!scores.length || isNaN(winnerIdx)) {
+        container.innerHTML = '<p class="hint">請先加入玩家並選擇勝者</p>';
+        return;
+      }
+      container.innerHTML = scores.map((p, idx) => {
+        if (idx === winnerIdx) return '';
+        return `
+          <div class="player-row" style="margin-bottom:8px" data-b2-loser="${idx}">
+            <span class="name">${p.name}</span>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+              <label class="hint" style="padding:0;margin:0">剩牌</label>
+              <input type="number" class="b2-cards" data-idx="${idx}" min="1" max="13" value="1"
+                style="width:52px;padding:6px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg-soft);text-align:center;font-family:inherit;font-size:0.9rem" />
+              <label class="hint" style="padding:0;margin:0">剩2</label>
+              <input type="number" class="b2-twos" data-idx="${idx}" min="0" max="4" value="0"
+                style="width:44px;padding:6px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg-soft);text-align:center;font-family:inherit;font-size:0.9rem;color:var(--accent-dark);font-weight:700" />
+            </div>
+          </div>`;
+      }).join('');
+    }
+    function updateB2UndoBtn() {
+      const btn = document.getElementById('btnB2Undo');
+      if (btn) btn.disabled = !b2History.length;
+    }
+    function renderB2History() {
+      const el = document.getElementById('b2History');
+      if (!el) return;
+      if (!b2History.length) {
+        el.innerHTML = '<div class="settle-empty">暫無紀錄</div>';
+        updateB2UndoBtn();
+        return;
+      }
+      el.innerHTML = b2History.map((h, i) => `
+        <div class="settle-line" style="flex-direction:column;align-items:flex-start;gap:2px">
+          <span>${i === 0 ? '🆕 ' : ''}${h.msg}</span>
+          <span class="hint" style="padding:0">${h.time}</span>
+        </div>
+      `).join('');
+      updateB2UndoBtn();
+    }
+    function undoLastB2Round() {
+      if (!b2History.length) { toast('沒有可還原的紀錄'); return; }
+      const last = b2History[0];
+      if (!last.snapshot || !Array.isArray(last.snapshot)) {
+        toast('此紀錄無法還原'); return;
+      }
+      const snapMap = {};
+      last.snapshot.forEach(s => { snapMap[s.name] = s.score; });
+      scores.forEach(p => {
+        if (Object.prototype.hasOwnProperty.call(snapMap, p.name)) p.score = snapMap[p.name];
+      });
+      b2History.shift();
+      saveB2History();
+      saveScores();
+      renderScores();
+      fillB2UI();
+      renderB2History();
+      const sr = document.getElementById('settleResult');
+      if (sr) sr.style.display = 'none';
+      toast('已還原上一鋪', 2200, 'ok');
+    }
+    function calcB2Loss(cards, twos) {
+      const rate = getB2Rate(cards);
+      let loss = cards * rate;
+      if (twos > 0) loss *= Math.pow(2, twos);
+      return loss;
+    }
+
+    const b2WinnerEl = document.getElementById('b2Winner');
+    if (b2WinnerEl) b2WinnerEl.addEventListener('change', renderB2Losers);
+    ['b2DoubleAt', 'b2TripleAt'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('change', saveB2Thresholds);
+        el.addEventListener('input', updateB2RuleHint);
+      }
+    });
+    const btnB2Calc = document.getElementById('btnB2Calc');
+    if (btnB2Calc) {
+      btnB2Calc.addEventListener('click', () => {
+        if (scores.length < 2) { toast('請先加入至少兩位玩家'); return; }
+        const winnerIdx = parseInt(document.getElementById('b2Winner').value, 10);
+        if (isNaN(winnerIdx) || winnerIdx < 0 || winnerIdx >= scores.length) {
+          toast('請選擇勝者'); return;
+        }
+        saveB2Thresholds();
+        const snapshot = scores.map(p => ({ name: p.name, score: p.score }));
+        let totalGain = 0;
+        const details = [];
+        for (let idx = 0; idx < scores.length; idx++) {
+          if (idx === winnerIdx) continue;
+          const p = scores[idx];
+          const cardsEl = document.querySelector(`.b2-cards[data-idx="${idx}"]`);
+          const twosEl = document.querySelector(`.b2-twos[data-idx="${idx}"]`);
+          const cards = Math.min(13, Math.max(0, parseInt((cardsEl || {}).value, 10) || 0));
+          const twos = Math.min(4, Math.max(0, parseInt((twosEl || {}).value, 10) || 0));
+          if (cards < 1) {
+            toast(`${p.name} 剩牌請填 1–13`);
+            return;
+          }
+          const loss = calcB2Loss(cards, twos);
+          p.score -= loss;
+          totalGain += loss;
+          const rate = getB2Rate(cards);
+          details.push(`${p.name} −${loss}（${cards}張${rate > 1 ? '×' + rate : ''}${twos ? ' 剩2×' + Math.pow(2, twos) : ''}）`);
+        }
+        scores[winnerIdx].score += totalGain;
+        b2History.unshift({
+          msg: `${scores[winnerIdx].name} +${totalGain}｜${details.join(' · ')}`,
+          time: new Date().toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          snapshot
+        });
+        saveB2History();
+        saveScores();
+        renderScores();
+        fillB2UI();
+        renderB2History();
+        const sr = document.getElementById('settleResult');
+        if (sr) sr.style.display = 'none';
+        toast('本局已記入', 2200, 'ok');
+      });
+    }
+    const btnB2Undo = document.getElementById('btnB2Undo');
+    if (btnB2Undo) btnB2Undo.addEventListener('click', undoLastB2Round);
+    const btnB2ClearHistory = document.getElementById('btnB2ClearHistory');
+    if (btnB2ClearHistory) {
+      btnB2ClearHistory.addEventListener('click', async () => {
+        if (!b2History.length) { toast('沒有紀錄', 2000, 'info'); return; }
+        const ok = await softConfirm('確定清空對局紀錄？玩家分數不會改變。', {
+          title: '清空紀錄', icon: '📋', okText: '清空'
+        });
+        if (!ok) return;
+        b2History = [];
+        saveB2History();
+        renderB2History();
+        toast('紀錄已清空', 2200, 'ok');
+      });
+    }
+
+    // ========== Random Picker ==========
+    function savePicker() {
+      localStorage.setItem(LS_PICKER, JSON.stringify(pickerNames));
+      pickerPageDirty = true;
+    }
+    const WHEEL_COLORS = [
+      '#FF3B3B', '#FF8A00', '#FFD400', '#7CFF2E', '#00D4AA',
+      '#00B4FF', '#4B6CFF', '#9B4DFF', '#FF4DC4', '#FF6B6B',
+      '#FFB347', '#A8E063', '#38EF7D', '#5B86E5', '#C471F5'
+    ];
+    let wheelRotation = 0;
+    let wheelSpinning = false;
+    function drawWheel() {
+      const canvas = document.getElementById('wheelCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const size = canvas.width;
+      const cx = size / 2;
+      const cy = size / 2;
+      const r = size / 2 - 8;
+      ctx.clearRect(0, 0, size, size);
+
+      const names = pickerNames.length ? pickerNames : ['加入玩家'];
+      const n = names.length;
+      const arc = (Math.PI * 2) / n;
+
+      // 指針在下方，0 度為正下方（canvas 預設 0 為右，用 -90° 校正到上；我們要下方指針所以 +90° 從上方起算再轉）
+      // 繪製時：第一格從 -π/2 開始（正上方），指針在下方對應 π/2，轉完後用角度對齊
+      for (let i = 0; i < n; i++) {
+        const start = -Math.PI / 2 + i * arc;
+        const end = start + arc;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, r, start, end);
+        ctx.closePath();
+        ctx.fillStyle = WHEEL_COLORS[i % WHEEL_COLORS.length];
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // 名字
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(start + arc / 2);
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#fff';
+        ctx.font = `bold ${Math.max(18, Math.min(32, Math.floor(140 / Math.max(n, 2))))}px "Zen Maru Gothic", "Noto Sans TC", sans-serif`;
+        ctx.shadowColor = 'rgba(0,0,0,0.35)';
+        ctx.shadowBlur = 4;
+        const label = names[i].length > 8 ? names[i].slice(0, 7) + '…' : names[i];
+        ctx.fillText(label, r - 22, 0);
+        ctx.restore();
+      }
+
+      // 外圈光點
+      const dots = 16;
+      for (let i = 0; i < dots; i++) {
+        const a = (i / dots) * Math.PI * 2 - Math.PI / 2;
+        const dx = cx + Math.cos(a) * (r + 2);
+        const dy = cy + Math.sin(a) * (r + 2);
+        ctx.beginPath();
+        ctx.arc(dx, dy, 6, 0, Math.PI * 2);
+        ctx.fillStyle = i % 2 === 0 ? '#FFF8DC' : '#FFE566';
+        ctx.fill();
+      }
+    }
+    function renderPicker() {
+      const el = document.getElementById('pickerPlayers');
+      el.innerHTML = pickerNames.map((n, i) =>
+        `<span class="picker-tag">${n}<button type="button" class="rm" data-i="${i}">×</button></span>`
+      ).join('');
+      drawWheel();
+      const canvas = document.getElementById('wheelCanvas');
+      if (canvas) canvas.style.transform = `rotate(${wheelRotation}deg)`;
+      pickerPageDirty = false;
+    }
+    document.getElementById('pickerPlayers').addEventListener('click', e => {
+      const btn = e.target.closest('.rm');
+      if (!btn) return;
+      pickerNames.splice(+btn.dataset.i, 1);
+      savePicker();
+      renderPicker();
+    });
+    document.getElementById('btnPickerAdd').addEventListener('click', addPickerName);
+    document.getElementById('pickerNewName').addEventListener('keydown', e => {
+      if (e.key === 'Enter') addPickerName();
+    });
+    function addPickerName() {
+      const name = document.getElementById('pickerNewName').value.trim();
+      if (!name) return;
+      if (pickerNames.includes(name)) { toast('已經有了'); return; }
+      pickerNames.push(name);
+      document.getElementById('pickerNewName').value = '';
+      savePicker();
+      renderPicker();
+    }
+    document.getElementById('btnSyncFromScore').addEventListener('click', () => {
+      pickerNames = scores.map(p => p.name);
+      savePicker();
+      renderPicker();
+      toast(pickerNames.length ? `已同步 ${pickerNames.length} 人` : '計分板沒有玩家');
+    });
+    document.getElementById('btnSpin').addEventListener('click', () => {
+      if (pickerNames.length < 1) {
+        toast('請先加入至少一位玩家');
+        return;
+      }
+      if (wheelSpinning) return;
+      const canvas = document.getElementById('wheelCanvas');
+      const result = document.getElementById('pickerResult');
+      const msg = document.getElementById('pickerMsg');
+      const btn = document.getElementById('btnSpin');
+
+      const n = pickerNames.length;
+      const winnerIdx = Math.floor(Math.random() * n);
+      const winner = pickerNames[winnerIdx];
+
+      // 指針在正下方：每格 arcDeg，第 i 格中心在 (i+0.5)*arcDeg（由正上方順時針）
+      // 要令該中心對準正下方，需再轉 (180 - centerFromTop) 度，加上多圈
+      const arcDeg = 360 / n;
+      const centerFromTop = (winnerIdx + 0.5) * arcDeg;
+      const targetMod = (180 - centerFromTop + 360) % 360;
+      const extraTurns = 5 + Math.floor(Math.random() * 3); // 5–7 圈
+      const currentMod = ((wheelRotation % 360) + 360) % 360;
+      let delta = targetMod - currentMod;
+      if (delta < 0) delta += 360;
+      const finalRot = wheelRotation + extraTurns * 360 + delta;
+
+      wheelSpinning = true;
+      btn.disabled = true;
+      result.textContent = '轉緊…';
+      result.classList.remove('placeholder');
+      msg.textContent = '';
+      msg.classList.remove('win');
+
+      const duration = 4200;
+      const startRot = wheelRotation;
+      const startTime = performance.now();
+      function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+      }
+      function frame(now) {
+        const t = Math.min(1, (now - startTime) / duration);
+        const e = easeOutCubic(t);
+        wheelRotation = startRot + (finalRot - startRot) * e;
+        canvas.style.transform = `rotate(${wheelRotation}deg)`;
+        if (t < 1) {
+          requestAnimationFrame(frame);
+        } else {
+          wheelRotation = finalRot;
+          canvas.style.transform = `rotate(${wheelRotation}deg)`;
+          result.textContent = winner;
+          msg.textContent = `🎉 由「${winner}」開始！`;
+          msg.classList.add('win');
+          toast(`${winner} 先手！`, 2400, 'ok');
+          wheelSpinning = false;
+          btn.disabled = false;
+        }
+      }
+      requestAnimationFrame(frame);
+    });
+
+    // ========== 擲骰子 ==========
+    function loadDicePrefs() {
+      try {
+        const raw = localStorage.getItem('benben_dice_prefs');
+        if (!raw) return;
+        const p = JSON.parse(raw);
+        if (p.count != null) document.getElementById('diceCount').value = p.count;
+        if (p.min != null) document.getElementById('diceMin').value = p.min;
+        if (p.max != null) document.getElementById('diceMax').value = p.max;
+      } catch (e) {}
+    }
+    function saveDicePrefs() {
+      localStorage.setItem('benben_dice_prefs', JSON.stringify({
+        count: document.getElementById('diceCount').value,
+        min: document.getElementById('diceMin').value,
+        max: document.getElementById('diceMax').value
+      }));
+    }
+    function rollOneDie(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    document.getElementById('btnRollDice').addEventListener('click', () => {
+      let count = parseInt(document.getElementById('diceCount').value, 10) || 1;
+      let min = parseInt(document.getElementById('diceMin').value, 10);
+      let max = parseInt(document.getElementById('diceMax').value, 10);
+      if (isNaN(min)) min = 1;
+      if (isNaN(max)) max = 6;
+      count = Math.min(12, Math.max(1, count));
+      if (max < min) {
+        toast('最大點不能小於最小點', 2400, 'err');
+        return;
+      }
+      document.getElementById('diceCount').value = count;
+      document.getElementById('diceMin').value = min;
+      document.getElementById('diceMax').value = max;
+      saveDicePrefs();
+
+      const tray = document.getElementById('diceTray');
+      const sumEl = document.getElementById('diceSum');
+      const btn = document.getElementById('btnRollDice');
+      btn.disabled = true;
+      tray.innerHTML = Array.from({ length: count }, (_, i) =>
+        `<div class="die rolling" style="animation-delay:${(i % 5) * 0.06}s">?</div>`
+      ).join('');
+      sumEl.textContent = '擲緊…';
+
+      // 滾動時快速閃數字，更誇張
+      const flashTimer = setInterval(() => {
+        tray.querySelectorAll('.die.rolling').forEach(el => {
+          el.textContent = rollOneDie(min, max);
+        });
+      }, 80);
+
+      const results = [];
+      for (let i = 0; i < count; i++) results.push(rollOneDie(min, max));
+
+      setTimeout(() => {
+        clearInterval(flashTimer);
+        tray.innerHTML = results.map((v, i) =>
+          `<div class="die land" style="animation-delay:${i * 0.08}s">${v}</div>`
+        ).join('');
+        const total = results.reduce((a, b) => a + b, 0);
+        if (count === 1) {
+          sumEl.innerHTML = `結果：<strong>${total}</strong>`;
+        } else {
+          sumEl.innerHTML = `各粒：${results.join(' + ')} ＝ <strong>${total}</strong>`;
+        }
+        toast(count === 1 ? `擲到 ${total}` : `總和 ${total}`, 2200, 'ok');
+        btn.disabled = false;
+      }, 1100);
+    });
+    loadDicePrefs();
+
+    // ========== Navigation ==========
+    const PAGE_ORDER = ['pageManuals', 'pageScore', 'pageRandom'];
+    function goToPage(pageId) {
+      if (!PAGE_ORDER.includes(pageId)) return;
+      // 確保可以捲動（避免 modal 關閉後 overflow 卡死）
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      document.querySelectorAll('.nav-item').forEach(b => {
+        b.classList.toggle('active', b.dataset.page === pageId);
+      });
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      const pageEl = document.getElementById(pageId);
+      if (pageEl) pageEl.classList.add('active');
+      fabUpload.classList.toggle('show', pageId === 'pageManuals');
+      // 頂欄（標題／icon／設定）在所有分頁都保持顯示
+      if (pageId === 'pageScore' && scorePageDirty) setScoreMode(scoreMode);
+      if (pageId === 'pageRandom' && pickerPageDirty) renderPicker();
+      // 即時回頂，避免 smooth scroll 期間先短暫顯示舊捲動位置
+      window.scrollTo(0, 0);
+    }
+    document.querySelectorAll('.nav-item').forEach(btn => {
+      btn.addEventListener('click', () => goToPage(btn.dataset.page));
+    });
+
+    // 左右滑動切換主分頁（說明書 / 計分 / 抽選）
+    let swipeStartX = null;
+    let swipeStartY = null;
+    let swipeIgnore = false;
+    document.addEventListener('touchstart', e => {
+      if (e.touches.length !== 1) return;
+      // 模態開啟時唔轉頁
+      if (document.querySelector('.modal.open')) { swipeStartX = null; return; }
+      const t = e.target;
+      if (t.closest('input, select, textarea, button, a, .cats, .modal, .bottom-nav')) {
+        swipeIgnore = true;
+        swipeStartX = null;
+        return;
+      }
+      swipeIgnore = false;
+      swipeStartX = e.touches[0].clientX;
+      swipeStartY = e.touches[0].clientY;
+    }, { passive: true });
+    document.addEventListener('touchend', e => {
+      if (swipeIgnore || swipeStartX == null) return;
+      const dx = e.changedTouches[0].clientX - swipeStartX;
+      const dy = e.changedTouches[0].clientY - swipeStartY;
+      swipeStartX = null;
+      // 水平滑動要明顯大於垂直，避免同上下 scroll 衝突
+      if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+      const active = document.querySelector('.page.active');
+      const curId = active ? active.id : 'pageManuals';
+      const idx = PAGE_ORDER.indexOf(curId);
+      if (idx < 0) return;
+      if (dx < 0 && idx < PAGE_ORDER.length - 1) goToPage(PAGE_ORDER[idx + 1]); // 左滑 → 下一頁
+      if (dx > 0 && idx > 0) goToPage(PAGE_ORDER[idx - 1]); // 右滑 → 上一頁
+    }, { passive: true });
+
+    // 摺疊：紀錄 / 計番參考
+    document.querySelectorAll('.collapsible-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.target;
+        const body = document.getElementById(id);
+        if (!body) return;
+        const open = body.style.display !== 'none';
+        body.style.display = open ? 'none' : '';
+        if (id === 'countHistoryWrap' && typeof updateCountHistoryToggleLabel === 'function') {
+          updateCountHistoryToggleLabel(!open);
+        } else {
+          const label = btn.textContent.replace(/\s*[▾▴]\s*$/, '');
+          btn.textContent = open ? label + ' ▾' : label + ' ▴';
+        }
+      });
+    });
+
+    // ========== Events ==========
+    document.getElementById('btnSettings').addEventListener('click', () => {
+      settingsPanel.classList.toggle('open');
+    });
+    document.getElementById('btnTestConnection').addEventListener('click', () => {
+      testConnection();
+    });
+    document.getElementById('btnSaveCats').addEventListener('click', saveCats);
+    document.getElementById('btnRefresh').addEventListener('click', () => loadIndex());
+
+    let timer;
+    qEl.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        query = qEl.value.trim();
+        clearBtn.classList.toggle('show', !!query);
+        render();
+      }, 80);
+    });
+    clearBtn.addEventListener('click', () => {
+      qEl.value = ''; query = ''; clearBtn.classList.remove('show'); qEl.focus(); render();
+    });
+
+    fabUpload.addEventListener('click', () => {
+      if (!hasConfig()) {
+        settingsPanel.classList.add('open');
+        toast('請先確認 Supabase 設定');
+        return;
+      }
+      selectedFiles = [];
+      editingManual = null;
+      document.querySelector('#uploadModal .modal-header .title').textContent = '🐻 新增桌遊本本';
+      document.getElementById('btnDoUpload').textContent = '上傳到雲端';
+      document.getElementById('gameName').value = '';
+      document.getElementById('gameNote').value = '';
+      document.getElementById('gameText').value = '';
+      document.getElementById('preview').innerHTML = '';
+      document.getElementById('progressWrap').classList.remove('show');
+      document.getElementById('btnDoUpload').disabled = true;
+      fillCatSelect();
+      document.getElementById('uploadModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+    function closeUpload() {
+      document.getElementById('uploadModal').classList.remove('open');
+      document.body.style.overflow = '';
+      selectedFiles = [];
+    }
+    document.getElementById('uploadClose').addEventListener('click', closeUpload);
+    document.getElementById('btnDoUpload').addEventListener('click', doUpload);
+
+
+    document.getElementById('viewerEdit').addEventListener('click', () => {
+      const current = MANUALS.find(m => m.slug === (viewerManual && viewerManual.slug));
+      if (!current) { toast('找不到這份說明書'); return; }
+      editingManual = current;
+      closeViewer();
+      selectedFiles = [];
+      document.getElementById('gameName').value = current.name || '';
+      document.getElementById('gameNote').value = current.note || '';
+      document.getElementById('gameText').value = current.text || '';
+      fillCatSelect();
+      document.getElementById('gameCat').value = current.category || '';
+      document.querySelector('#uploadModal .modal-header .title').textContent = '✏️ 編輯桌遊本本';
+      document.getElementById('btnDoUpload').textContent = '儲存修改';
+      document.getElementById('preview').innerHTML = '<div style="grid-column:1/-1;color:var(--muted);font-size:.8rem">現有相片會保留；如需新增相片，請在下方選取。刪除現有相片請先在檢視畫面按「刪相」。</div>';
+      document.getElementById('progressWrap').classList.remove('show');
+      document.getElementById('btnDoUpload').disabled = false;
+      document.getElementById('uploadModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+    async function deleteCurrentPhoto() {
+      if (!viewerManual || !viewerImages.length) return;
+      const hasText = !!viewerText;
+      const imgIdx = hasText ? viewerIndex - 1 : viewerIndex;
+      if (imgIdx < 0 || imgIdx >= viewerImages.length) return;
+      if (!(await softConfirm('確定刪除此頁相片？此操作會直接刪除雲端上的檔案。',{title:'刪除相片',icon:'🗑️'}))) return;
+      try {
+        const fileName = (viewerManual.files || [])[imgIdx];
+        if (!fileName) throw new Error('找不到相片檔名');
+        const path = `${viewerManual.slug}/${fileName}`;
+        await sbDelete(path);
+        viewerManual.files.splice(imgIdx,1);
+        viewerManual.pages = viewerManual.files.length;
+        await saveIndex(MANUALS, `Delete photo: ${viewerManual.name}`);
+        viewerImages.splice(imgIdx,1);
+        const newTotal = viewerImages.length + (hasText ? 1 : 0);
+        viewerIndex = Math.max(0,Math.min(viewerIndex,newTotal-1));
+        showViewerPage(); render(); toast('相片已刪除','', 'ok');
+      } catch(err) { toast('刪除失敗：'+err.message,3200,'err'); }
+    }
+    document.getElementById('viewerDeletePhoto').addEventListener('click', deleteCurrentPhoto);
+
+    async function deleteManualFromList(manual, button) {
+      if (!manual) return;
+      const accepted = await softConfirm(
+        `確定從雲端刪除「${manual.name || manual.slug}」？這會刪除該說明書 folder 內的所有檔案，並從索引移除，無法直接復原。`,
+        { title: '刪除整份說明書', icon: '🗑️', okText: '刪除全部檔案' }
+      );
+      if (!accepted) return;
+      if (!hasConfig()) { toast('請先確認 Supabase 連線', 3000, 'err'); return; }
+      const originalText = button ? button.textContent : '';
+      if (button) { button.disabled = true; button.textContent = '刪除中…'; }
+      try {
+        const folderPath = `${manual.slug}`.replace(/^\/+|\/+$/g, '');
+        let files = [];
+        try {
+          files = await sbListFilesRecursive(folderPath);
+        } catch (e) {
+          if (!/not found|404|不存在/i.test(String(e.message || e))) throw e;
+          files = [];
+        }
+        for (const file of files) {
+          await sbDelete(file.path);
+        }
+
+        // Update index from latest remote
+        const textContent = await sbDownloadText(INDEX_FILE);
+        let remoteManuals = [];
+        if (textContent) {
+          try {
+            const payload = JSON.parse(textContent);
+            remoteManuals = Array.isArray(payload.manuals) ? payload.manuals : (Array.isArray(payload) ? payload : []);
+          } catch (_) {
+            remoteManuals = MANUALS.slice();
+          }
+        }
+        const updatedManuals = remoteManuals.filter(m => m.slug !== manual.slug);
+        await saveIndex(updatedManuals, `Delete manual: ${manual.name || manual.slug}`);
+        MANUALS = updatedManuals;
+        renderCats();
+        fillCatSelect();
+        render();
+        toast(files.length ? `已刪除說明書及 ${files.length} 個檔案，索引已同步` : '說明書已從索引移除', 3200, 'ok');
+      } catch (err) {
+        console.error(err);
+        toast('刪除未完全完成：' + err.message, 5000, 'err');
+        try { await loadIndex(); } catch (_) {}
+      } finally {
+        if (button) { button.disabled = false; button.textContent = originalText || '刪除'; }
+      }
+    }
+        grid.addEventListener('click', e => {
+      const editButton = e.target.closest('[data-edit-slug]');
+      if (editButton) {
+        const editManual = MANUALS.find(m => m.slug === editButton.dataset.editSlug);
+        if (editManual) { viewerManual = editManual; document.getElementById('viewerEdit').click(); }
+        return;
+      }
+      const deleteButton = e.target.closest('[data-delete-slug]');
+      if (deleteButton) {
+        e.preventDefault();
+        e.stopPropagation();
+        const manual = MANUALS.find(m => m.slug === deleteButton.dataset.deleteSlug);
+        deleteManualFromList(manual, deleteButton);
+        return;
+      }
+      const card = e.target.closest('.card');
+      if (!card) return;
+      const manual = MANUALS.find(m => m.slug === card.dataset.slug);
+      if (manual) openViewer(manual);
+    });
+    document.getElementById('viewerClose').addEventListener('click', closeViewer);
+    document.getElementById('viewerBack').addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); closeViewer(); });
+    document.getElementById('viewerPrev').addEventListener('click', () => {
+      if (viewerIndex > 0) { viewerIndex--; showViewerPage(); }
+    });
+    document.getElementById('viewerNext').addEventListener('click', () => {
+      const hasText = !!viewerText;
+      const total = viewerImages.length + (hasText ? 1 : 0);
+      if (viewerIndex < total - 1) { viewerIndex++; showViewerPage(); }
+    });
+    document.addEventListener('keydown', e => {
+      if (document.getElementById('viewerModal').classList.contains('open')) {
+        if (e.key === 'Escape') closeViewer();
+        if (e.key === 'ArrowLeft') document.getElementById('viewerPrev').click();
+        if (e.key === 'ArrowRight') document.getElementById('viewerNext').click();
+      }
+      if (document.getElementById('uploadModal').classList.contains('open') && e.key === 'Escape') closeUpload();
+    });
+    let touchX = null;
+    let pinchStartDistance = 0;
+    let pinchStartScale = 1;
+    let imageScale = 1;
+    let viewerRotation = 0;
+    const viewerBodyEl = document.getElementById('viewerBody');
+    function touchDistance(t1, t2) {
+      const dx = t1.clientX - t2.clientX, dy = t1.clientY - t2.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+    function applyViewerImageTransform() {
+      const img = viewerBodyEl.querySelector('.viewer-page-image');
+      if (!img) return;
+      img.style.maxWidth = (imageScale > 1 || viewerRotation % 180 !== 0) ? 'none' : '100%';
+      img.style.transform = `rotate(${viewerRotation}deg) scale(${imageScale})`;
+    }
+    function rotateViewerImage() {
+      if (!viewerBodyEl.querySelector('.viewer-page-image')) return;
+      viewerRotation = (viewerRotation + 90) % 360;
+      applyViewerImageTransform();
+    }
+    document.getElementById('viewerRotate').addEventListener('click', rotateViewerImage);
+    function resetViewerImageZoom() {
+      imageScale = 1;
+      applyViewerImageTransform();
+    }
+    viewerBodyEl.addEventListener('touchstart', e => {
+      if (e.touches.length >= 2) {
+        touchX = null;
+        pinchStartDistance = touchDistance(e.touches[0], e.touches[1]);
+        pinchStartScale = imageScale;
+      } else if (e.touches.length === 1) touchX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    viewerBodyEl.addEventListener('touchmove', e => {
+      if (e.touches.length < 2) return;
+      const img = viewerBodyEl.querySelector('.viewer-page-image');
+      if (!img || !pinchStartDistance) return;
+      const ratio = touchDistance(e.touches[0], e.touches[1]) / pinchStartDistance;
+      imageScale = Math.min(5, Math.max(1, pinchStartScale * ratio));
+      img.style.maxWidth = 'none';
+      img.style.transform = `rotate(${viewerRotation}deg) scale(${imageScale})`;
+      e.preventDefault();
+    }, { passive: false });
+    viewerBodyEl.addEventListener('touchend', e => {
+      if (e.touches.length < 2) pinchStartDistance = 0;
+      if (touchX == null || e.changedTouches.length !== 1) return;
+      const dx = e.changedTouches[0].screenX - touchX;
+      touchX = null;
+      if (Math.abs(dx) < 60) return;
+      if (dx < 0) document.getElementById('viewerNext').click();
+      else document.getElementById('viewerPrev').click();
+    }, { passive: true });
+
+    // iOS Safari can still zoom the document despite viewport flags. Block browser-level
+    // pinch/double-tap zoom outside the photo viewer; viewer pinch is handled above.
+    document.addEventListener('gesturestart', e => {
+      if (!document.getElementById('viewerModal').classList.contains('fullscreen')) e.preventDefault();
+    }, { passive: false });
+    document.addEventListener('gesturechange', e => {
+      if (!document.getElementById('viewerModal').classList.contains('fullscreen')) e.preventDefault();
+    }, { passive: false });
+    document.addEventListener('gestureend', e => {
+      if (!document.getElementById('viewerModal').classList.contains('fullscreen')) e.preventDefault();
+    }, { passive: false });
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', e => {
+      if (document.getElementById('viewerModal').classList.contains('fullscreen')) return;
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) e.preventDefault();
+      lastTouchEnd = now;
+    }, { passive: false });
+    document.addEventListener('touchmove', e => {
+      if (e.touches && e.touches.length > 1 && !document.getElementById('viewerModal').classList.contains('fullscreen')) e.preventDefault();
+    }, { passive: false });
+
+    // Init
+    loadSettings();
+    renderCats();
+    fillCatSelect();
+    setScoreMode(scoreMode);
+    renderPicker();
+    loadIndex();
+    if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed:', err));
+  });
+}
+  </script>
 </body>
 </html>
