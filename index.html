@@ -201,7 +201,7 @@
     .search-box input {
       width: 100%; padding: 12px 40px 12px 42px; border-radius: 999px;
       border: 1.5px solid var(--border); background: var(--panel); color: var(--text);
-      font-size: 15px; outline: none; transition: border-color .15s, box-shadow .15s;
+      font-size: 16px; outline: none; transition: border-color .15s, box-shadow .15s;
       box-shadow: var(--shadow-sm);
     }
     .search-box input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
@@ -255,7 +255,7 @@
     .field input, .field select, .field textarea {
       width: 100%; padding: 11px 13px; border-radius: var(--radius-xs);
       border: 1.5px solid var(--border); background: var(--bg-soft); color: var(--text);
-      font-size: 0.9rem; outline: none; font-family: inherit;
+      font-size: 16px; outline: none; font-family: inherit;
     }
     .field input:focus, .field select:focus, .field textarea:focus {
       border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft);
@@ -518,6 +518,12 @@
     #viewerModal.fullscreen .viewer-body:has(.viewer-text) .viewer-text { flex:1 0 auto; }
     #viewerModal.fullscreen .viewer-nav button { min-width:44px; min-height:42px; background:rgba(40,40,40,.75); color:#fff; border:1px solid rgba(255,255,255,.35); border-radius:10px; }
     #viewerModal.fullscreen .viewer-nav button { -webkit-tap-highlight-color:transparent; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; touch-action:manipulation; flex-shrink:0; }
+    #viewerModal.fullscreen .viewer-nav #viewerEdit,
+    #viewerModal.fullscreen .viewer-nav #viewerDeletePhoto {
+      min-width: auto; padding: 6px 12px; font-size: 0.78rem; font-weight: 600;
+      background: rgba(40,40,40,.85); color: #fff;
+    }
+    #viewerModal.fullscreen .viewer-nav #viewerDeletePhoto { border-color: rgba(232,139,139,.7); color: #f5a0a0; }
     #viewerModal.fullscreen .viewer-nav #viewerBack { min-width:40px; width:40px; min-height:40px; height:40px; padding:0; display:flex; align-items:center; justify-content:center; font-family:Arial,sans-serif; font-size:1.55rem; line-height:1; font-weight:400; border-radius:50%; background:rgba(20,20,20,.65); border:1px solid rgba(255,255,255,.45); box-shadow:none; }
     .card-actions { display:flex; gap:6px; align-items:center; flex-shrink:0; }
     .card-edit, .card-delete { -webkit-tap-highlight-color:transparent; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; touch-action:manipulation; }
@@ -839,7 +845,7 @@
     <div id="countPanel" style="display:none;margin-top:14px">
       <div class="settle-card" style="margin-top:0">
         <h3>🧮 本回合計分器</h3>
-        <p class="hint" style="padding:0;margin-bottom:10px">為每位玩家輸入本回合增減，例如 +10、−5、0。可留空＝0。</p>
+        <p class="hint" style="padding:0;margin-bottom:10px">為每位玩家輸入本回合增減，例如 +10、-5、0。可留空＝0。</p>
         <div id="countInputs"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
           <button class="btn ghost" id="btnCountQuickP5" type="button" style="padding:8px 12px">全 +5</button>
@@ -1121,13 +1127,13 @@
     <div class="modal-sheet">
       <div class="modal-header">
         <div class="title" id="viewerTitle">說明書</div>
-        <button class="btn ghost" id="viewerEdit" type="button" style="padding:7px 10px">編輯</button>
-        <button class="btn danger" id="viewerDeletePhoto" type="button" style="padding:7px 10px;display:none">刪相</button>
         <button class="close" id="viewerClose" type="button">×</button>
       </div>
       <div class="viewer-body" id="viewerBody"></div>
       <div class="viewer-nav">
         <button type="button" id="viewerBack" aria-label="返回主畫面" title="返回主畫面">←</button>
+        <button type="button" id="viewerEdit" class="btn ghost" style="min-width:auto;padding:6px 10px;font-size:0.78rem;border-radius:10px">編輯</button>
+        <button type="button" id="viewerDeletePhoto" class="btn danger" style="min-width:auto;padding:6px 10px;font-size:0.78rem;border-radius:10px;display:none">刪相</button>
         <button type="button" id="viewerRotate" aria-label="旋轉相片" title="順時針旋轉 90 度" style="font-size:1.2rem">↻</button>
         <button type="button" id="viewerPrev">‹</button>
         <div class="page" id="viewerPage">—</div>
@@ -1605,14 +1611,14 @@
     // ========== Cats ==========
     function renderCats() {
       catsEl.innerHTML = CATEGORIES.map(c =>
-        `<button type="button" class="cat-chip ${c === activeCat ? 'active' : ''}" data-cat="${c}">${c}</button>`
+        `<button type="button" class="cat-chip ${c === activeCat ? 'active' : ''}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`
       ).join('');
     }
     function fillCatSelect() {
       const sel = document.getElementById('gameCat');
       const opts = CATEGORIES.filter(c => c !== '全部');
       sel.innerHTML = '<option value="">未分類</option>' +
-        opts.map(c => `<option value="${c}">${c}</option>`).join('');
+        opts.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
     }
     catsEl.addEventListener('click', e => {
       const btn = e.target.closest('.cat-chip');
@@ -1650,11 +1656,16 @@
     }
 
     // ========== Upload ==========
+    let previewObjectUrls = [];
     function updatePreview() {
       const previewEl = document.getElementById('preview');
+      // Revoke previous object URLs to avoid memory leaks
+      previewObjectUrls.forEach(u => { try { URL.revokeObjectURL(u); } catch (_) {} });
+      previewObjectUrls = [];
       previewEl.innerHTML = '';
       selectedFiles.forEach((f, i) => {
         const url = URL.createObjectURL(f);
+        previewObjectUrls.push(url);
         const div = document.createElement('div');
         div.className = 'thumb';
         div.innerHTML = `<img src="${url}" alt=""><span class="num">${i+1}</span><button type="button" class="rm" data-i="${i}" aria-label="移除相片">×</button><button type="button" class="rotate" data-rotate="${i}" aria-label="旋轉相片">↻</button>`;
@@ -1662,6 +1673,9 @@
       });
       // Enable the button as soon as a name is entered. Validate the content on click
       // and show a helpful message instead of leaving the button looking unresponsive.
+      document.getElementById('btnDoUpload').disabled = !document.getElementById('gameName').value.trim();
+    }
+    function updateUploadButtonOnly() {
       document.getElementById('btnDoUpload').disabled = !document.getElementById('gameName').value.trim();
     }
     document.getElementById('preview').addEventListener('click', async e => {
@@ -1700,8 +1714,8 @@
       selectedFiles = selectedFiles.concat(Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')));
       updatePreview();
     });
-    document.getElementById('gameName').addEventListener('input', updatePreview);
-    document.getElementById('gameText').addEventListener('input', updatePreview);
+    document.getElementById('gameName').addEventListener('input', updateUploadButtonOnly);
+    document.getElementById('gameText').addEventListener('input', updateUploadButtonOnly);
 
     async function doUpload() {
       if (!hasConfig()) { toast('請先確認 Supabase 連線'); return; }
@@ -1727,20 +1741,54 @@
       progressBar.style.width = '0%';
 
       try {
-        const existingManual = editingManual || MANUALS.find(m => m.slug === slug);
+        // Fetch latest index to avoid lost update on concurrent multi-device edits
+        let remoteManuals = [];
+        try {
+          const textContentIdx = await sbDownloadText(INDEX_FILE);
+          if (textContentIdx) {
+            const payload = JSON.parse(textContentIdx);
+            remoteManuals = Array.isArray(payload.manuals) ? payload.manuals : (Array.isArray(payload) ? payload : []);
+          }
+        } catch (_) {
+          remoteManuals = MANUALS.slice();
+        }
+        MANUALS = remoteManuals;
+
+        let existingManual = editingManual || MANUALS.find(m => m.slug === slug);
+        // New upload with same name: ask before merging into existing
+        if (!editingManual && existingManual) {
+          const ok = await softConfirm(
+            `已存在同名「${existingManual.name}」。要追加相片到既有本本，還是取消後改名？`,
+            { title: '同名遊戲已存在', icon: '📚', okText: '追加到既有' }
+          );
+          if (!ok) {
+            btn.disabled = false;
+            progressWrap.classList.remove('show');
+            return;
+          }
+        }
         // Keep the storage slug stable when editing. Display-name changes must never move/delete photo files.
         if (editingManual) {
           slug = editingManual.slug;
           basePath = editingManual.slug;
+          existingManual = MANUALS.find(m => m.slug === slug) || editingManual;
         }
         let pages = existingManual ? [...(existingManual.files || [])] : [];
+
+        // Use max existing page number + 1 to avoid overwriting after middle-page deletes
+        let maxNum = 0;
+        pages.forEach(f => {
+          const m = String(f).match(/^(\d+)/);
+          if (m) maxNum = Math.max(maxNum, parseInt(m[1], 10));
+        });
 
         const total = selectedFiles.length;
         for (let i = 0; i < total; i++) {
           progressText.textContent = `轉 JPEG ${i+1}/${total}…`;
           progressBar.style.width = ((i / Math.max(total, 1)) * 40) + '%';
           const compressed = await compressImage(selectedFiles[i], 1600, 0.82);
-          const pageNum = String(pages.length + 1).padStart(3, '0');
+          maxNum += 1;
+          const pageNum = String(maxNum).padStart(3, '0');
           const fileName = `${pageNum}.jpg`;
           progressText.textContent = `上傳 ${fileName}（${Math.round(compressed.size/1024)} KB）…`;
           progressBar.style.width = (40 + (i / Math.max(total, 1)) * 50) + '%';
@@ -1825,7 +1873,7 @@
       }
 
       if (hasText && viewerIndex === 0) {
-        body.innerHTML = `<div class="viewer-text">${escapeHtml(viewerText)}</div>`;
+        body.innerHTML = `<div class="viewer-text">${escapeHtml(viewerText).replace(/\n/g, '<br>')}</div>`;
         if (viewerImages.length === 0) {
           // only text
         }
@@ -1846,7 +1894,12 @@
       if (shownImage) { shownImage.style.transform = ''; shownImage.style.maxWidth = '100%'; }
     }
     function escapeHtml(s) {
-      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
     function closeViewer() {
       document.getElementById('viewerModal').classList.remove('open','fullscreen');
@@ -1856,10 +1909,12 @@
 
     // ========== Render Manuals ==========
     function highlight(text, q) {
-      if (!q || !text) return text || '';
+      const safe = escapeHtml(text || '');
+      if (!q) return safe;
       try {
-        return text.replace(new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'), '<span class="highlight">$1</span>');
-      } catch (e) { return text; }
+        const re = new RegExp('(' + String(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+        return safe.replace(re, '<span class="highlight">$1</span>');
+      } catch (e) { return safe; }
     }
     function render() {
       let list = MANUALS;
@@ -1884,15 +1939,15 @@
         return;
       }
       grid.innerHTML = list.map(m => `
-        <article class="card" data-slug="${m.slug}">
+        <article class="card" data-slug="${escapeHtml(m.slug)}">
           <div class="card-top">
             <div style="display:flex;gap:6px;flex-wrap:wrap">
-              ${m.category ? `<span class="badge cat">${m.category}</span>` : ''}
+              ${m.category ? `<span class="badge cat">${escapeHtml(m.category)}</span>` : ''}
               <span class="badge pages">${m.pages || 0} 頁${m.text ? ' · 有文字' : ''}</span>
             </div>
             <div class="card-actions">
-              <button type="button" class="card-edit" data-edit-slug="${m.slug}" aria-label="編輯 ${escapeHtml(m.name || '說明書')}">編輯</button>
-              <button type="button" class="card-delete" data-delete-slug="${m.slug}" aria-label="刪除 ${escapeHtml(m.name || '說明書')}">刪除</button>
+              <button type="button" class="card-edit" data-edit-slug="${escapeHtml(m.slug)}" aria-label="編輯 ${escapeHtml(m.name || '說明書')}">編輯</button>
+              <button type="button" class="card-delete" data-delete-slug="${escapeHtml(m.slug)}" aria-label="刪除 ${escapeHtml(m.name || '說明書')}">刪除</button>
             </div>
           </div>
           <div class="card-title">${highlight(m.name, query)}</div>
@@ -1922,11 +1977,19 @@
       localStorage.setItem('benben_mj_history', JSON.stringify(mjHistory.slice(0, 50)));
     }
     function fillMjSelects() {
-      const opts = scores.map((p, i) => `<option value="${i}">${p.name}</option>`).join('');
       const w = document.getElementById('mjWinner');
       const l = document.getElementById('mjLoser');
-      if (w) w.innerHTML = opts || '<option value="">請先加入玩家</option>';
-      if (l) l.innerHTML = opts || '<option value="">請先加入玩家</option>';
+      const prevW = w ? w.value : '';
+      const prevL = l ? l.value : '';
+      const opts = scores.map((p, i) => `<option value="${i}">${escapeHtml(p.name)}</option>`).join('');
+      if (w) {
+        w.innerHTML = opts || '<option value="">請先加入玩家</option>';
+        if (prevW !== '' && +prevW < scores.length) w.value = prevW;
+      }
+      if (l) {
+        l.innerHTML = opts || '<option value="">請先加入玩家</option>';
+        if (prevL !== '' && +prevL < scores.length) l.value = prevL;
+      }
     }
     function updateMjUndoBtn() {
       const btn = document.getElementById('btnMjUndo');
@@ -1942,8 +2005,8 @@
       }
       el.innerHTML = mjHistory.map((h, i) => `
         <div class="settle-line" style="flex-direction:column;align-items:flex-start;gap:2px">
-          <span>${i === 0 ? '🆕 ' : ''}${h.msg}</span>
-          <span class="hint" style="padding:0">${h.time}</span>
+          <span>${i === 0 ? '🆕 ' : ''}${escapeHtml(h.msg)}</span>
+          <span class="hint" style="padding:0">${escapeHtml(h.time || '')}</span>
         </div>
       `).join('');
       updateMjUndoBtn();
@@ -2050,9 +2113,9 @@
           ? `<span class="hint" style="display:block;padding:0;margin-top:2px">≈ $${(p.score * unit).toFixed(1)}</span>`
           : '';
         return `
-        <div class="player-row" data-name="${p.name}">
+        <div class="player-row" data-name="${escapeHtml(p.name)}">
           <span style="font-size:0.85rem;color:var(--muted);width:22px">${i === 0 && p.score > 0 ? '👑' : (i+1)}</span>
-          <span class="name">${p.name}${moneyHint}</span>
+          <span class="name">${escapeHtml(p.name)}${moneyHint}</span>
           <span class="score ${cls}">${p.score > 0 ? '+' : ''}${p.score}</span>
           ${showBtns ? `<div class="score-btns">
             <button type="button" class="score-btn minus" data-act="minus">−</button>
@@ -2170,7 +2233,7 @@
         const modeName = scoreMode === 'mahjong' ? '麻雀' : '鋤大D';
         linesEl.innerHTML = lines.map(l => `
           <div class="settle-line">
-            <span><strong>${l.from}</strong> → <strong>${l.to}</strong></span>
+            <span><strong>${escapeHtml(l.from)}</strong> → <strong>${escapeHtml(l.to)}</strong></span>
             <span class="amount">$${l.amount}</span>
           </div>
         `).join('') + `<p class="field" style="margin:10px 0 0"><span class="hint">依目前分數 × 每分金額計算（${modeName}）</span></p>`;
@@ -2284,7 +2347,7 @@
       }
       el.innerHTML = scores.map((p, idx) => `
         <div class="player-row" style="margin-bottom:8px">
-          <span class="name">${p.name}</span>
+          <span class="name">${escapeHtml(p.name)}</span>
           <div style="display:flex;align-items:center;gap:6px">
             <button type="button" class="score-btn minus count-adj" data-idx="${idx}" data-d="-1">−</button>
             <input type="text" inputmode="text" class="count-delta" data-idx="${idx}" value="" placeholder="0"
@@ -2330,7 +2393,7 @@
       // 列：最舊在上（第 1 回合）
       const rounds = countHistory.slice().reverse();
       let html = '<div class="score-grid-wrap"><table class="score-grid"><thead><tr><th>回合</th>';
-      colSet.forEach(n => { html += `<th>${n}</th>`; });
+      colSet.forEach(n => { html += `<th>${escapeHtml(n)}</th>`; });
       html += '</tr></thead><tbody>';
       rounds.forEach((h, i) => {
         html += `<tr><td>第 ${i + 1} 回合</td>`;
@@ -2392,12 +2455,15 @@
       let any = false;
       scores.forEach((p, idx) => {
         const input = document.querySelector(`.count-delta[data-idx="${idx}"]`);
-        const raw = (input && input.value !== '') ? parseFloat(input.value) : 0;
+        let rawStr = (input && input.value !== '') ? String(input.value).trim() : '';
+        // Normalize fullwidth / en / em dashes to ASCII minus so −5 parses correctly
+        rawStr = rawStr.replace(/[−–—]/g, '-');
+        const raw = rawStr === '' ? 0 : parseFloat(rawStr);
         const d = isNaN(raw) ? 0 : raw;
         deltas.push(d);
         if (d !== 0) any = true;
       });
-      if (!any) { toast('請至少輸入一個非 0 分數（如 +10 或 −5）'); return; }
+      if (!any) { toast('請至少輸入一個非 0 分數（如 +10 或 -5）'); return; }
       const snapshot = scores.map(p => ({ name: p.name, score: p.score }));
       const deltaMap = {};
       const details = [];
@@ -2497,7 +2563,7 @@
       const w = document.getElementById('b2Winner');
       if (!w) return;
       const prev = w.value;
-      w.innerHTML = scores.map((p, i) => `<option value="${i}">${p.name}</option>`).join('')
+      w.innerHTML = scores.map((p, i) => `<option value="${i}">${escapeHtml(p.name)}</option>`).join('')
         || '<option value="">請先加入玩家</option>';
       if (prev !== '' && +prev < scores.length) w.value = prev;
       renderB2Losers();
@@ -2510,17 +2576,26 @@
         container.innerHTML = '<p class="hint">請先加入玩家並選擇勝者</p>';
         return;
       }
+      // Preserve existing input values when possible
+      const prevVals = {};
+      container.querySelectorAll('[data-b2-loser]').forEach(row => {
+        const idx = row.getAttribute('data-b2-loser');
+        const cards = row.querySelector('.b2-cards');
+        const twos = row.querySelector('.b2-twos');
+        if (cards) prevVals[idx] = { cards: cards.value, twos: twos ? twos.value : '0' };
+      });
       container.innerHTML = scores.map((p, idx) => {
         if (idx === winnerIdx) return '';
+        const pv = prevVals[String(idx)] || { cards: '1', twos: '0' };
         return `
           <div class="player-row" style="margin-bottom:8px" data-b2-loser="${idx}">
-            <span class="name">${p.name}</span>
+            <span class="name">${escapeHtml(p.name)}</span>
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
               <label class="hint" style="padding:0;margin:0">剩牌</label>
-              <input type="number" class="b2-cards" data-idx="${idx}" min="1" max="13" value="1"
+              <input type="number" class="b2-cards" data-idx="${idx}" min="1" max="13" value="${escapeHtml(pv.cards)}"
                 style="width:52px;padding:6px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg-soft);text-align:center;font-family:inherit;font-size:0.9rem" />
               <label class="hint" style="padding:0;margin:0">剩2</label>
-              <input type="number" class="b2-twos" data-idx="${idx}" min="0" max="4" value="0"
+              <input type="number" class="b2-twos" data-idx="${idx}" min="0" max="4" value="${escapeHtml(pv.twos)}"
                 style="width:44px;padding:6px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg-soft);text-align:center;font-family:inherit;font-size:0.9rem;color:var(--accent-dark);font-weight:700" />
             </div>
           </div>`;
@@ -2540,8 +2615,8 @@
       }
       el.innerHTML = b2History.map((h, i) => `
         <div class="settle-line" style="flex-direction:column;align-items:flex-start;gap:2px">
-          <span>${i === 0 ? '🆕 ' : ''}${h.msg}</span>
-          <span class="hint" style="padding:0">${h.time}</span>
+          <span>${i === 0 ? '🆕 ' : ''}${escapeHtml(h.msg)}</span>
+          <span class="hint" style="padding:0">${escapeHtml(h.time || '')}</span>
         </div>
       `).join('');
       updateB2UndoBtn();
@@ -2592,9 +2667,8 @@
           toast('請選擇勝者'); return;
         }
         saveB2Thresholds();
-        const snapshot = scores.map(p => ({ name: p.name, score: p.score }));
-        let totalGain = 0;
-        const details = [];
+        // Collect & validate all first, then apply (avoid partial score updates)
+        const losses = [];
         for (let idx = 0; idx < scores.length; idx++) {
           if (idx === winnerIdx) continue;
           const p = scores[idx];
@@ -2607,11 +2681,17 @@
             return;
           }
           const loss = calcB2Loss(cards, twos);
-          p.score -= loss;
-          totalGain += loss;
           const rate = getB2Rate(cards);
-          details.push(`${p.name} −${loss}（${cards}張${rate > 1 ? '×' + rate : ''}${twos ? ' 剩2×' + Math.pow(2, twos) : ''}）`);
+          losses.push({ idx, p, cards, twos, loss, rate });
         }
+        const snapshot = scores.map(p => ({ name: p.name, score: p.score }));
+        let totalGain = 0;
+        const details = [];
+        losses.forEach(({ idx, p, cards, twos, loss, rate }) => {
+          scores[idx].score -= loss;
+          totalGain += loss;
+          details.push(`${p.name} −${loss}（${cards}張${rate > 1 ? '×' + rate : ''}${twos ? ' 剩2×' + Math.pow(2, twos) : ''}）`);
+        });
         scores[winnerIdx].score += totalGain;
         b2History.unshift({
           msg: `${scores[winnerIdx].name} +${totalGain}｜${details.join(' · ')}`,
@@ -2716,7 +2796,7 @@
     function renderPicker() {
       const el = document.getElementById('pickerPlayers');
       el.innerHTML = pickerNames.map((n, i) =>
-        `<span class="picker-tag">${n}<button type="button" class="rm" data-i="${i}">×</button></span>`
+        `<span class="picker-tag">${escapeHtml(n)}<button type="button" class="rm" data-i="${i}">×</button></span>`
       ).join('');
       drawWheel();
       const canvas = document.getElementById('wheelCanvas');
@@ -3037,15 +3117,38 @@
         const fileName = (viewerManual.files || [])[imgIdx];
         if (!fileName) throw new Error('找不到相片檔名');
         const path = `${viewerManual.slug}/${fileName}`;
-        await sbDelete(path);
-        viewerManual.files.splice(imgIdx,1);
+        // Refresh index first to reduce concurrent lost-update risk, then update index before deleting file
+        try {
+          const textContent = await sbDownloadText(INDEX_FILE);
+          if (textContent) {
+            const payload = JSON.parse(textContent);
+            const remote = Array.isArray(payload.manuals) ? payload.manuals : (Array.isArray(payload) ? payload : []);
+            MANUALS = remote;
+            const fresh = MANUALS.find(m => m.slug === viewerManual.slug);
+            if (fresh) {
+              viewerManual = fresh;
+              // re-find index of this file after possible concurrent changes
+              const fi = (viewerManual.files || []).indexOf(fileName);
+              if (fi < 0) throw new Error('相片已被其他裝置刪除或變更');
+            }
+          }
+        } catch (e) {
+          if (e.message && e.message.includes('其他裝置')) throw e;
+        }
+        const fi = (viewerManual.files || []).indexOf(fileName);
+        if (fi < 0) throw new Error('找不到相片檔名');
+        viewerManual.files.splice(fi, 1);
         viewerManual.pages = viewerManual.files.length;
+        const mIdx = MANUALS.findIndex(m => m.slug === viewerManual.slug);
+        if (mIdx >= 0) MANUALS[mIdx] = viewerManual;
         await saveIndex(MANUALS, `Delete photo: ${viewerManual.name}`);
-        viewerImages.splice(imgIdx,1);
+        // Delete file after index is updated
+        try { await sbDelete(path); } catch (_) {}
+        viewerImages.splice(imgIdx, 1);
         const newTotal = viewerImages.length + (hasText ? 1 : 0);
-        viewerIndex = Math.max(0,Math.min(viewerIndex,newTotal-1));
-        showViewerPage(); render(); toast('相片已刪除','', 'ok');
-      } catch(err) { toast('刪除失敗：'+err.message,3200,'err'); }
+        viewerIndex = Math.max(0, Math.min(viewerIndex, newTotal - 1));
+        showViewerPage(); render(); toast('相片已刪除', '', 'ok');
+      } catch(err) { toast('刪除失敗：'+err.message,3200,'err'); try { await loadIndex(); } catch(_){} }
     }
     document.getElementById('viewerDeletePhoto').addEventListener('click', deleteCurrentPhoto);
 
@@ -3061,18 +3164,7 @@
       if (button) { button.disabled = true; button.textContent = '刪除中…'; }
       try {
         const folderPath = `${manual.slug}`.replace(/^\/+|\/+$/g, '');
-        let files = [];
-        try {
-          files = await sbListFilesRecursive(folderPath);
-        } catch (e) {
-          if (!/not found|404|不存在/i.test(String(e.message || e))) throw e;
-          files = [];
-        }
-        for (const file of files) {
-          await sbDelete(file.path);
-        }
-
-        // Update index from latest remote
+        // Update index first (from latest remote) so a later failure still leaves index consistent
         const textContent = await sbDownloadText(INDEX_FILE);
         let remoteManuals = [];
         if (textContent) {
@@ -3089,6 +3181,17 @@
         renderCats();
         fillCatSelect();
         render();
+
+        let files = [];
+        try {
+          files = await sbListFilesRecursive(folderPath);
+        } catch (e) {
+          if (!/not found|404|不存在/i.test(String(e.message || e))) throw e;
+          files = [];
+        }
+        for (const file of files) {
+          try { await sbDelete(file.path); } catch (_) {}
+        }
         toast(files.length ? `已刪除說明書及 ${files.length} 個檔案，索引已同步` : '說明書已從索引移除', 3200, 'ok');
       } catch (err) {
         console.error(err);
@@ -3149,8 +3252,18 @@
     function applyViewerImageTransform() {
       const img = viewerBodyEl.querySelector('.viewer-page-image');
       if (!img) return;
-      img.style.maxWidth = (imageScale > 1 || viewerRotation % 180 !== 0) ? 'none' : '100%';
-      img.style.transform = `rotate(${viewerRotation}deg) scale(${imageScale})`;
+      // Enlarge layout size when zoomed so overflow:auto can pan; use transform only for rotate
+      if (imageScale > 1 || viewerRotation % 180 !== 0) {
+        img.style.maxWidth = 'none';
+        img.style.width = (imageScale * 100) + '%';
+        img.style.height = 'auto';
+        img.style.transform = `rotate(${viewerRotation}deg)`;
+      } else {
+        img.style.maxWidth = '100%';
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.transform = '';
+      }
     }
     function rotateViewerImage() {
       if (!viewerBodyEl.querySelector('.viewer-page-image')) return;
@@ -3175,8 +3288,7 @@
       if (!img || !pinchStartDistance) return;
       const ratio = touchDistance(e.touches[0], e.touches[1]) / pinchStartDistance;
       imageScale = Math.min(5, Math.max(1, pinchStartScale * ratio));
-      img.style.maxWidth = 'none';
-      img.style.transform = `rotate(${viewerRotation}deg) scale(${imageScale})`;
+      applyViewerImageTransform();
       e.preventDefault();
     }, { passive: false });
     viewerBodyEl.addEventListener('touchend', e => {
@@ -3203,6 +3315,11 @@
     let lastTouchEnd = 0;
     document.addEventListener('touchend', e => {
       if (document.getElementById('viewerModal').classList.contains('fullscreen')) return;
+      // Avoid eating rapid taps on buttons / score controls
+      if (e.target.closest('button, .score-btn, a, input, select, textarea, .cat-chip, .nav-item, .fab')) {
+        lastTouchEnd = Date.now();
+        return;
+      }
       const now = Date.now();
       if (now - lastTouchEnd <= 300) e.preventDefault();
       lastTouchEnd = now;
