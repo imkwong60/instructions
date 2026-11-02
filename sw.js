@@ -1,5 +1,6 @@
-/* 桌遊本本 Service Worker */
-const CACHE = 'benben-v10';
+/* 說明本本 Service Worker */
+const CACHE = 'benben-v1';
+const IMAGE_CACHE = 'manuals-images-v1';
 const PRECACHE = [
   './',
   './index.html',
@@ -16,21 +17,61 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
+  const keep = new Set([CACHE, IMAGE_CACHE]);
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
+      Promise.all(keys.filter((k) => !keep.has(k)).map((k) => caches.delete(k)))
     ).then(() => self.clients.claim())
   );
 });
 
+function isSupabaseApi(url) {
+  // Never cache Supabase REST/Auth APIs
+  return (
+    url.hostname.endsWith('supabase.co') &&
+    (url.pathname.includes('/rest/v1/') || url.pathname.includes('/auth/v1/'))
+  );
+}
+
+function isCdn(url) {
+  const h = url.hostname;
+  return (
+    h === 'cdn.jsdelivr.net' ||
+    h === 'unpkg.com' ||
+    h.endsWith('jsdelivr.net') ||
+    h.endsWith('unpkg.com')
+  );
+}
+
+function isManualImage(url) {
+  // Supabase Storage public object under the manuals bucket (photos, not index)
+  return (
+    url.hostname.endsWith('supabase.co') &&
+    url.pathname.includes('/storage/v1/object/public/manuals/') &&
+    !url.pathname.includes('/index.json')
+  );
+}
+
+function isIndexJson(url) {
+  return (
+    url.hostname.endsWith('supabase.co') &&
+    url.pathname.includes('/storage/v1/object/public/manuals/index.json')
+  );
+}
+
 self.addEventListener('fetch', (event) => {
   const req = event.request;
+  if (req.method !== 'GET') return;
+
   const url = new URL(req.url);
 
-  // GitHub API / raw content：一律走網絡（計分、上傳需要最新）
+  // Never intercept / cache APIs or third-party CDNs
+  if (isSupabaseApi(url) || isCdn(url)) {
+    return;
+  }
+
+  // Fonts: network with cache fallback
   if (
-    url.hostname === 'api.github.com' ||
-    url.hostname === 'raw.githubusercontent.com' ||
     url.hostname === 'fonts.googleapis.com' ||
     url.hostname === 'fonts.gstatic.com'
   ) {
@@ -38,17 +79,61 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 同源靜態：Cache first，失敗再網絡
-  if (req.method === 'GET' && url.origin === self.location.origin) {
+  // index.json → network-first, fallback to cache
+  if (isIndexJson(url)) {
     event.respondWith(
-      caches.match(req).then((cached) => {
-        const network = fetch(req).then((res) => {
+      fetch(req)
+        .then((res) => {
           if (res && res.ok) {
             const clone = res.clone();
-            caches.open(CACHE).then((c) => c.put(req, clone));
+            caches.open(CACHE).then((c) => c.put(req, clone)).catch(() => {});
           }
           return res;
-        }).catch(() => cached);
+        })
+        .catch(() => caches.match(req))
+    );
+    return;
+  }
+
+  // Manual photos → cache-first using dedicated image cache
+  if (isManualImage(url)) {
+    event.respondWith(
+      caches.open(IMAGE_CACHE).then(async (cache) => {
+        const cached = await cache.match(req);
+        if (cached) return cached;
+        try {
+          const res = await fetch(req);
+          if (res && res.ok) {
+            try {
+              await cache.put(req, res.clone());
+            } catch (_) {
+              /* QuotaExceeded or other — ignore */
+            }
+          }
+          return res;
+        } catch (err) {
+          const again = await cache.match(req);
+          if (again) return again;
+          throw err;
+        }
+      })
+    );
+    return;
+  }
+
+  // Same-origin static assets → cache-first
+  if (url.origin === self.location.origin) {
+    event.respondWith(
+      caches.match(req).then((cached) => {
+        const network = fetch(req)
+          .then((res) => {
+            if (res && res.ok) {
+              const clone = res.clone();
+              caches.open(CACHE).then((c) => c.put(req, clone)).catch(() => {});
+            }
+            return res;
+          })
+          .catch(() => cached);
         return cached || network;
       })
     );
