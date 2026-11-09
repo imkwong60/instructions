@@ -1,6 +1,7 @@
-/* 說明本本 Service Worker */
-const CACHE = 'benben-v1';
+const CACHE = 'benben-shell-v2';
 const IMAGE_CACHE = 'manuals-images-v1';
+const IMAGE_CACHE_MAX = 200;
+const APP_CACHE_PREFIX = 'benben-shell-';
 const PRECACHE = [
   './',
   './index.html',
@@ -12,130 +13,130 @@ const PRECACHE = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)).then(() => self.skipWaiting())
+    caches.open(CACHE)
+      .then((cache) => cache.addAll(PRECACHE))
+      .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', (event) => {
-  const keep = new Set([CACHE, IMAGE_CACHE]);
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => !keep.has(k)).map((k) => caches.delete(k)))
-    ).then(() => self.clients.claim())
+    caches.keys()
+      .then((keys) => Promise.all(
+        keys
+          .filter((key) => key.startsWith(APP_CACHE_PREFIX) && key !== CACHE)
+          .concat(keys.includes('benben-v1') ? ['benben-v1'] : [])
+          .map((key) => caches.delete(key))
+      ))
+      .then(() => self.clients.claim())
   );
 });
 
 function isSupabaseApi(url) {
-  // Never cache Supabase REST/Auth APIs
-  return (
-    url.hostname.endsWith('supabase.co') &&
-    (url.pathname.includes('/rest/v1/') || url.pathname.includes('/auth/v1/'))
-  );
-}
-
-function isCdn(url) {
-  const h = url.hostname;
-  return (
-    h === 'cdn.jsdelivr.net' ||
-    h === 'unpkg.com' ||
-    h.endsWith('jsdelivr.net') ||
-    h.endsWith('unpkg.com')
-  );
+  return url.hostname.endsWith('supabase.co') &&
+    (url.pathname.includes('/rest/v1/') || url.pathname.includes('/auth/v1/'));
 }
 
 function isManualImage(url) {
-  // Supabase Storage public object under the manuals bucket (photos, not index)
-  return (
-    url.hostname.endsWith('supabase.co') &&
+  return url.hostname.endsWith('supabase.co') &&
     url.pathname.includes('/storage/v1/object/public/manuals/') &&
-    !url.pathname.includes('/index.json')
-  );
+    !url.pathname.endsWith('/index.json');
 }
 
 function isIndexJson(url) {
-  return (
-    url.hostname.endsWith('supabase.co') &&
-    url.pathname.includes('/storage/v1/object/public/manuals/index.json')
-  );
+  return url.hostname.endsWith('supabase.co') &&
+    url.pathname.endsWith('/storage/v1/object/public/manuals/index.json');
+}
+
+function isInScope(url) {
+  const scopePath = new URL(self.registration.scope).pathname;
+  return url.pathname.startsWith(scopePath);
+}
+
+async function cacheResponse(cache, key, response, maxEntries) {
+  if (response && response.ok) {
+    try {
+      await cache.put(key, response.clone());
+      if (maxEntries) {
+        const keys = await cache.keys();
+        const overflow = keys.length - maxEntries;
+        for (let i = 0; i < overflow; i++) {
+          await cache.delete(keys[i]);
+        }
+      }
+    } catch (error) {
+      console.warn('Service Worker cache write failed:', error);
+    }
+  }
 }
 
 self.addEventListener('fetch', (event) => {
   const req = event.request;
-  if (req.method !== 'GET') return;
+  if (req.method !== 'GET' || req.headers.has('range')) return;
 
   const url = new URL(req.url);
+  if (isSupabaseApi(url)) return;
 
-  // Never intercept / cache APIs or third-party CDNs
-  if (isSupabaseApi(url) || isCdn(url)) {
-    return;
-  }
-
-  // Fonts: network with cache fallback
-  if (
-    url.hostname === 'fonts.googleapis.com' ||
-    url.hostname === 'fonts.gstatic.com'
-  ) {
-    event.respondWith(fetch(req).catch(() => caches.match(req)));
-    return;
-  }
-
-  // index.json → network-first, fallback to cache
   if (isIndexJson(url)) {
-    event.respondWith(
-      fetch(req)
-        .then((res) => {
-          if (res && res.ok) {
-            const clone = res.clone();
-            caches.open(CACHE).then((c) => c.put(req, clone)).catch(() => {});
-          }
-          return res;
-        })
-        .catch(() => caches.match(req))
-    );
-    return;
-  }
-
-  // Manual photos → cache-first using dedicated image cache
-  if (isManualImage(url)) {
-    event.respondWith(
-      caches.open(IMAGE_CACHE).then(async (cache) => {
-        const cached = await cache.match(req);
+    event.respondWith((async () => {
+      const cache = await caches.open(CACHE);
+      const cacheUrl = new URL(req.url);
+      cacheUrl.search = '';
+      const cacheKey = new Request(cacheUrl.href);
+      try {
+        const response = await fetch(req);
+        await cacheResponse(cache, cacheKey, response);
+        return response;
+      } catch (error) {
+        const cached = await cache.match(cacheKey);
         if (cached) return cached;
-        try {
-          const res = await fetch(req);
-          if (res && res.ok) {
-            try {
-              await cache.put(req, res.clone());
-            } catch (_) {
-              /* QuotaExceeded or other — ignore */
-            }
-          }
-          return res;
-        } catch (err) {
-          const again = await cache.match(req);
-          if (again) return again;
-          throw err;
-        }
-      })
-    );
+        throw error;
+      }
+    })());
     return;
   }
 
-  // Same-origin static assets → cache-first
-  if (url.origin === self.location.origin) {
-    event.respondWith(
-      caches.match(req).then((cached) => {
-        const network = fetch(req)
-          .then((res) => {
-            if (res && res.ok) {
-              const clone = res.clone();
-              caches.open(CACHE).then((c) => c.put(req, clone)).catch(() => {});
-            }
-            return res;
-          })
-          .catch(() => cached);
-        return cached || network;
-      })
-    );
+  if (isManualImage(url)) {
+    event.respondWith((async () => {
+      const cache = await caches.open(IMAGE_CACHE);
+      const cached = await cache.match(req);
+      if (cached) return cached;
+
+      const response = await fetch(req);
+      await cacheResponse(cache, req, response, IMAGE_CACHE_MAX);
+      return response;
+    })());
+    return;
   }
+
+  if (url.origin !== self.location.origin || !isInScope(url)) return;
+
+  if (req.mode === 'navigate') {
+    event.respondWith((async () => {
+      const cache = await caches.open(CACHE);
+      const cacheKey = new Request(req.url);
+      try {
+        const response = await fetch(req);
+        await cacheResponse(cache, cacheKey, response);
+        return response;
+      } catch (error) {
+        const cached = await cache.match(cacheKey, { ignoreSearch: true });
+        if (cached) return cached;
+        const appShell = await cache.match(new URL('./index.html', self.registration.scope).href);
+        if (appShell) return appShell;
+        throw error;
+      }
+    })());
+    return;
+  }
+
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE);
+    const cached = await cache.match(req);
+    if (cached) return cached;
+
+    const response = await fetch(req);
+    await cacheResponse(cache, req, response);
+    return response;
+  })());
 });
